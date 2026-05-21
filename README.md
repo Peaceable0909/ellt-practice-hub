@@ -53,13 +53,7 @@ cp .env.example .env
 
 Fill in `.env` with your keys:
 
-```env
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key
 
-# Used server-side only via /api/feedback
-ANTHROPIC_API_KEY=sk-ant-your-key
-```
 
 ### 4. Set up Supabase
 
