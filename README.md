@@ -155,22 +155,3 @@ ellt-practice-hub/
 ├── vercel.json
 └── vite.config.js
 ```
-
----
-
-## Customisation
-
-### Add a new listening test
-Edit `src/data/listening.js` — add a new object to the `LISTENING` array with `id`, `title`, `audio`, and `qs`.
-
-### Change the colour scheme
-All colours are CSS variables in `src/index.css`. Dark mode uses `:root`, light mode uses `body.light`.
-
-### Swap the AI model
-In `api/feedback.js`, change `model: 'claude-sonnet-4-20250514'` to any model in the [Anthropic docs](https://docs.anthropic.com/en/docs/about-claude/models).
-
----
-
-## Licence
-
-MIT — free to use, modify, and deploy.
