@@ -101,7 +101,7 @@ EXAMINER NOTE: [One practical exam strategy tip — 2 sentences max]`
       const band = bandMatch?.[1] || 'B2'
       const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
       const row = { skill:'writing', test_id:testId, test_title:taskTitle, band_score:bandScore }
-      await saveResult(row, userId)
+      await saveResult(row)
       addResult(row)
       setSaved(true)
     } catch (e) {
@@ -289,7 +289,7 @@ ${essay}
       const band = bandMatch?.[1] || 'B2'
       const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
       const row = { skill:'writing', test_id:selected.id, test_title:selected.title, band_score:bandScore, essay_text:essay }
-      await saveResult(row, userId)
+      await saveResult(row)
       addResult(row)
     } catch (e) { setFeedback('Error connecting to AI. Please try again.') }
     setLoadingAI(false)
