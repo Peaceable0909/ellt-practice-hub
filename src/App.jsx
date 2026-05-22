@@ -60,7 +60,7 @@ export default function App() {
     if (!session?.user?.id || isPasswordRecovery) return
 
     setLoadingResults(true)
-    loadResults(session.user.id)
+    loadResults()
       .then(data => {
         setResults(data)
         setLoadingResults(false)
