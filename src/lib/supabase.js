@@ -5,15 +5,21 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export const supabase = createClient(
   SUPABASE_URL || 'https://placeholder.supabase.co',
-  SUPABASE_ANON_KEY || 'placeholder'
+  SUPABASE_ANON_KEY || 'placeholder',
+  {
+    auth: {
+      persistSession: true,          // keep session in localStorage
+      autoRefreshToken: true,        // auto-refresh before expiry
+      detectSessionInUrl: true,      // handle OAuth redirects
+    }
+  }
 )
 
-// ─── AUTH ─────────────────────────────────────────────────────────────────
+// ─── AUTH ────────────────────────────────────────────────────
 
 export async function signUp(email, password, fullName) {
   const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
+    email, password,
     options: { data: { full_name: fullName } },
   })
   return { data, error }
@@ -34,7 +40,7 @@ export async function signInWithGoogle() {
 
 export async function sendPasswordReset(email) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}`,
+    redirectTo: window.location.origin,
   })
   return { data, error }
 }
@@ -48,37 +54,59 @@ export async function signOut() {
   await supabase.auth.signOut()
 }
 
-export async function getSession() {
-  const { data } = await supabase.auth.getSession()
-  return data.session
-}
-
 export function onAuthChange(callback) {
   return supabase.auth.onAuthStateChange((event, session) => {
     callback(session, event)
   })
 }
 
-// ─── DATA ─────────────────────────────────────────────────────────────────
+// ─── DATA ────────────────────────────────────────────────────
 
-export async function saveResult(data, userId) {
-  if (!userId) return
+/** Save a test result — always gets userId from session if not passed */
+export async function saveResult(data, passedUserId) {
+  // Get userId — use passed value OR fetch from current session
+  let userId = passedUserId
+  if (!userId) {
+    const { data: { session } } = await supabase.auth.getSession()
+    userId = session?.user?.id
+  }
+
+  if (!userId) {
+    console.warn('[ELLTPulse] saveResult: no userId — result not saved')
+    return
+  }
+
   const { error } = await supabase
     .from('ellt_test_results')
     .insert([{ ...data, user_id: userId }])
-  if (error) console.error('Save error:', error)
+
+  if (error) {
+    console.error('[ELLTPulse] saveResult error:', error.message)
+  }
 }
 
-export async function loadResults(userId) {
+/** Load all results for a user — with retry on empty */
+export async function loadResults(userId, retries = 2) {
   if (!userId) return []
-  const { data, error } = await supabase
-    .from('ellt_test_results')
-    .select('*')
-    .eq('user_id', userId)
-    .order('completed_at', { ascending: false })
-    .limit(200)
-  if (error) { console.error('Load error:', error); return [] }
-  return data || []
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const { data, error } = await supabase
+      .from('ellt_test_results')
+      .select('*')
+      .eq('user_id', userId)
+      .order('completed_at', { ascending: false })
+      .limit(500)
+
+    if (error) {
+      console.error('[ELLTPulse] loadResults error:', error.message)
+      if (attempt < retries) await new Promise(r => setTimeout(r, 800))
+      continue
+    }
+
+    return data || []
+  }
+
+  return []
 }
 
 export async function getProfile(userId) {
