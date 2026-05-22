@@ -75,3 +75,39 @@ However, there are also some bad sides. Writing every day can be boring or feel 
 In conclusion, I think keeping a daily journal can really help people who feel stressed or who like writing. But it depends on the person, because not everyone has the patience to do it every day. For me, I prefer to write only sometimes, when I really need to put my thoughts in order.`,
   },
 ]
+
+// ─── NEW: IELTS Writing Tasks ────────────────────────────────────────────────
+export const WRITING_TASK1 = [
+  {
+    id: 'wt1', title: 'Grandville Stadium Attendance', source: 'IELTS Academic — Task 1',
+    prompt: 'The chart below gives attendance figures for Grandville Stadium from 2017, which are projected through 2030 after a major improvement project.',
+    task: 'Summarize the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
+    minWords: 150, band: 8,
+    chartDescription: 'Bar chart showing projected annual attendance after 2019 stadium improvements. Three event types: Theater, Sporting Events, Concerts. Years: 2017 (blue), 2020 (orange), 2030 (yellow). Theater: ~12k → ~16k → ~50k. Sporting Events: ~150k → ~157k → ~163k. Concerts: ~30k → ~44k → ~120k.',
+    model: `The bar chart illustrates the actual and projected annual attendance at Grandville Stadium for three event types — theatre, sporting events, and concerts — across three years: 2017, 2020, and 2030, following a major improvement project completed in 2019.
+
+Overall, all three event categories are expected to see growth by 2030, with concerts showing the most dramatic increase, while sporting events remain the most attended category throughout the entire period.
+
+In 2017, sporting events dominated attendance with approximately 150,000 visitors, far surpassing concerts at around 30,000 and theatre at only 12,000. By 2020, these figures had risen modestly, with sporting events reaching approximately 157,000, concerts climbing to around 44,000, and theatre increasing slightly to 16,000.
+
+The most striking projected changes are seen by 2030. Concert attendance is forecast to surge to roughly 120,000 — a fourfold increase from 2017 — suggesting that the improvements have significantly enhanced the stadium's appeal for musical events. Theatre, although still the smallest category, is projected to reach approximately 50,000, representing the largest proportional growth of around 300%. Sporting events, while still the leading category at around 163,000, show comparatively modest growth over the thirteen-year period.
+
+In summary, the stadium improvements appear to have had the greatest projected impact on concert and theatre attendance, while sporting events maintain a consistent lead.`,
+  }
+]
+
+export const WRITING_IELTS = [
+  {
+    id: 'wi1', title: 'Tablets Replacing Books in Schools', source: 'IELTS Academic — Task 2',
+    prompt: 'An increasing number of schools provide tablets and laptop computers for students to use in school, replacing books and other printed materials like exams and assignments.',
+    task: 'What are the advantages and disadvantages of this trend? Write at least 250 words.',
+    minWords: 250, band: 8,
+    model: `In recent years, digital devices such as tablets and laptops have become increasingly common in educational settings, gradually replacing traditional textbooks, printed assignments and paper-based examinations. While this shift brings a number of significant benefits, it also introduces challenges that cannot be ignored.
+
+One of the main advantages of using digital devices in schools is the ability to provide students with immediate access to a vast amount of information. Instead of relying on a single textbook, students can explore multiple sources, watch educational videos, and access updated content at any time. This not only enriches the learning experience but also helps develop independent research skills that are essential in the modern world. Furthermore, devices can be tailored to meet the needs of individual learners; teachers can assign different tasks to students based on their abilities, making lessons more inclusive and personalized. From an environmental standpoint, reducing the use of paper also contributes positively to sustainability.
+
+However, there are notable drawbacks to consider. Excessive screen time has been linked to health concerns such as eye strain, poor posture, and sleep disruption, particularly among younger students. Additionally, the use of devices in the classroom can create significant distractions, as students may be tempted to access social media or entertainment platforms instead of focusing on their studies. Schools in less affluent areas may also struggle to provide sufficient devices for all students, potentially widening the educational gap between privileged and underprivileged groups.
+
+In conclusion, while the integration of tablets and laptops into schools offers exciting possibilities for learning, it must be managed carefully. Clear guidelines, appropriate supervision, and equitable access are essential if schools are to harness the benefits while minimising the risks associated with this digital transition.`
+  }
+]

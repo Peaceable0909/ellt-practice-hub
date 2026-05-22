@@ -1,7 +1,7 @@
 import { signOut } from '../lib/supabase'
 
 export default function Nav({ page, setPage, dark, setDark, user, profile }) {
-  const links = ['Home', 'Practice', 'Mock Tests', 'Progress', 'Live Sessions']
+  const links = ['Home', 'Practice', 'Mock Tests', 'Progress', 'My Plan', 'Live Sessions']
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student'
   const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 
