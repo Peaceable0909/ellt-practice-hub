@@ -15,7 +15,7 @@ function Field({ label, type, placeholder, value, onChange, children }) {
         onChange={onChange}
         required
         style={{
-          width: '100%', padding: '10px 14px', borderRadius: 8,
+          width: '100%', padding: '10px 14px', borderRadius: 12,
           border: '1px solid var(--border)', background: 'var(--bg)',
           color: 'var(--text)', fontSize: 13, fontFamily: 'inherit',
           outline: 'none', boxSizing: 'border-box', transition: 'border .2s',
@@ -36,7 +36,7 @@ function GoogleBtn({ onClick, loading }) {
       onClick={onClick}
       disabled={loading}
       style={{
-        width: '100%', padding: '11px 0', borderRadius: 8,
+        width: '100%', padding: '11px 0', borderRadius: 12,
         border: '1px solid var(--border)', background: 'var(--bg3)',
         color: 'var(--text)', fontWeight: 600, fontSize: 13,
         cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
@@ -73,7 +73,7 @@ function Alert({ msg, type }) {
   const isError = type === 'error'
   return (
     <div style={{
-      marginBottom: 14, padding: '10px 14px', borderRadius: 8, fontSize: 13, lineHeight: 1.5,
+      marginBottom: 14, padding: '10px 14px', borderRadius: 12, fontSize: 13, lineHeight: 1.5,
       background: isError ? 'var(--coralBg)' : 'var(--tealBg)',
       border: `1px solid ${isError ? 'rgba(248,113,113,0.3)' : 'var(--tealBr)'}`,
       color: isError ? 'var(--coral)' : 'var(--teal)',
@@ -87,10 +87,10 @@ function Alert({ msg, type }) {
 function SubmitBtn({ loading, label }) {
   return (
     <button type="submit" disabled={loading} style={{
-      width: '100%', padding: '11px 0', borderRadius: 8, border: 'none',
+      width: '100%', padding: '11px 0', borderRadius: 12, border: 'none',
       background: loading ? 'var(--border)' : 'linear-gradient(135deg, var(--teal), var(--blue))',
       color: loading ? 'var(--textM)' : '#000',
-      fontWeight: 700, fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer',
+      fontWeight: 900, fontSize: 14, cursor: loading ? 'not-allowed' : 'pointer',
       fontFamily: 'inherit', transition: 'all .2s',
     }}>
       {loading ? 'Please wait…' : label}
@@ -242,7 +242,7 @@ export default function Auth({ isPasswordRecovery }) {
                   <button key={m} type="button"
                     onClick={() => { setMode(m); clear() }}
                     style={{
-                      flex: 1, padding: '8px 0', borderRadius: 8, border: 'none',
+                      flex: 1, padding: '8px 0', borderRadius: 12, border: 'none',
                       background: mode === m ? 'var(--bg2)' : 'transparent',
                       color: mode === m ? 'var(--text)' : 'var(--textM)',
                       fontWeight: mode === m ? 600 : 400, fontSize: 13,

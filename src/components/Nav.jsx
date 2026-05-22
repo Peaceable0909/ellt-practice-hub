@@ -1,96 +1,77 @@
+import { useState } from 'react'
 import { signOut } from '../lib/supabase'
 
-export default function Nav({ page, setPage, dark, setDark, user, profile }) {
+export default function Nav({ page, setPage, dark, setDark, user, profile, results = [] }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const streak = 1
+  const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
+  const hearts = 5
+  const displayName = profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Student'
+  const initials = (profile?.full_name || displayName).split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+
   const links = ['Home', 'Practice', 'Mock Tests', 'Progress', 'My Plan', 'Live Sessions']
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student'
-  const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 
   return (
     <nav style={{
-      background: dark ? 'rgba(6,11,20,0.95)' : 'rgba(244,247,252,0.95)',
-      backdropFilter: 'blur(16px)',
-      borderBottom: '1px solid var(--border)',
+      background: 'var(--bg2)', borderBottom: '2px solid var(--border)',
       position: 'sticky', top: 0, zIndex: 100,
     }}>
-      <div style={{
-        maxWidth: 1280, margin: '0 auto', padding: '0 20px',
-        display: 'flex', alignItems: 'center', height: 60, gap: 6,
-      }}>
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 20px', display: 'flex', alignItems: 'center', height: 62, gap: 8 }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 24 }}>
-          <div style={{
-            width: 30, height: 30, borderRadius: 8,
-            background: 'linear-gradient(135deg, var(--teal), var(--blue))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: 700, fontSize: 13, color: '#000',
-          }}>E</div>
-          <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-            ELLTPulse
-          </span>
+        <div onClick={() => setPage('Home')} style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 20, cursor: 'pointer', flexShrink: 0 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 18, color: '#fff', border: '3px solid var(--greenD)' }}>E</div>
+          <span style={{ fontWeight: 900, fontSize: 17, color: 'var(--text)', letterSpacing: '-0.3px' }}>ELLTPulse</span>
         </div>
 
-        {/* Nav links */}
+        {/* Desktop nav */}
         <div style={{ display: 'flex', gap: 2, flex: 1, flexWrap: 'wrap' }}>
           {links.map(l => (
             <button key={l} onClick={() => setPage(l)} style={{
-              padding: '5px 12px', borderRadius: 7, border: 'none', cursor: 'pointer',
-              fontSize: 12, fontWeight: 500, transition: 'all 0.2s',
-              background: page === l ? 'var(--tealBg)' : 'transparent',
-              color: page === l ? 'var(--teal)' : 'var(--textM)',
-              outline: page === l ? '1px solid var(--tealBr)' : 'none',
-              fontFamily: 'inherit',
+              padding: '7px 12px', borderRadius: 10, border: 'none',
+              background: page === l ? 'var(--greenBg)' : 'transparent',
+              color: page === l ? 'var(--green)' : 'var(--textM)',
+              fontWeight: page === l ? 800 : 600, fontSize: 12,
+              cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
+              borderBottom: page === l ? '2px solid var(--greenD)' : '2px solid transparent',
+              transition: 'all .15s',
             }}>
               {l}
             </button>
           ))}
         </div>
 
-        {/* Right side */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Stats */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginLeft: 8 }}>
+          {/* Streak */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }} onClick={() => setPage('Progress')}>
+            <span style={{ fontSize: 20 }}>🔥</span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--streak)' }}>{streak}</span>
+          </div>
 
-          {/* Dark/light toggle */}
-          <button onClick={() => setDark(d => !d)} title="Toggle theme" style={{
-            width: 34, height: 34, borderRadius: 8,
-            border: '1px solid var(--border)', background: 'var(--bg3)',
-            color: 'var(--textM)', cursor: 'pointer', fontSize: 14,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
+          {/* XP */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }} onClick={() => setPage('Progress')}>
+            <span style={{ fontSize: 16 }}>⚡</span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: 'var(--xp)' }}>{xp}</span>
+          </div>
+
+          {/* Hearts */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span key={i} style={{ fontSize: 14, opacity: i < hearts ? 1 : 0.2 }}>❤️</span>
+            ))}
+          </div>
+
+          {/* Theme */}
+          <button onClick={() => setDark(d => !d)} style={{ width: 32, height: 32, borderRadius: 8, border: '2px solid var(--border)', background: 'var(--bg3)', cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {dark ? '☀️' : '🌙'}
           </button>
 
-          {/* User info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 4 }}>
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, var(--teal), var(--blue))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#000', flexShrink: 0,
-            }}>
+          {/* Avatar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={signOut} title="Log out">
+            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'var(--green)', border: '3px solid var(--greenD)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 900, color: '#fff' }}>
               {initials}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', lineHeight: 1.2 }}>
-                {displayName}
-              </span>
-              <span style={{ fontSize: 10, color: 'var(--textD)', lineHeight: 1.2 }}>
-                {user?.email}
-              </span>
-            </div>
           </div>
-
-          {/* Log out */}
-          <button
-            onClick={signOut}
-            title="Log out"
-            style={{
-              padding: '5px 10px', borderRadius: 7,
-              border: '1px solid var(--border)', background: 'transparent',
-              color: 'var(--textM)', cursor: 'pointer', fontSize: 11,
-              fontWeight: 500, fontFamily: 'inherit',
-            }}
-          >
-            Log out
-          </button>
         </div>
       </div>
     </nav>

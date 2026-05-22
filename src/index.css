@@ -1,80 +1,181 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ─── DUOLINGO LIGHT (default) ─────────────────────────────── */
 :root {
-  --bg: #060B14;
-  --bg2: #0F1A2E;
-  --bg3: #162236;
-  --border: #1E3050;
-  --borderB: #2A4070;
-  --teal: #00D4AA;
-  --tealD: #00A882;
-  --tealBg: rgba(0,212,170,0.08);
-  --tealBr: rgba(0,212,170,0.25);
-  --amber: #F59E0B;
-  --amberBg: rgba(245,158,11,0.08);
-  --blue: #3B82F6;
-  --blueBg: rgba(59,130,246,0.08);
-  --coral: #F87171;
-  --coralBg: rgba(248,113,113,0.08);
-  --purple: #A78BFA;
-  --purpleBg: rgba(167,139,250,0.08);
-  --text: #F0F6FF;
-  --textM: #8BA5C8;
-  --textD: #4A6A90;
+  --bg:         #FFFFFF;
+  --bg2:        #FFFFFF;
+  --bg3:        #F7F7F7;
+  --border:     #E5E5E5;
+  --borderB:    #AFAFAF;   /* bottom shadow border for buttons */
+  --green:      #58CC02;
+  --greenD:     #46A302;
+  --greenBg:    #D7FFB8;
+  --greenBdr:   #58CC02;
+  --blue:       #1CB0F6;
+  --blueD:      #1899D6;
+  --blueBg:     #DDF4FF;
+  --blueBdr:    #84D8FF;
+  --purple:     #CE82FF;
+  --purpleD:    #A560E8;
+  --purpleBg:   #F1DAFF;
+  --purpleBdr:  #CE82FF;
+  --amber:      #FF9600;
+  --amberBg:    #FFF0CD;
+  --amberBdr:   #FFDE6E;
+  --coral:      #FF4B4B;
+  --coralBg:    #FFDFE0;
+  --coralBdr:   #FF9600;
+  --teal:       #58CC02;   /* alias to green for existing refs */
+  --tealBg:     #D7FFB8;
+  --tealBr:     #58CC02;
+  --text:       #3C3C3C;
+  --textM:      #777777;
+  --textD:      #AFAFAF;
+  --streak:     #FF9600;
+  --xp:         #CE82FF;
+  --heart:      #FF4B4B;
 }
 
-body.light {
-  --bg: #F4F7FC;
-  --bg2: #FFFFFF;
-  --bg3: #EEF2F8;
-  --border: #D1D9E8;
-  --borderB: #B8C5D6;
-  --teal: #0A6E55;
-  --tealD: #085240;
-  --tealBg: rgba(10,110,85,0.06);
-  --tealBr: rgba(10,110,85,0.2);
-  --amber: #B45309;
-  --amberBg: rgba(180,83,9,0.06);
-  --blue: #1D4ED8;
-  --blueBg: rgba(29,78,216,0.06);
-  --coral: #DC2626;
-  --coralBg: rgba(220,38,38,0.06);
-  --purple: #7C3AED;
-  --purpleBg: rgba(124,58,237,0.06);
-  --text: #0F172A;
-  --textM: #475569;
-  --textD: #94A3B8;
+/* ─── DARK MODE ─────────────────────────────────────────────── */
+body.dark {
+  --bg:       #131F24;
+  --bg2:      #1F2E35;
+  --bg3:      #2B3D45;
+  --border:   #3A4E57;
+  --borderB:  #2A3D47;
+  --green:    #58CC02;
+  --greenD:   #46A302;
+  --greenBg:  rgba(88,204,2,0.12);
+  --greenBdr: rgba(88,204,2,0.4);
+  --blue:     #1CB0F6;
+  --blueD:    #1899D6;
+  --blueBg:   rgba(28,176,246,0.12);
+  --blueBdr:  rgba(28,176,246,0.35);
+  --purple:   #CE82FF;
+  --purpleD:  #A560E8;
+  --purpleBg: rgba(206,130,255,0.12);
+  --purpleBdr:rgba(206,130,255,0.35);
+  --amber:    #FF9600;
+  --amberBg:  rgba(255,150,0,0.12);
+  --amberBdr: rgba(255,150,0,0.35);
+  --coral:    #FF4B4B;
+  --coralBg:  rgba(255,75,75,0.12);
+  --coralBdr: rgba(255,75,75,0.35);
+  --teal:     #58CC02;
+  --tealBg:   rgba(88,204,2,0.12);
+  --tealBr:   rgba(88,204,2,0.4);
+  --text:     #F2F2F2;
+  --textM:    #9BABB5;
+  --textD:    #5A7380;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  font-family: 'Nunito', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
 }
 
-audio { width: 100%; height: 36px; border-radius: 8px; }
-
-textarea, input[type="text"] {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-family: inherit;
-  font-size: 13px;
-  resize: vertical;
-  outline: none;
-  transition: border-color 0.2s;
-  width: 100%;
-  box-sizing: border-box;
+/* ─── DUOLINGO BUTTON STYLE ──────────────────────────────────── */
+.duo-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px 22px;
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px;
+  border-radius: 14px; cursor: pointer; text-transform: uppercase;
+  letter-spacing: 0.8px; border: none; transition: transform .1s;
 }
-textarea:focus, input[type="text"]:focus { border-color: var(--teal); }
+.duo-btn:active { transform: translateY(2px); }
+.duo-btn-green {
+  background: var(--green); color: #fff;
+  border-bottom: 4px solid var(--greenD);
+}
+.duo-btn-green:hover { background: var(--greenD); }
+.duo-btn-blue {
+  background: var(--blue); color: #fff;
+  border-bottom: 4px solid var(--blueD);
+}
+.duo-btn-outline {
+  background: var(--bg); color: var(--text);
+  border: 2px solid var(--border) !important;
+  border-bottom: 4px solid var(--borderB) !important;
+}
+.duo-btn-outline:hover { background: var(--bg3); }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+/* ─── SKILL CARD (Duolingo-style) ────────────────────────────── */
+.skill-card {
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  border-bottom: 4px solid var(--borderB);
+  border-radius: 16px;
+  padding: 20px;
+  transition: transform .15s;
+}
+.skill-card:hover { transform: translateY(-2px); }
+
+/* ─── PROGRESS BAR ───────────────────────────────────────────── */
+.xp-bar { height: 16px; background: var(--bg3); border-radius: 99px; overflow: hidden; border: 2px solid var(--border); }
+.xp-bar-fill { height: 100%; border-radius: 99px; transition: width .4s; }
+
+/* ─── STREAK BADGE ───────────────────────────────────────────── */
+.streak { display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: 15px; color: var(--streak); }
+
+/* ─── COURSE PATH ────────────────────────────────────────────── */
+.path-node {
+  width: 72px; height: 72px; border-radius: 50%; border-bottom: 5px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; transition: transform .15s; margin: 0 auto;
+  font-weight: 900;
+}
+.path-node:hover { transform: scale(1.08); }
+.path-node.locked { filter: grayscale(1); opacity: .5; cursor: not-allowed; }
+.path-node.done { position: relative; }
+.path-node.done::after {
+  content: '✓';
+  position: absolute; bottom: -2px; right: -2px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--green); color: #fff;
+  font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+
+/* ─── HEARTS ─────────────────────────────────────────────────── */
+.heart { color: var(--heart); font-size: 18px; }
+.heart.empty { opacity: .25; }
+
+/* ─── QUESTION OPTION ────────────────────────────────────────── */
+.q-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 18px; border-radius: 12px;
+  border: 2px solid var(--border); border-bottom: 4px solid var(--borderB);
+  background: var(--bg2); cursor: pointer; transition: all .15s;
+  font-weight: 700; font-size: 14px;
+}
+.q-option:hover { border-color: var(--blue); background: var(--blueBg); }
+.q-option.selected { border-color: var(--blue); background: var(--blueBg); color: var(--blue); }
+.q-option.correct { border-color: var(--green); background: var(--greenBg); color: var(--green); }
+.q-option.incorrect { border-color: var(--coral); background: var(--coralBg); color: var(--coral); }
+
+/* ─── RESULT BANNER ──────────────────────────────────────────── */
+.result-correct { background: var(--greenBg); border-top: 2px solid var(--greenBdr); padding: 16px 20px; }
+.result-wrong   { background: var(--coralBg);  border-top: 2px solid var(--coralBdr);  padding: 16px 20px; }
+
+audio { width: 100%; height: 36px; border-radius: 8px; }
+textarea, input[type="text"], input[type="date"], input[type="time"], select {
+  background: var(--bg2); border: 2px solid var(--border);
+  border-radius: 12px; padding: 11px 14px; color: var(--text);
+  font-family: 'Nunito', sans-serif; font-size: 14px;
+  outline: none; transition: border .2s; width: 100%; box-sizing: border-box;
+}
+textarea:focus, input:focus, select:focus { border-color: var(--blue); }
+textarea { resize: vertical; }
+
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-.app-container { max-width: 1280px; margin: 0 auto; padding: 28px 20px; }
+.app-container { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
+
+/* Confetti animation */
+@keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.15)} 100%{transform:scale(1)} }
+.pop { animation: pop .3s ease-out; }
