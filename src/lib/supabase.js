@@ -8,7 +8,7 @@ export const supabase = createClient(
   SUPABASE_ANON_KEY || 'placeholder'
 )
 
-// ─── AUTH ────────────────────────────────────────────────────────────────────
+// ─── AUTH ─────────────────────────────────────────────────────────────────
 
 export async function signUp(email, password, fullName) {
   const { data, error } = await supabase.auth.signUp({
@@ -24,6 +24,26 @@ export async function signIn(email, password) {
   return { data, error }
 }
 
+export async function signInWithGoogle() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  })
+  return { data, error }
+}
+
+export async function sendPasswordReset(email) {
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}`,
+  })
+  return { data, error }
+}
+
+export async function updatePassword(newPassword) {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+  return { data, error }
+}
+
 export async function signOut() {
   await supabase.auth.signOut()
 }
@@ -34,12 +54,12 @@ export async function getSession() {
 }
 
 export function onAuthChange(callback) {
-  return supabase.auth.onAuthStateChange((_event, session) => {
-    callback(session)
+  return supabase.auth.onAuthStateChange((event, session) => {
+    callback(session, event)
   })
 }
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+// ─── DATA ─────────────────────────────────────────────────────────────────
 
 export async function saveResult(data, userId) {
   if (!userId) return

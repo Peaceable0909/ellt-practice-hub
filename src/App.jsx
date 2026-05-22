@@ -16,26 +16,37 @@ export default function App() {
   const [results, setResults] = useState([])
   const [loadingResults, setLoadingResults] = useState(false)
   const [authReady, setAuthReady] = useState(false)
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
   // Theme
   useEffect(() => {
     document.body.className = dark ? '' : 'light'
   }, [dark])
 
-  // Auth state — runs once on mount
+  // Auth state
   useEffect(() => {
-    // Get current session immediately
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session)
       setAuthReady(true)
     })
 
-    // Listen for changes (login, logout, token refresh)
-    const { data: { subscription } } = onAuthChange((sess) => {
+    const { data: { subscription } } = onAuthChange((sess, event) => {
+      // Detect password recovery flow
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsPasswordRecovery(true)
+        setSession(sess)
+        setAuthReady(true)
+        return
+      }
+      // On any other sign-in, clear recovery mode
+      if (event === 'SIGNED_IN' && isPasswordRecovery) {
+        setIsPasswordRecovery(false)
+      }
       setSession(sess)
       if (!sess) {
         setResults([])
         setProfile(null)
+        setIsPasswordRecovery(false)
       }
     })
 
@@ -44,7 +55,7 @@ export default function App() {
 
   // Load results + profile when user logs in
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id || isPasswordRecovery) return
 
     setLoadingResults(true)
     loadResults(session.user.id)
@@ -52,9 +63,14 @@ export default function App() {
       .finally(() => setLoadingResults(false))
 
     getProfile(session.user.id).then(p => {
-      setProfile(p)
+      // For Google users, name comes from user_metadata
+      if (!p?.full_name && session.user.user_metadata?.full_name) {
+        setProfile({ full_name: session.user.user_metadata.full_name })
+      } else {
+        setProfile(p)
+      }
     })
-  }, [session?.user?.id])
+  }, [session?.user?.id, isPasswordRecovery])
 
   const addResult = useCallback(row => {
     setResults(prev => [
@@ -63,18 +79,33 @@ export default function App() {
     ])
   }, [])
 
-  // Show nothing while checking auth (avoids flash)
+  // Loading splash
   if (!authReady) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: 'var(--textM)', fontSize: 14 }}>Loading…</div>
+      <div style={{
+        minHeight: '100vh', background: 'var(--bg)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexDirection: 'column', gap: 12,
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: 10,
+          background: 'linear-gradient(135deg, var(--teal), var(--blue))',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: 700, fontSize: 18, color: '#000',
+        }}>E</div>
+        <div style={{ color: 'var(--textM)', fontSize: 13 }}>Loading…</div>
       </div>
     )
   }
 
-  // Not logged in — show auth screen
+  // Password recovery — show auth with reset form
+  if (isPasswordRecovery) {
+    return <Auth isPasswordRecovery={true}/>
+  }
+
+  // Not logged in
   if (!session) {
-    return <Auth />
+    return <Auth/>
   }
 
   const sharedProps = { results, addResult, userId: session.user.id }
@@ -82,18 +113,15 @@ export default function App() {
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
       <Nav
-        page={page}
-        setPage={setPage}
-        dark={dark}
-        setDark={setDark}
-        user={session.user}
-        profile={profile}
+        page={page} setPage={setPage}
+        dark={dark} setDark={setDark}
+        user={session.user} profile={profile}
       />
-      {page === 'Home'          && <Home          setPage={setPage} results={results} profile={profile} />}
-      {page === 'Practice'      && <Practice       {...sharedProps} />}
-      {page === 'Mock Tests'    && <MockTests      {...sharedProps} />}
-      {page === 'Progress'      && <Progress       {...sharedProps} loading={loadingResults} />}
-      {page === 'Live Sessions' && <LiveSessions />}
+      {page === 'Home'          && <Home          setPage={setPage} results={results} profile={profile}/>}
+      {page === 'Practice'      && <Practice       {...sharedProps}/>}
+      {page === 'Mock Tests'    && <MockTests      {...sharedProps}/>}
+      {page === 'Progress'      && <Progress       {...sharedProps} loading={loadingResults}/>}
+      {page === 'Live Sessions' && <LiveSessions/>}
     </div>
   )
 }
