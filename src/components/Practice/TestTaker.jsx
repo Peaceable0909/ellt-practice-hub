@@ -30,7 +30,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
   const submit = async () => {
     setSaving(true)
     const row = { skill, test_id: test.id, test_title: test.title, score, total: test.qs.length, band_score: parseFloat((score / test.qs.length * 9).toFixed(1)), answers: JSON.stringify(answers) }
-    await saveResult(row, userId)
+    await saveResult(row)
     addResult(row)
     setSubmitted(true)
     setSaving(false)
