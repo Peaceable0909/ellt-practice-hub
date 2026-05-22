@@ -783,7 +783,7 @@ export default function FullMockTest({ userId, addResult, onExit }) {
     ]
 
     for (const s of saves) {
-      await saveResult(s, userId)
+      await saveResult(s)
       addResult(s)
     }
 
