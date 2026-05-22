@@ -274,7 +274,7 @@ export default function SpeakingHub({ results, addResult, userId }) {
       const band = bandMatch?.[1] || 'B2'
       const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
       const row = { skill:'speaking', test_id:selected.id, test_title:selected.title, band_score:bandScore }
-      await saveResult(row, userId)
+      await saveResult(row)
       addResult(row)
     } catch (e) {
       setFeedback('Error connecting to AI. Please try again.')
