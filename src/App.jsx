@@ -19,7 +19,7 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
 
-  useEffect(() => { document.body.className = dark ? '' : 'light' }, [dark])
+  useEffect(() => { document.body.className = dark ? 'dark' : '' }, [dark])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
