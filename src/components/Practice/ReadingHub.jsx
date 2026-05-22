@@ -3,13 +3,13 @@ import { READING } from '../../data/reading'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
 
-export default function ReadingHub({ results, addResult }) {
+export default function ReadingHub({ results, addResult, userId }) {
   const [test, setTest] = useState(null)
 
   if (test) {
     const prev = results.find(r => r.test_id === test.id)
     return (
-      <TestTaker
+      <TestTaker userId={userId}
         test={test}
         skill="reading"
         prev={prev}

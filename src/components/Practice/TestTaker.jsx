@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip } from '../ui'
 
-export default function TestTaker({ test, skill, prev, addResult, onBack }) {
+export default function TestTaker({ test, skill, prev, addResult, onBack, userId }) {
   const [answers, setAnswers] = useState({})
   const [submitted, setSubmitted] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -35,7 +35,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
       band_score: parseFloat((score / test.qs.length * 9).toFixed(1)),
       answers: JSON.stringify(answers),
     }
-    await saveResult(row)
+    await saveResult(row, userId)
     addResult(row)
     setSubmitted(true)
     setSaving(false)
@@ -79,10 +79,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
       {/* Passage for reading */}
       {isReading && test.passage && (
         <Card style={{ marginBottom: 14, background: 'var(--bg3)' }}>
-          <button
-            onClick={() => setPassageOpen(o => !o)}
-            style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 0, color: 'var(--text)', fontWeight: 600, fontSize: 13, fontFamily: 'inherit' }}
-          >
+          <button onClick={() => setPassageOpen(o => !o)} style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 0, color: 'var(--text)', fontWeight: 600, fontSize: 13, fontFamily: 'inherit' }}>
             📖 Reading Passage — {test.title}
             <span style={{ color: 'var(--textM)', fontSize: 11 }}>{passageOpen ? '▲ Collapse' : '▼ Expand'}</span>
           </button>
@@ -102,7 +99,6 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
           const isCorrect = submitted && (isFill
             ? (typeof userAns === 'string' && userAns.toUpperCase().trim() === q.a.toUpperCase())
             : userAns === q.a)
-          const isWrong = submitted && !isCorrect
 
           return (
             <Card key={qi} style={{
@@ -125,10 +121,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
                   <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10, color: 'var(--text)', lineHeight: 1.55 }}>{q.q}</p>
                   {isFill ? (
                     <div>
-                      <input
-                        type="text"
-                        placeholder="Type your answer..."
-                        disabled={submitted}
+                      <input type="text" placeholder="Type your answer..." disabled={submitted}
                         value={typeof answers[qi] === 'string' ? answers[qi] : ''}
                         onChange={e => setAnswers(a => ({ ...a, [qi]: e.target.value.toUpperCase() }))}
                         style={{ maxWidth: 280, textTransform: 'uppercase', fontWeight: 600, letterSpacing: 1 }}
@@ -144,18 +137,13 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
                       {q.opts.map((opt, oi) => {
                         const isSel = userAns === oi
                         const isAns = oi === q.a
-                        let borderCol = 'var(--border)'
-                        let bg = 'transparent'
-                        let textCol = 'var(--textM)'
+                        let borderCol = 'var(--border)', bg = 'transparent', textCol = 'var(--textM)'
                         if (!submitted && isSel) { borderCol = 'var(--teal)'; bg = 'var(--tealBg)'; textCol = 'var(--teal)' }
                         if (submitted && isAns) { borderCol = '#22c55e'; bg = '#22c55e14'; textCol = '#22c55e' }
                         if (submitted && isSel && !isAns) { borderCol = '#ef4444'; bg = '#ef444414'; textCol = '#ef4444' }
                         return (
-                          <div
-                            key={oi}
-                            onClick={() => !submitted && setAnswers(a => ({ ...a, [qi]: oi }))}
-                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, border: `1.5px solid ${borderCol}`, background: bg, cursor: submitted ? 'default' : 'pointer', transition: 'all 0.15s' }}
-                          >
+                          <div key={oi} onClick={() => !submitted && setAnswers(a => ({ ...a, [qi]: oi }))}
+                            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 8, border: `1.5px solid ${borderCol}`, background: bg, cursor: submitted ? 'default' : 'pointer', transition: 'all 0.15s' }}>
                             <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${borderCol}`, flexShrink: 0, position: 'relative' }}>
                               {!submitted && isSel && <div style={{ position: 'absolute', top: 2, left: 2, width: 8, height: 8, borderRadius: '50%', background: 'var(--teal)' }} />}
                               {submitted && isAns && <div style={{ position: 'absolute', top: 2, left: 2, width: 8, height: 8, borderRadius: '50%', background: '#22c55e' }} />}
@@ -176,7 +164,6 @@ export default function TestTaker({ test, skill, prev, addResult, onBack }) {
         })}
       </div>
 
-      {/* Submit / retry */}
       {!submitted ? (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 20, gap: 10 }}>
           <Btn onClick={onBack}>Cancel</Btn>

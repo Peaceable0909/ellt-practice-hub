@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { loadResults } from './lib/supabase'
+import { supabase, loadResults, onAuthChange, getProfile } from './lib/supabase'
+import Auth from './components/Auth'
 import Nav from './components/Nav'
 import Home from './components/Home'
 import Practice from './components/Practice'
@@ -10,24 +11,51 @@ import LiveSessions from './components/LiveSessions'
 export default function App() {
   const [dark, setDark] = useState(true)
   const [page, setPage] = useState('Home')
+  const [session, setSession] = useState(null)
+  const [profile, setProfile] = useState(null)
   const [results, setResults] = useState([])
   const [loadingResults, setLoadingResults] = useState(false)
+  const [authReady, setAuthReady] = useState(false)
 
-  // Apply dark/light class to body
+  // Theme
   useEffect(() => {
     document.body.className = dark ? '' : 'light'
   }, [dark])
 
-  // Load saved results from Supabase on mount
+  // Auth state — runs once on mount
   useEffect(() => {
-    setLoadingResults(true)
-    loadResults()
-      .then(data => setResults(data))
-      .catch(() => {})
-      .finally(() => setLoadingResults(false))
+    // Get current session immediately
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setAuthReady(true)
+    })
+
+    // Listen for changes (login, logout, token refresh)
+    const { data: { subscription } } = onAuthChange((sess) => {
+      setSession(sess)
+      if (!sess) {
+        setResults([])
+        setProfile(null)
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  // Add a new result to local state (avoids an extra DB round-trip)
+  // Load results + profile when user logs in
+  useEffect(() => {
+    if (!session?.user?.id) return
+
+    setLoadingResults(true)
+    loadResults(session.user.id)
+      .then(setResults)
+      .finally(() => setLoadingResults(false))
+
+    getProfile(session.user.id).then(p => {
+      setProfile(p)
+    })
+  }, [session?.user?.id])
+
   const addResult = useCallback(row => {
     setResults(prev => [
       { ...row, completed_at: new Date().toISOString() },
@@ -35,13 +63,33 @@ export default function App() {
     ])
   }, [])
 
-  const sharedProps = { results, addResult }
+  // Show nothing while checking auth (avoids flash)
+  if (!authReady) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ color: 'var(--textM)', fontSize: 14 }}>Loading…</div>
+      </div>
+    )
+  }
+
+  // Not logged in — show auth screen
+  if (!session) {
+    return <Auth />
+  }
+
+  const sharedProps = { results, addResult, userId: session.user.id }
 
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', color: 'var(--text)' }}>
-      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} />
-
-      {page === 'Home'          && <Home          setPage={setPage} results={results} />}
+      <Nav
+        page={page}
+        setPage={setPage}
+        dark={dark}
+        setDark={setDark}
+        user={session.user}
+        profile={profile}
+      />
+      {page === 'Home'          && <Home          setPage={setPage} results={results} profile={profile} />}
       {page === 'Practice'      && <Practice       {...sharedProps} />}
       {page === 'Mock Tests'    && <MockTests      {...sharedProps} />}
       {page === 'Progress'      && <Progress       {...sharedProps} loading={loadingResults} />}

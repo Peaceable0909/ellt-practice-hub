@@ -11,7 +11,7 @@ const TABS = [
   { key: 'Speaking',  icon: '🎤', color: 'var(--coral)' },
 ]
 
-export default function Practice({ results, addResult }) {
+export default function Practice({ results, addResult, userId }) {
   const [tab, setTab] = useState('Listening')
 
   return (
@@ -46,10 +46,10 @@ export default function Practice({ results, addResult }) {
         ))}
       </div>
 
-      {tab === 'Listening' && <ListeningHub results={results} addResult={addResult} />}
-      {tab === 'Reading'   && <ReadingHub   results={results} addResult={addResult} />}
-      {tab === 'Writing'   && <WritingHub   results={results} addResult={addResult} />}
-      {tab === 'Speaking'  && <SpeakingHub  results={results} addResult={addResult} />}
+      {tab === 'Listening' && <ListeningHub results={results} addResult={addResult} userId={userId} />}
+      {tab === 'Reading'   && <ReadingHub   results={results} addResult={addResult} userId={userId} />}
+      {tab === 'Writing'   && <WritingHub   results={results} addResult={addResult} userId={userId} />}
+      {tab === 'Speaking'  && <SpeakingHub  results={results} addResult={addResult} userId={userId} />}
     </div>
   )
 }

@@ -1,116 +1,190 @@
 import { Card, Chip } from './ui'
 
-const FEATURES = [
-  { key: 'Listening', icon: '🎧', color: 'var(--blue)',   desc: '6 full-length audio tests with 8 questions each — played and answered inline' },
-  { key: 'Reading',   icon: '📖', color: 'var(--amber)',  desc: '5 academic passages with 16 questions each — full text displayed here' },
-  { key: 'Writing',   icon: '✍️', color: 'var(--purple)', desc: 'Official prompts with model answers and instant AI examiner feedback' },
-  { key: 'Speaking',  icon: '🎤', color: 'var(--coral)',  desc: 'Stage 2 presentation guides with structure frameworks and AI scoring' },
-]
+const SKILL_COLORS = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
+const SKILL_ICONS  = { listening:'🎧', reading:'📖', writing:'✍️', speaking:'🎤' }
 
-export default function Home({ setPage, results }) {
+export default function Home({ setPage, results, profile }) {
   const totalTests = results.length
-  const avgBand = totalTests
-    ? (results.reduce((s, r) => s + (r.band_score || 0), 0) / totalTests).toFixed(1)
-    : '—'
+  const overallBand = totalTests
+    ? (results.reduce((s,r) => s+(r.band_score||0),0)/totalTests).toFixed(1) : '—'
+
+  // Skill breakdowns
+  const bySkill = {}
+  results.forEach(r => {
+    if (!bySkill[r.skill]) bySkill[r.skill] = []
+    bySkill[r.skill].push(r)
+  })
+  const skillBand = skill => {
+    const arr = bySkill[skill]||[]
+    if (!arr.length) return null
+    return (arr.reduce((s,r)=>s+(r.band_score||0),0)/arr.length).toFixed(1)
+  }
+
+  // Completed mock tests
+  const mockGroups = {}
+  results.filter(r=>r.is_mock&&r.mock_test_id).forEach(r => {
+    if (!mockGroups[r.mock_test_id]) mockGroups[r.mock_test_id] = []
+    mockGroups[r.mock_test_id].push(r)
+  })
+  const mockCount = Object.values(mockGroups).filter(g=>g.length>=2).length
+
+  // Recent 5 results
+  const recent = [...results].sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at)).slice(0,5)
+
+  const name = profile?.full_name?.split(' ')[0] || 'there'
 
   return (
     <div className="app-container">
-      {/* Hero */}
-      <div style={{ maxWidth: 640, marginBottom: 48 }}>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '4px 12px', borderRadius: 100,
-          border: '1px solid var(--tealBr)', background: 'var(--tealBg)', marginBottom: 16,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--teal)', display: 'inline-block' }} />
-          <span style={{ fontSize: 11, color: 'var(--teal)', fontWeight: 600, letterSpacing: '0.5px' }}>
-            OXFORD ELLT SIMULATION HUB
-          </span>
-        </div>
-
-        <h1 style={{ fontSize: 40, fontWeight: 700, color: 'var(--text)', margin: '0 0 14px', lineHeight: 1.15, letterSpacing: '-0.8px' }}>
-          Pass Your Oxford ELLT.<br />
-          <span style={{ color: 'var(--teal)' }}>All content right here.</span>
+      {/* Welcome */}
+      <div style={{ marginBottom:28 }}>
+        <h1 style={{ fontSize:26, fontWeight:700, color:'var(--text)', marginBottom:4 }}>
+          Welcome back, {name} 👋
         </h1>
-
-        <p style={{ fontSize: 15, color: 'var(--textM)', lineHeight: 1.7, margin: '0 0 24px' }}>
-          16 official practice tests across Listening, Reading, Writing, and Speaking — displayed fully inline, no redirects to PDFs.
-          Get instant AI feedback, track your band scores, and join live sessions with expert tutors.
+        <p style={{ color:'var(--textM)', fontSize:14 }}>
+          Here's your progress. Keep practising to improve your band score.
         </p>
+      </div>
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <button
-            onClick={() => setPage('Practice')}
-            style={{
-              padding: '12px 24px', borderRadius: 10, border: 'none',
-              background: 'linear-gradient(135deg, var(--teal), var(--blue))',
-              color: '#000', fontWeight: 700, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >
-            Start Practicing →
-          </button>
-          <button
-            onClick={() => setPage('Mock Tests')}
-            style={{
-              padding: '12px 24px', borderRadius: 10,
-              border: '1px solid var(--border)', background: 'transparent',
-              color: 'var(--textM)', fontWeight: 600, fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
-            }}
-          >
-            Take Mock Test
+      {/* Top stats */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))', gap:12, marginBottom:24 }}>
+        {[
+          { v:overallBand, l:'Overall Band', col:'var(--teal)'   },
+          { v:totalTests,  l:'Tests Done',   col:'var(--amber)'  },
+          { v:mockCount,   l:'Mock Tests',   col:'var(--purple)' },
+          { v:`${totalTests?Math.round(results.filter(r=>r.score!=null).reduce((s,r)=>s+(r.score/r.total||0),0)/Math.max(1,results.filter(r=>r.score!=null).length)*100):0}%`, l:'Accuracy', col:'var(--blue)' },
+        ].map(s => (
+          <Card key={s.l} style={{ textAlign:'center' }}>
+            <div style={{ fontSize:28, fontWeight:700, color:s.col, marginBottom:4 }}>{s.v}</div>
+            <div style={{ fontSize:11, color:'var(--textM)' }}>{s.l}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Skill scores */}
+      <div style={{ fontSize:15, fontWeight:700, color:'var(--text)', marginBottom:12 }}>Skill Progress</div>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:10, marginBottom:24 }}>
+        {['listening','reading','writing','speaking'].map(skill => {
+          const band = skillBand(skill)
+          const pct = band ? Math.min(100,(parseFloat(band)/9)*100) : 0
+          const col = SKILL_COLORS[skill]
+          const count = (bySkill[skill]||[]).length
+          return (
+            <Card key={skill} style={{ cursor:'pointer' }} onClick={() => setPage('Practice')}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ fontSize:18 }}>{SKILL_ICONS[skill]}</span>
+                  <span style={{ fontSize:13, fontWeight:600, color:'var(--text)', textTransform:'capitalize' }}>{skill}</span>
+                </div>
+                <span style={{ fontSize:18, fontWeight:700, color:col }}>{band||'—'}</span>
+              </div>
+              <div style={{ height:5, background:'var(--border)', borderRadius:3, marginBottom:5 }}>
+                <div style={{ height:'100%', width:`${pct}%`, background:col, borderRadius:3, transition:'width .4s' }}/>
+              </div>
+              <div style={{ fontSize:11, color:'var(--textM)' }}>
+                {count > 0 ? `${count} test${count>1?'s':''} taken` : 'Not started — click to practise'}
+              </div>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Mock test CTA */}
+      <Card style={{ marginBottom:24, background:'linear-gradient(135deg,var(--tealBg),var(--blueBg))', borderColor:'var(--tealBr)' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:12 }}>
+          <div>
+            <div style={{ fontSize:15, fontWeight:700, color:'var(--text)', marginBottom:4 }}>
+              Take a Full Mock Test
+            </div>
+            <div style={{ fontSize:13, color:'var(--textM)' }}>
+              All 4 sections back to back · Voice recording for Speaking · AI scored
+            </div>
+          </div>
+          <button onClick={() => setPage('Mock Tests')} style={{
+            padding:'10px 22px', borderRadius:8, border:'none',
+            background:'linear-gradient(135deg,var(--teal),var(--blue))',
+            color:'#000', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
+            Start Mock Test →
           </button>
         </div>
-      </div>
+      </Card>
 
-      {/* Feature cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12, marginBottom: 40 }}>
-        {FEATURES.map(f => (
-          <Card key={f.key} style={{ cursor: 'pointer' }} onClick={() => setPage('Practice')}>
-            <div style={{ fontSize: 26, marginBottom: 10 }}>{f.icon}</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: f.color, marginBottom: 5 }}>{f.key}</div>
-            <div style={{ fontSize: 12, color: 'var(--textM)', lineHeight: 1.55 }}>{f.desc}</div>
-            <div style={{ marginTop: 12, fontSize: 11, color: f.color, fontWeight: 600 }}>Practice Now →</div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 40 }}>
+      {/* Practice by skill */}
+      <div style={{ fontSize:15, fontWeight:700, color:'var(--text)', marginBottom:12 }}>Practice by Skill</div>
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:10, marginBottom:24 }}>
         {[
-          { v: totalTests || '0', l: 'Tests Completed',     col: 'var(--teal)'   },
-          { v: avgBand,           l: 'Current Band Score',  col: 'var(--amber)'  },
-          { v: '16',              l: 'Official Tests',       col: 'var(--blue)'   },
-          { v: 'AI',              l: 'Feedback Engine',      col: 'var(--purple)' },
+          { k:'listening', label:'Listening', desc:'6 audio tests',  col:'var(--blue)'   },
+          { k:'reading',   label:'Reading',   desc:'5 full passages',col:'var(--amber)'  },
+          { k:'writing',   label:'Writing',   desc:'5 essay tasks',  col:'var(--purple)' },
+          { k:'speaking',  label:'Speaking',  desc:'7 topics + AI',  col:'var(--coral)'  },
         ].map(s => (
-          <Card key={s.l} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 28, fontWeight: 700, color: s.col, marginBottom: 4 }}>{s.v}</div>
-            <div style={{ fontSize: 11, color: 'var(--textM)' }}>{s.l}</div>
+          <Card key={s.k} style={{ cursor:'pointer', display:'flex', alignItems:'center', gap:12 }}
+            onClick={() => setPage('Practice')}>
+            <div style={{ fontSize:24 }}>{SKILL_ICONS[s.k]}</div>
+            <div>
+              <div style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>{s.label}</div>
+              <div style={{ fontSize:11, color:'var(--textM)' }}>{s.desc}</div>
+            </div>
+            <div style={{ marginLeft:'auto', fontSize:11, color:s.col, fontWeight:600 }}>→</div>
           </Card>
         ))}
       </div>
 
-      {/* Why us */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-        {[
-          { icon: '📚', title: '16 Official Tests',   sub: 'Real Oxford ELLT resources',     col: 'var(--teal)'   },
-          { icon: '🤖', title: 'AI Feedback',         sub: 'Band-level examiner scoring',    col: 'var(--purple)' },
-          { icon: '📡', title: 'Live Sessions',        sub: 'Expert tutors, group practice',  col: 'var(--coral)'  },
-        ].map(c => (
-          <Card key={c.title} style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: 10, flexShrink: 0,
-              background: `${c.col}18`, border: `1px solid ${c.col}33`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-            }}>
-              {c.icon}
-            </div>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{c.title}</div>
-              <div style={{ fontSize: 12, color: 'var(--textM)', marginTop: 2 }}>{c.sub}</div>
-            </div>
-          </Card>
-        ))}
-      </div>
+      {/* Recent activity */}
+      {recent.length > 0 && (
+        <>
+          <div style={{ fontSize:15, fontWeight:700, color:'var(--text)', marginBottom:12 }}>
+            Recent Activity
+          </div>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {recent.map((r,i) => (
+              <Card key={i} style={{ display:'flex', alignItems:'center', gap:12, padding:'11px 14px' }}>
+                <div style={{ width:34, height:34, borderRadius:8, flexShrink:0,
+                  background:`${SKILL_COLORS[r.skill]}18`,
+                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:15 }}>
+                  {SKILL_ICONS[r.skill]}
+                </div>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:13, fontWeight:600, color:'var(--text)' }}>
+                    {r.test_title} {r.is_mock && <span style={{ fontSize:10, color:'var(--textD)' }}>(Mock)</span>}
+                  </div>
+                  <div style={{ fontSize:11, color:'var(--textM)' }}>
+                    {new Date(r.completed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}
+                  </div>
+                </div>
+                {r.score != null && <span style={{ fontSize:12, color:'var(--textM)' }}>{r.score}/{r.total}</span>}
+                <Chip text={`Band ${r.band_score}`}
+                  color={r.band_score>=7?'var(--teal)':r.band_score>=5.5?'var(--amber)':'var(--coral)'}/>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+
+      {totalTests === 0 && (
+        <Card style={{ textAlign:'center', padding:'32px 20px', background:'var(--tealBg)', borderColor:'var(--tealBr)' }}>
+          <div style={{ fontSize:32, marginBottom:8 }}>🎯</div>
+          <div style={{ fontSize:15, fontWeight:600, color:'var(--text)', marginBottom:6 }}>
+            Ready to start?
+          </div>
+          <div style={{ fontSize:13, color:'var(--textM)', marginBottom:16 }}>
+            Take your first practice test or jump straight into a full mock exam.
+          </div>
+          <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
+            <button onClick={() => setPage('Practice')} style={{
+              padding:'9px 20px', borderRadius:8, border:'none',
+              background:'linear-gradient(135deg,var(--teal),var(--blue))',
+              color:'#000', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
+              Start Practising →
+            </button>
+            <button onClick={() => setPage('Mock Tests')} style={{
+              padding:'9px 20px', borderRadius:8, border:'1px solid var(--border)',
+              background:'transparent', color:'var(--textM)', fontWeight:600,
+              fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
+              Take Mock Test
+            </button>
+          </div>
+        </Card>
+      )}
     </div>
   )
 }

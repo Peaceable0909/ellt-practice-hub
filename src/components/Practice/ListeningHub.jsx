@@ -3,13 +3,13 @@ import { LISTENING } from '../../data/listening'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
 
-export default function ListeningHub({ results, addResult }) {
+export default function ListeningHub({ results, addResult, userId }) {
   const [test, setTest] = useState(null)
 
   if (test) {
     const prev = results.find(r => r.test_id === test.id)
     return (
-      <TestTaker
+      <TestTaker userId={userId}
         test={test}
         skill="listening"
         prev={prev}

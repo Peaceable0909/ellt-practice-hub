@@ -4,7 +4,7 @@ import { saveResult } from '../../lib/supabase'
 import { getAIFeedback, buildWritingPrompt } from '../../lib/ai'
 import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 
-export default function WritingHub({ results, addResult }) {
+export default function WritingHub({ results, addResult, userId }) {
   const [selected, setSelected] = useState(null)
   const [essay, setEssay] = useState('')
   const [feedback, setFeedback] = useState('')
@@ -27,7 +27,7 @@ export default function WritingHub({ results, addResult }) {
       const band = bandMatch ? bandMatch[1] : 'B2'
       const bandScore = band === 'C2' ? 9 : band === 'C1' ? 7.5 : band === 'B2' ? 6 : 5
       const row = { skill: 'writing', test_id: selected.id, test_title: selected.title, band_score: bandScore, essay_text: essay }
-      await saveResult(row)
+      await saveResult(row, userId)
       addResult(row)
     } catch (e) {
       setFeedback('Error connecting to AI. Please check your API key in Vercel settings.')
