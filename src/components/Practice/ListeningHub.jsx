@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM16_T1 } from '../../data/listening'
+import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2, LISTENING_CAM17_T3, LISTENING_CAM17_T4 } from '../../data/listening'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
 import { Headphones } from 'lucide-react'
 
-const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1, ...LISTENING_CAM16_T1]
+const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1, ...LISTENING_CAM17_T2, ...LISTENING_CAM17_T3, ...LISTENING_CAM17_T4]
 
 export default function ListeningHub({ results, addResult, userId }) {
   const [test, setTest] = useState(null)
@@ -15,7 +15,7 @@ export default function ListeningHub({ results, addResult, userId }) {
   }
 
   const filtered = ALL_LISTENING.filter(t =>
-    filter === 'all' ? true : filter === 'ielts' ? t.source : !t.source
+    filter === 'all' ? true : filter === 'cambridge' ? t.source?.startsWith('Cambridge') : filter === 'ielts' ? t.source?.startsWith('IELTS') : !t.source
   )
 
   return (
@@ -30,7 +30,7 @@ export default function ListeningHub({ results, addResult, userId }) {
       </div>
 
       <div className="tab-bar" style={{ marginBottom: 14 }}>
-        {[['all','All Tests'],['oxford','Oxford ELLT'],['ielts','IELTS Academic']].map(([k,l]) => (
+        {[['all','All Tests'],['oxford','Oxford ELLT'],['ielts','IELTS Academic'],['cambridge','Cambridge']].map(([k,l]) => (
           <button key={k} onClick={() => setFilter(k)} style={{
             padding: '8px 14px', borderRadius: 10, flexShrink: 0,
             border: filter===k ? `2px solid var(--blue)` : `2px solid var(--border)`,
