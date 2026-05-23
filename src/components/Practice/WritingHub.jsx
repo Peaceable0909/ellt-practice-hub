@@ -1,10 +1,10 @@
 import { useState, useRef } from 'react'
-import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2 } from '../../data/writing'
+import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2, WRITING_OFFICIAL_2023 } from '../../data/writing'
 import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 import { Camera, Upload, X, Image, PenLine, ChevronLeft, Eye, EyeOff, FileText } from 'lucide-react'
 
-const ALL_WRITING = [...WRITING, ...WRITING_IELTS, ...(WRITING_IELTS_2||[])]
+const ALL_WRITING = [...WRITING, ...WRITING_IELTS, ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[])]
 
 // Convert file to base64
 function fileToBase64(file) {
