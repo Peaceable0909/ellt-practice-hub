@@ -20,7 +20,7 @@ export default function MockTests({ results, addResult, userId }) {
     mockGroups[r.mock_test_id].push(r)
   })
   const completedMocks = Object.values(mockGroups)
-    .filter(g => g.length >= 2)
+    .filter(g => g.length >= 4)
     .map(g => {
       const avg = (g.reduce((s,r) => s+(r.band_score||0),0)/g.length).toFixed(1)
       const date = g.sort((a,b) => new Date(b.completed_at)-new Date(a.completed_at))[0].completed_at
