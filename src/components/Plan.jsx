@@ -11,7 +11,7 @@ const PERIOD_DAYS = { '1_week':7, '2_weeks':14, '3_weeks':21, '1_month':30 }
 const SKILL_ICONS = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, mock: ClipboardList, review: CheckCircle, intro: Trophy }
 const SKILL_COLORS_MAP = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)', mock:'var(--green)', review:'var(--teal)', intro:'var(--green)' }
 
-export default function Plan({ userId, results, addResult }) {
+export default function Plan({ userId, userEmail, results, addResult }) {
   const [schedule, setSchedule] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeSession, setActiveSession] = useState(null)  // the session currently open
@@ -50,7 +50,7 @@ export default function Plan({ userId, results, addResult }) {
 
   async function saveSchedule() {
     setSaving(true)
-    const row = { user_id: userId, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: {}, updated_at: new Date().toISOString() }
+    const row = { user_id: userId, user_email: userEmail, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: {}, updated_at: new Date().toISOString() }
     const { data } = await supabase.from('student_schedules').upsert([row]).select().single()
     if (data) { setSchedule(data); setCompleted({}) }
     setSaving(false)
