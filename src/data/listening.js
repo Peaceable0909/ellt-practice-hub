@@ -310,3 +310,77 @@ export const LISTENING_CAM17_T1 = [
     ]
   },
 ]
+
+
+// ─── Cambridge IELTS 16 — Test 1 ─────────────────────────────────────────────
+
+export const LISTENING_CAM16_T1 = [
+  {
+    id: 'lc5', title: 'Cambridge IELTS 16 — Test 1 Part 1',
+    intro: 'You will hear a conversation between a woman and a man about a surfing holiday. Complete the notes.',
+    audio: '/audio/cam16-t1-p1.mp3', diff: 'B2', source: 'Cambridge IELTS 16',
+    qs: [
+      { q: "Q1. Group type: enquiring for a ___ holiday", type:'fill', a:'FAMILY' },
+      { q: "Q2. Requirement: all members need to be ___", type:'fill', a:'FIT' },
+      { q: "Q3. Accommodation available: various ___ in the area", type:'fill', a:'HOTELS' },
+      { q: "Q4. Name of the beach location:", type:'fill', a:'CARROWNISKEY' },
+      { q: "Q5. Equipment hire: save money by hiring by the ___", type:'fill', a:'WEEK' },
+      { q: "Q6. Saturday activity: going to the ___", type:'fill', a:'BAY' },
+      { q: "Q7. Best month to visit:", type:'fill', a:'SEPTEMBER' },
+      { q: "Q8. Average temperature (degrees Celsius):", type:'fill', a:'19' },
+      { q: "Q9. Daily hire rate (euros, before weekly discount):", type:'fill', a:'30' },
+      { q: "Q10. Essential equipment to bring: ___", type:'fill', a:'BOOTS' },
+    ]
+  },
+  {
+    id: 'lc6', title: 'Cambridge IELTS 16 — Test 1 Part 2',
+    intro: 'You will hear a guide talking to a group about a local history tour. Answer the questions.',
+    audio: '/audio/cam16-t1-p2.mp3', diff: 'B2', source: 'Cambridge IELTS 16',
+    qs: [
+      { q: "Q11. Which is ONE of the TWO things that surprised the guide about the local history?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
+      { q: "Q12. Which is the OTHER thing that surprised the guide?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
+      { q: "Q13. What is at location marked G on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:6 },
+      { q: "Q14. What is at location C on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:2 },
+      { q: "Q15. What is at location A on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:0 },
+      { q: "Q16. What is at location E on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:4 },
+      { q: "Q17. What is at location D on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:3 },
+      { q: "Q18. What is at location H on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:6 },
+      { q: "Q19. What is at location F on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:5 },
+      { q: "Q20. What is at location C (second area) on the map?", opts:["A. Old bakery","B. Mill","C. Tannery","D. Port office","E. School","F. Jail","G. Church","H. Market"], a:2 },
+    ]
+  },
+  {
+    id: 'lc7', title: 'Cambridge IELTS 16 — Test 1 Part 3',
+    intro: 'You will hear two students, Olivia and Nathan, discussing a research assignment on volcanoes.',
+    audio: '/audio/cam16-t1-p3.mp3', diff: 'C1', source: 'Cambridge IELTS 16',
+    qs: [
+      { q: "Q21. Olivia and Nathan agree that their report should focus on:", opts:["A. Explaining why volcanoes are found in certain locations","B. Describing what happens during a volcanic eruption","C. Examining the impact of volcanoes on people's lives"], a:2 },
+      { q: "Q22. Nathan suggests their report should be based mainly on:", opts:["A. Information from scientific journals","B. Ideas from an expert they interviewed","C. Data they collected themselves"], a:0 },
+      { q: "Q23. What does Olivia think about the diagram of volcanic rock formation?", opts:["A. It is not accurate enough","B. It is too complicated to be useful","C. It would help readers understand the topic"], a:2 },
+      { q: "Q24. Nathan felt that his visit to a volcano was disappointing because:", opts:["A. The weather was too dangerous","B. He could not get close enough to observe it","C. It was not as active as he had expected"], a:2 },
+      { q: "Q25. What do they agree is the main advantage of using case studies?", opts:["A. They make complex processes easier to follow","B. They allow comparison of different situations","C. They provide more reliable statistics"], a:0 },
+      { q: "Q26. What problem do they identify with their current plan?", opts:["A. It does not cover a wide enough range of examples","B. The structure does not match the assignment brief","C. It contains too much descriptive material"], a:1 },
+      { q: "Q27. What does Nathan say about the Tambora eruption?", opts:["A. He found a book with very detailed information","B. He was surprised by how little data exists about it","C. He thinks it is not relevant to their assignment"], a:0 },
+      { q: "Q28. What is Olivia's opinion of the section on prediction methods?", opts:["A. She thinks the methods described are out of date","B. She wants more examples to support the points made","C. She would like to remove it from their report"], a:1 },
+      { q: "Q29. They agree that the conclusion should:", opts:["A. Introduce one final recommendation","B. Summarise findings from all sections","C. Focus only on the most important point"], a:1 },
+      { q: "Q30. What will Nathan do next?", opts:["A. Re-read the assignment guidelines","B. Contact their supervisor for feedback","C. Redraft the opening section"], a:2 },
+    ]
+  },
+  {
+    id: 'lc8', title: 'Cambridge IELTS 16 — Test 1 Part 4',
+    intro: 'You will hear a lecture about how birds navigate during migration. Complete the notes. Write ONE WORD ONLY.',
+    audio: '/audio/cam16-t1-p4.mp3', diff: 'C1', source: 'Cambridge IELTS 16',
+    qs: [
+      { q: "Q31. Early theory: birds hid in ___ during winter", type:'fill', a:'MUD' },
+      { q: "Q32. Birds were thought to lose their ___ before migration", type:'fill', a:'FEATHERS' },
+      { q: "Q33. Birds navigate partly by recognising the ___ of landmarks", type:'fill', a:'SHAPE' },
+      { q: "Q34. Birds can use the ___ as a compass at night", type:'fill', a:'MOON' },
+      { q: "Q35. The length of a bird's ___ affects its magnetic sensitivity", type:'fill', a:'NECK' },
+      { q: "Q36. Ringing birds provided early ___ of migration routes", type:'fill', a:'EVIDENCE' },
+      { q: "Q37. Radar tracking revealed precise ___ taken by migrating birds", type:'fill', a:'DESTINATIONS' },
+      { q: "Q38. Some birds navigate using the smell of ___", type:'fill', a:'OCEANS' },
+      { q: "Q39. Pollution threatens birds' chances of ___ after long migrations", type:'fill', a:'RECOVERY' },
+      { q: "Q40. Researchers now use a global ___ to track individual birds", type:'fill', a:'ATLAS' },
+    ]
+  },
+]
