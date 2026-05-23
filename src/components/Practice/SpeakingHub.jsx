@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { SPEAKING } from '../../data/speaking'
+import { SPEAKING, SPEAKING_IELTS } from '../../data/speaking'
 import { saveResult } from '../../lib/supabase'
 import { Card, Chip, FeedbackBlock } from '../ui'
 import { Mic, MicOff, ChevronLeft, Square, Clock, CheckCircle, BookOpen } from 'lucide-react'
@@ -250,6 +250,8 @@ EXAMINER TIP: [One actionable tip for ELLT Stage 2 — 2 sentences max]`
 }
 
 // ─── SPEAKING HUB ─────────────────────────────────────────────
+const ALL_SPEAKING = [...SPEAKING, ...SPEAKING_IELTS]
+
 export default function SpeakingHub({ results, addResult, userId }) {
   const [selected, setSelected] = useState(null)
   const [phase, setPhase]       = useState('intro')  // intro | speaking | feedback
@@ -393,7 +395,7 @@ export default function SpeakingHub({ results, addResult, userId }) {
         <p style={{ fontSize: 13, color: 'var(--textM)', fontWeight: 600 }}>Choose a topic, prepare for 2 minutes, then speak. AI grades your fluency, content coverage, vocabulary and tone.</p>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-        {SPEAKING.map(s => {
+        {ALL_SPEAKING.map(s => {
           const prev = results.find(r => r.test_id === s.id)
           return (
             <div key={s.id} onClick={() => { setSelected(s); setPhase('intro') }} className="skill-card" style={{ cursor: 'pointer' }}>
