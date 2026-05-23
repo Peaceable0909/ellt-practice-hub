@@ -314,11 +314,11 @@ export const LISTENING_CAM17_T1 = [
 
 // ─── Cambridge IELTS 16 — Test 1 ─────────────────────────────────────────────
 
-export const LISTENING_CAM16_T1 = [
+export const LISTENING_CAM17_T3 = [
   {
-    id: 'lc5', title: 'Cambridge IELTS 16 — Test 1 Part 1',
+    id: 'lc17t3p1', title: 'Cambridge IELTS 17 — Test 3 Part 1',
     intro: 'You will hear a conversation between a woman and a man about a surfing holiday. Complete the notes.',
-    audio: '/audio/cam16-t1-p1.mp3', diff: 'B2', source: 'Cambridge IELTS 16',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q1. Group type: enquiring for a ___ holiday", type:'fill', a:'FAMILY' },
       { q: "Q2. Requirement: all members need to be ___", type:'fill', a:'FIT' },
@@ -333,9 +333,9 @@ export const LISTENING_CAM16_T1 = [
     ]
   },
   {
-    id: 'lc6', title: 'Cambridge IELTS 16 — Test 1 Part 2',
+    id: 'lc17t3p2', title: 'Cambridge IELTS 17 — Test 3 Part 2',
     intro: 'You will hear a guide talking to a group about a local history tour. Answer the questions.',
-    audio: '/audio/cam16-t1-p2.mp3', diff: 'B2', source: 'Cambridge IELTS 16',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q11. Which is ONE of the TWO things that surprised the guide about the local history?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
       { q: "Q12. Which is the OTHER thing that surprised the guide?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
@@ -350,9 +350,9 @@ export const LISTENING_CAM16_T1 = [
     ]
   },
   {
-    id: 'lc7', title: 'Cambridge IELTS 16 — Test 1 Part 3',
+    id: 'lc17t3p3', title: 'Cambridge IELTS 17 — Test 3 Part 3',
     intro: 'You will hear two students, Olivia and Nathan, discussing a research assignment on volcanoes.',
-    audio: '/audio/cam16-t1-p3.mp3', diff: 'C1', source: 'Cambridge IELTS 16',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q21. Olivia and Nathan agree that their report should focus on:", opts:["A. Explaining why volcanoes are found in certain locations","B. Describing what happens during a volcanic eruption","C. Examining the impact of volcanoes on people's lives"], a:2 },
       { q: "Q22. Nathan suggests their report should be based mainly on:", opts:["A. Information from scientific journals","B. Ideas from an expert they interviewed","C. Data they collected themselves"], a:0 },
@@ -367,9 +367,9 @@ export const LISTENING_CAM16_T1 = [
     ]
   },
   {
-    id: 'lc8', title: 'Cambridge IELTS 16 — Test 1 Part 4',
+    id: 'lc17t3p4', title: 'Cambridge IELTS 17 — Test 3 Part 4',
     intro: 'You will hear a lecture about how birds navigate during migration. Complete the notes. Write ONE WORD ONLY.',
-    audio: '/audio/cam16-t1-p4.mp3', diff: 'C1', source: 'Cambridge IELTS 16',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q31. Early theory: birds hid in ___ during winter", type:'fill', a:'MUD' },
       { q: "Q32. Birds were thought to lose their ___ before migration", type:'fill', a:'FEATHERS' },
@@ -381,6 +381,84 @@ export const LISTENING_CAM16_T1 = [
       { q: "Q38. Some birds navigate using the smell of ___", type:'fill', a:'OCEANS' },
       { q: "Q39. Pollution threatens birds' chances of ___ after long migrations", type:'fill', a:'RECOVERY' },
       { q: "Q40. Researchers now use a global ___ to track individual birds", type:'fill', a:'ATLAS' },
+    ]
+  },
+]
+
+// ─── Cambridge IELTS 17 — Test 2 ─────────────────────────────────────────────
+
+export const LISTENING_CAM17_T2 = [
+  {
+    id: 'lc17t2p1', title: 'Cambridge IELTS 17 — Test 2 Part 1',
+    intro: 'You will hear a conversation about a local heritage project. Complete the notes. Write ONE WORD AND/OR A NUMBER for each answer.',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q1. The project involves ___ old records and documents", type:'fill', a:'COLLECTING' },
+      { q: "Q2. The project mainly uses historical ___ and archives", type:'fill', a:'RECORDS' },
+      { q: "Q3. Materials are sourced mainly from the ___ side of the town", type:'fill', a:'WEST' },
+      { q: "Q4. One category of records covers local ___", type:'fill', a:'TRANSPORT' },
+      { q: "Q5. Another category covers ___ in the area", type:'fill', a:'ART' },
+      { q: "Q6. Medical category: records from the local ___", type:'fill', a:'HOSPITAL' },
+      { q: "Q7. The records will eventually be displayed in the heritage ___", type:'fill', a:'GARDEN' },
+      { q: "Q8. The fundraising event planned is a ___", type:'fill', a:'QUIZ' },
+      { q: "Q9. To attend the event, people will need to buy ___", type:'fill', a:'TICKETS' },
+      { q: "Q10. To promote the event they are designing a ___", type:'fill', a:'POSTER' },
+    ]
+  },
+  {
+    id: 'lc17t2p4', title: 'Cambridge IELTS 17 — Test 2 Part 4',
+    intro: 'You will hear a lecture about the Icelandic language and the effects of digital technology. Complete the notes. Write ONE WORD AND/OR A NUMBER for each answer.',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q31. Number of people who speak Icelandic: approximately ___", type:'fill', a:'321,000' },
+      { q: "Q32. Icelandic speakers create new words (e.g. a new Icelandic word for ___)", type:'fill', a:'PODCAST' },
+      { q: "Q33. Young Icelanders develop ___ skills through exposure to English digital content", type:'fill', a:'BILINGUAL' },
+      { q: "Q34. Teachers have noted that children's ___ books are increasingly in English", type:'fill', a:'PICTURE' },
+      { q: "Q35. There are concerns about young people's Icelandic ___ skills declining", type:'fill', a:'GRAMMAR' },
+      { q: "Q36. The language is closely linked to Icelandic cultural ___", type:'fill', a:'IDENTITY' },
+      { q: "Q37. Some young Icelanders are no longer ___ in their native language", type:'fill', a:'FLUENT' },
+      { q: "Q38. Icelandic schools are introducing Icelandic ___ programmes to help", type:'fill', a:'VOCABULARY' },
+      { q: "Q39. Teachers have observed changes in ___ conversations among children", type:'fill', a:'PLAYGROUND' },
+      { q: "Q40. The biggest influence comes from young people's use of ___", type:'fill', a:'SMARTPHONES' },
+    ]
+  },
+]
+
+// ─── Cambridge IELTS 17 — Test 4 ─────────────────────────────────────────────
+
+export const LISTENING_CAM17_T4 = [
+  {
+    id: 'lc17t4p1', title: 'Cambridge IELTS 17 — Test 4 Part 1',
+    intro: 'You will hear a conversation between a tenant and a property manager about problems with a flat. Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q1. Problem with the ___ in the hallway", type:'fill', a:'FLOOR' },
+      { q: "Q2. Kitchen issue: broken ___", type:'fill', a:'FRIDGE' },
+      { q: "Q3. Damage reported: stains on ___", type:'fill', a:'SHIRTS' },
+      { q: "Q4. External issue: broken ___", type:'fill', a:'WINDOWS' },
+      { q: "Q5. Safety concern regarding the ___", type:'fill', a:'BALCONY' },
+      { q: "Q6. Specialist required: an ___", type:'fill', a:'ELECTRICIAN' },
+      { q: "Q7. Ongoing problem: excessive ___ from nearby building work", type:'fill', a:'DUST' },
+      { q: "Q8. The tenant has contacted the ___", type:'fill', a:'POLICE' },
+      { q: "Q9. Management promised to provide ___ for maintenance staff", type:'fill', a:'TRAINING' },
+      { q: "Q10. Next step agreed: schedule a formal ___", type:'fill', a:'REVIEW' },
+    ]
+  },
+  {
+    id: 'lc17t4p4', title: 'Cambridge IELTS 17 — Test 4 Part 4',
+    intro: 'You will hear a lecture about maple syrup production. Complete the notes. Write ONE WORD ONLY for each answer.',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q31. Maple syrup is a thick, ___, sweet liquid", type:'fill', a:'GOLDEN' },
+      { q: "Q32. Maple syrup provides a ___ alternative to refined sugar", type:'fill', a:'HEALTHY' },
+      { q: "Q33. Canada's ___ is ideal for maple trees", type:'fill', a:'CLIMATE' },
+      { q: "Q34. Indigenous people boiled sap using heated ___ from the sun", type:'fill', a:'ROCK' },
+      { q: "Q35. The ___ of the collection tubes varies", type:'fill', a:'DIAMETER' },
+      { q: "Q36. Sap flows through a ___ inserted into the tree", type:'fill', a:'TUBE' },
+      { q: "Q37. The sap is boiled over a ___", type:'fill', a:'FIRE' },
+      { q: "Q38. Boiling produces large amounts of ___ as water evaporates", type:'fill', a:'STEAM' },
+      { q: "Q39. Syrup that is stored too long can become ___", type:'fill', a:'CLOUDY' },
+      { q: "Q40. The syrup is measured and sold by the ___", type:'fill', a:'LITRE' },
     ]
   },
 ]
