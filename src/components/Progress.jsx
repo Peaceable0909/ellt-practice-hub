@@ -19,7 +19,7 @@ function avgBand(results, skill) {
   return (arr.reduce((s, r) => s + (r.band_score || 0), 0) / arr.length).toFixed(1)
 }
 
-export default function Progress({ results, loading }) {
+export default function Progress({ results, loading, streak = 0 }) {
   const overall = results.length
     ? (results.reduce((s, r) => s + (r.band_score || 0), 0) / results.length).toFixed(1)
     : '—'
@@ -65,7 +65,7 @@ export default function Progress({ results, loading }) {
           { v: overall,              l: 'Overall Band',    col: 'var(--teal)'   },
           { v: results.length,       l: 'Tests Done',      col: 'var(--amber)'  },
           { v: `${accuracy}%`,       l: 'Avg Accuracy',    col: 'var(--blue)'   },
-          { v: '1d 🔥',              l: 'Study Streak',    col: 'var(--coral)'  },
+          { v: `${streak}d 🔥`,      l: 'Study Streak',    col: 'var(--coral)'  },
         ].map(s => (
           <Card key={s.l} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 26, fontWeight: 700, color: s.col, marginBottom: 4 }}>{s.v}</div>
