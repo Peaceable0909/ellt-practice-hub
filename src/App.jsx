@@ -7,6 +7,7 @@ import Practice from './components/Practice'
 import MockTests from './components/MockTests'
 import Progress from './components/Progress'
 import LiveSessions from './components/LiveSessions'
+import SessionReminder from './components/SessionReminder'
 
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem('ellt-theme') !== 'light')
@@ -17,6 +18,7 @@ export default function App() {
   const [loadingResults, setLoadingResults] = useState(false)
   const [authReady, setAuthReady] = useState(false)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
+  const [schedule, setSchedule] = useState(null)
 
   useEffect(() => {
     document.body.className = dark ? 'dark' : ''
@@ -41,6 +43,7 @@ export default function App() {
     if (!session?.user?.id || isPasswordRecovery) return
     setLoadingResults(true)
     loadResults().then(setResults).finally(() => setLoadingResults(false))
+    supabase.from('student_schedules').select('*').eq('user_id', session.user.id).single().then(({ data }) => { if (data) setSchedule(data) })
     getProfile(session.user.id).then(p => {
       setProfile(p?.full_name ? p : session.user.user_metadata?.full_name
         ? { full_name: session.user.user_metadata.full_name } : null)
@@ -83,6 +86,7 @@ export default function App() {
         </div>
       )}
 
+      <SessionReminder schedule={schedule} />
       {page === 'Plan'     && <Plan {...sharedProps} />}
       {page === 'Practice' && <Practice {...sharedProps} />}
       {page === 'MockTest' && <MockTests {...sharedProps} />}
