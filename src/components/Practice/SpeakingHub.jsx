@@ -64,7 +64,13 @@ function MicRecorder({ topic, onComplete }) {
         }
         setInterimText(interim)
       }
-      r.onerror = () => {}
+      r.onerror = (e) => {
+        if (e.error === 'not-allowed') {
+          recogRef.current = null
+          // Speech permission denied — let SpeakingHub know via a special transcript
+          onComplete('[MICROPHONE_DENIED]', 0)
+        }
+      }
       r.onend = () => {
         // Auto-restart if still in recording phase
         if (recogRef.current) {
