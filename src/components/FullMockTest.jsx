@@ -6,13 +6,15 @@ import { WRITING } from '../data/writing'
 import { SPEAKING } from '../data/speaking'
 import { Card, Chip } from './ui'
 
-// Fixed mock test content
-const MOCK = {
-  listening: LISTENING[0],  // Concerts
-  reading:   READING[1],    // Do Animals Have Friends?
-  writing:   WRITING[0],    // Team Work
-  speaking:  SPEAKING[0],   // Tourism
-}
+// HIGH-01 fix: Rotate mock test content across multiple sets
+const MOCK_SETS = [
+  { listening: LISTENING[0], reading: READING[1], writing: WRITING[0], speaking: SPEAKING[0] },
+  { listening: LISTENING[1], reading: READING[0], writing: WRITING[1], speaking: SPEAKING[1] },
+  { listening: LISTENING[2], reading: READING[2], writing: WRITING[2], speaking: SPEAKING[2] },
+]
+// Pick set based on number of completed mocks (stored in localStorage)
+const mockCount = parseInt(localStorage.getItem('ellt-mock-count') || '0')
+const MOCK = MOCK_SETS[mockCount % MOCK_SETS.length]
 
 const SECTION_DURATIONS = { listening: 20*60, reading: 30*60, writing: 45*60, speaking: 10*60 }
 const SECTION_ORDER = ['listening','reading','writing','speaking']
@@ -787,6 +789,7 @@ export default function FullMockTest({ userId, addResult, onExit }) {
       addResult(s)
     }
 
+    localStorage.setItem('ellt-mock-count', String(mockCount + 1))
     setPhase('results')
   }
 
@@ -812,7 +815,15 @@ export default function FullMockTest({ userId, addResult, onExit }) {
       {phase === 'results' && scores && (
         <ResultsPhase
           scores={scores}
-          onRetake={() => { mockId.current = crypto.randomUUID(); setPhase('intro') }}
+          onRetake={() => {
+          mockId.current = crypto.randomUUID()
+          setListeningAnswers({})
+          setReadingAnswers({})
+          setWritingText('')
+          setSpeakingTranscript('')
+          setScores(null)
+          setPhase('intro')
+        }}
           onHome={onExit}/>
       )}
     </div>
