@@ -115,24 +115,25 @@ export const LISTENING = [
   },
 ]
 
-// ─── NEW: IELTS Academic Listening Tests ─────────────────────────────────────
+// ─── CORRECTED IELTS Listening Tests ─────────────────────────────────────────
+// Full tapescripts extracted — all answers verified from official Cambridge materials
 
 export const LISTENING_IELTS = [
   {
     id: 'li1',
     title: "Packham's Shipping Agency",
-    intro: "You will hear a telephone conversation between a customer named Jacob and an agent at a shipping company. Listen and complete the customer quotation form.",
+    intro: "You will hear a telephone conversation between a customer named Jacob and an agent at a shipping company. Complete the customer quotation form.",
     audio: '/audio/ielts-packham-shipping.mp3',
     diff: 'B2', source: 'IELTS Academic',
     qs: [
-      { q: "Q1. Complete the form: Customer's surname (write in CAPITALS)", type:'fill', a:'MKERE' },
-      { q: "Q2. Complete the form: Name of college (e.g. _______ College, Downlands Rd)", type:'fill', a:'HAMILTON' },
-      { q: "Q3. Complete the form: Postcode", type:'fill', a:'BS8 4RJ' },
-      { q: "Q4. Complete the form: Container width", type:'fill', a:'0.75M' },
-      { q: "Q5. Complete the form: Container height", type:'fill', a:'1.2M' },
-      { q: "Q6. Complete the form: Second item in contents (after clothes)", type:'fill', a:'BOOKS' },
-      { q: "Q7. Complete the form: Third item in contents", type:'fill', a:'COMPUTER EQUIPMENT' },
-      { q: "Q8. Complete the form: Total estimated value (£)", type:'fill', a:'600' },
+      { q: "Q1. Customer's surname (write in CAPITALS)", type:'fill', a:'MKERE' },
+      { q: "Q2. Name of college (______ College, Downlands Rd)", type:'fill', a:'WESTALL' },
+      { q: "Q3. Postcode", type:'fill', a:'BS8 9PU' },
+      { q: "Q4. Container width", type:'fill', a:'0.75M' },
+      { q: "Q5. Container height", type:'fill', a:'0.5M' },
+      { q: "Q6. Second item in contents (after clothes)", type:'fill', a:'BOOKS' },
+      { q: "Q7. Third item in contents", type:'fill', a:'TOYS' },
+      { q: "Q8. Total estimated value (£)", type:'fill', a:'600' },
       { q: "Q9. Type of insurance chosen:", opts:['A. Economy','B. Standard','C. Premium'], a:2 },
       { q: "Q10. Customer wants goods delivered to:", opts:['A. Port','B. Home','C. Depot'], a:0 },
     ]
@@ -140,54 +141,54 @@ export const LISTENING_IELTS = [
   {
     id: 'li2',
     title: 'Social Contacts in the UK',
-    intro: "You will hear an extract from a talk given to a group going to stay in the UK. The speaker discusses making social contacts. Listen and answer the short-answer questions.",
+    intro: "You will hear a talk given to a group going to stay in the UK about making social contacts. Answer the questions.",
     audio: '/audio/ielts-social-contacts.mp3',
     diff: 'B2', source: 'IELTS Academic',
     qs: [
-      { q: "Q11. What is the FIRST factor that can make social contact in a foreign country difficult?", type:'fill', a:'LANGUAGE' },
-      { q: "Q12. What is the SECOND factor that can make social contact difficult?", type:'fill', a:'DIFFERENT CUSTOMS' },
-      { q: "Q13. What type of community group does the speaker mention (besides theatre)?", type:'fill', a:'SPORTS' },
-      { q: "Q14. What is the second type of community group mentioned (besides theatre and the previous answer)?", type:'fill', a:'MUSIC' },
-      { q: "Q15. First place where information about community activities can be found:", type:'fill', a:'LIBRARY' },
-      { q: "Q16. Second place where information about community activities can be found:", type:'fill', a:'COMMUNITY CENTRE' },
+      { q: "Q11. First factor that makes social contact in a foreign country difficult:", type:'fill', a:'LANGUAGE' },
+      { q: "Q12. Second factor that makes social contact difficult:", type:'fill', a:'CUSTOMS' },
+      { q: "Q13. Community group type (besides theatre):", type:'fill', a:'MUSIC' },
+      { q: "Q14. Another community group type mentioned:", type:'fill', a:'LOCAL HISTORY' },
+      { q: "Q15. First place to find information about community activities:", type:'fill', a:'TOWN HALL' },
+      { q: "Q16. Second place to find information about community activities:", type:'fill', a:'(PUBLIC) LIBRARY' },
     ]
   },
   {
     id: 'li3',
     title: 'The National Arts Centre',
-    intro: "You will hear a radio broadcast about the National Arts Centre. Listen and complete the notes and table below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+    intro: "You will hear a radio broadcast about the National Arts Centre. Complete the notes and table.",
     audio: '/audio/ielts-national-arts-centre.mp3',
     diff: 'C1', source: 'IELTS Academic',
     qs: [
       { q: "Q11. The National Arts Centre is well known for:", type:'fill', a:'CLASSICAL MUSIC' },
-      { q: "Q12. Besides concert rooms, theatres, cinemas, art galleries, public library and restaurants — what other facility is in the complex?", type:'fill', a:'BOOKSHOP' },
+      { q: "Q12. Additional facility in the complex (besides concert rooms, theatres, cinemas, art galleries, public library and restaurants):", type:'fill', a:'BOOKSHOP' },
       { q: "Q13. In the 1960s the Centre was:", type:'fill', a:'PLANNED' },
       { q: "Q14. The Centre opened to the public in:", type:'fill', a:'1983' },
       { q: "Q15. The Centre is managed by:", type:'fill', a:'CITY COUNCIL' },
       { q: "Q16. The Centre is open how many days per year?", type:'fill', a:'363' },
-      { q: "Q17. Where is 'The Magic Flute' (opera by Mozart) performed?", type:'fill', a:'GARDEN HALL' },
-      { q: "Q18. What is the name of the Canadian film showing on Wednesday?", type:'fill', a:'THREE LIVES' },
-      { q: "Q19. What is the ticket price for the Wednesday film?", type:'fill', a:'£4.50' },
-      { q: "Q20. What exhibition runs Saturday and Sunday 11am–10pm?", type:'fill', a:'FACES OF CHINA' },
+      { q: "Q17. Where is 'The Magic Flute' performed on Monday and Tuesday?", type:'fill', a:'GARDEN HALL' },
+      { q: "Q18. Name of the Canadian film showing on Wednesday:", type:'fill', a:'THREE LIVES' },
+      { q: "Q19. Ticket price for the Wednesday film:", type:'fill', a:'£4.50' },
+      { q: "Q20. Name of the art exhibition running Saturday and Sunday:", type:'fill', a:'FACES OF CHINA' },
     ]
   },
   {
     id: 'li4',
     title: 'Studying with the Open University',
-    intro: "You will hear two friends, Rachel and Paul, discussing studying with the Open University. Rachel has already completed a course. Listen and complete the sentences.",
+    intro: "Two friends, Rachel and Paul, discuss studying with the Open University. Complete the sentences.",
     audio: '/audio/ielts-sentence-completion.mp3',
     diff: 'B2', source: 'IELTS Academic',
     qs: [
       { q: "Q27. Studying with the Open University demanded a great deal of:", type:'fill', a:'MOTIVATION' },
-      { q: "Q28. Studying and working at the same time improved Rachel's:", type:'fill', a:'TIME-MANAGEMENT' },
+      { q: "Q28. Studying and working at the same time improved Rachel's ___ skills:", type:'fill', a:'TIME-MANAGEMENT' },
       { q: "Q29. It was helpful that the course was structured in:", type:'fill', a:'MODULES' },
-      { q: "Q30. She enjoyed meeting other students at:", type:'fill', a:'TUTORIALS' },
+      { q: "Q30. She enjoyed meeting other students at:", type:'fill', a:'SUMMER SCHOOLS' },
     ]
   },
   {
     id: 'li5',
     title: 'University Course Options',
-    intro: "You will hear a Communication Studies student, Jack, talking to his tutor about optional courses for next semester. What does Jack say about each course option?",
+    intro: "A Communication Studies student, Jack, talks to his tutor about optional courses. What does Jack say about each option?",
     audio: '/audio/ielts-multiple-choice.mp3',
     diff: 'C1', source: 'IELTS Academic',
     qs: [
@@ -201,14 +202,28 @@ export const LISTENING_IELTS = [
   {
     id: 'li6',
     title: 'Hotel Information',
-    intro: "You will hear a man asking for hotel information at a tourist information office. Match each description to the correct hotel.",
+    intro: "A man asks for hotel information at a tourist information office. Match each description to the correct hotel.",
     audio: '/audio/ielts-matching-hotels.mp3',
     diff: 'B2', source: 'IELTS Academic',
     qs: [
       { q: "Q1. Which hotel is in a rural area?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:4 },
-      { q: "Q2. Which hotel only opened recently?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:3 },
-      { q: "Q3. Which hotel offers facilities for business functions?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:1 },
-      { q: "Q4. Which hotel has an indoor swimming pool?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:2 },
+      { q: "Q2. Which hotel only opened recently?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:1 },
+      { q: "Q3. Which hotel offers facilities for business functions?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:2 },
+      { q: "Q4. Which hotel has an indoor swimming pool?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:0 },
+    ]
+  },
+  {
+    id: 'li7',
+    title: 'Town Library Tour',
+    intro: "You will hear the librarian of a new town library talking to a group of visitors. Label the plan of the library.",
+    audio: '',
+    diff: 'B2', source: 'IELTS Academic',
+    qs: [
+      { q: "Q11. What is in the first room on the left as you enter?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:7 },
+      { q: "Q12. What is in the room just beyond the librarian's desk on the right?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:6 },
+      { q: "Q13. What collection is on the far wall of the main library area?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:3 },
+      { q: "Q14. What is next door to the seminar room?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:1 },
+      { q: "Q15. What is in the large room to the right of the main library area?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:5 },
     ]
   },
 ]
