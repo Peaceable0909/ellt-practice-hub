@@ -114,3 +114,101 @@ export const LISTENING = [
     ],
   },
 ]
+
+// ─── NEW: IELTS Academic Listening Tests ─────────────────────────────────────
+
+export const LISTENING_IELTS = [
+  {
+    id: 'li1',
+    title: "Packham's Shipping Agency",
+    intro: "You will hear a telephone conversation between a customer named Jacob and an agent at a shipping company. Listen and complete the customer quotation form.",
+    audio: '/audio/ielts-packham-shipping.mp3',
+    diff: 'B2', source: 'IELTS Academic',
+    qs: [
+      { q: "Q1. Complete the form: Customer's surname (write in CAPITALS)", type:'fill', a:'MKERE' },
+      { q: "Q2. Complete the form: Name of college (e.g. _______ College, Downlands Rd)", type:'fill', a:'HAMILTON' },
+      { q: "Q3. Complete the form: Postcode", type:'fill', a:'BS8 4RJ' },
+      { q: "Q4. Complete the form: Container width", type:'fill', a:'0.75M' },
+      { q: "Q5. Complete the form: Container height", type:'fill', a:'1.2M' },
+      { q: "Q6. Complete the form: Second item in contents (after clothes)", type:'fill', a:'BOOKS' },
+      { q: "Q7. Complete the form: Third item in contents", type:'fill', a:'COMPUTER EQUIPMENT' },
+      { q: "Q8. Complete the form: Total estimated value (£)", type:'fill', a:'600' },
+      { q: "Q9. Type of insurance chosen:", opts:['A. Economy','B. Standard','C. Premium'], a:2 },
+      { q: "Q10. Customer wants goods delivered to:", opts:['A. Port','B. Home','C. Depot'], a:0 },
+    ]
+  },
+  {
+    id: 'li2',
+    title: 'Social Contacts in the UK',
+    intro: "You will hear an extract from a talk given to a group going to stay in the UK. The speaker discusses making social contacts. Listen and answer the short-answer questions.",
+    audio: '/audio/ielts-social-contacts.mp3',
+    diff: 'B2', source: 'IELTS Academic',
+    qs: [
+      { q: "Q11. What is the FIRST factor that can make social contact in a foreign country difficult?", type:'fill', a:'LANGUAGE' },
+      { q: "Q12. What is the SECOND factor that can make social contact difficult?", type:'fill', a:'DIFFERENT CUSTOMS' },
+      { q: "Q13. What type of community group does the speaker mention (besides theatre)?", type:'fill', a:'SPORTS' },
+      { q: "Q14. What is the second type of community group mentioned (besides theatre and the previous answer)?", type:'fill', a:'MUSIC' },
+      { q: "Q15. First place where information about community activities can be found:", type:'fill', a:'LIBRARY' },
+      { q: "Q16. Second place where information about community activities can be found:", type:'fill', a:'COMMUNITY CENTRE' },
+    ]
+  },
+  {
+    id: 'li3',
+    title: 'The National Arts Centre',
+    intro: "You will hear a radio broadcast about the National Arts Centre. Listen and complete the notes and table below. Write NO MORE THAN THREE WORDS AND/OR A NUMBER for each answer.",
+    audio: '/audio/ielts-national-arts-centre.mp3',
+    diff: 'C1', source: 'IELTS Academic',
+    qs: [
+      { q: "Q11. The National Arts Centre is well known for:", type:'fill', a:'CLASSICAL MUSIC' },
+      { q: "Q12. Besides concert rooms, theatres, cinemas, art galleries, public library and restaurants — what other facility is in the complex?", type:'fill', a:'BOOKSHOP' },
+      { q: "Q13. In the 1960s the Centre was:", type:'fill', a:'PLANNED' },
+      { q: "Q14. The Centre opened to the public in:", type:'fill', a:'1983' },
+      { q: "Q15. The Centre is managed by:", type:'fill', a:'CITY COUNCIL' },
+      { q: "Q16. The Centre is open how many days per year?", type:'fill', a:'363' },
+      { q: "Q17. Where is 'The Magic Flute' (opera by Mozart) performed?", type:'fill', a:'GARDEN HALL' },
+      { q: "Q18. What is the name of the Canadian film showing on Wednesday?", type:'fill', a:'THREE LIVES' },
+      { q: "Q19. What is the ticket price for the Wednesday film?", type:'fill', a:'£4.50' },
+      { q: "Q20. What exhibition runs Saturday and Sunday 11am–10pm?", type:'fill', a:'FACES OF CHINA' },
+    ]
+  },
+  {
+    id: 'li4',
+    title: 'Studying with the Open University',
+    intro: "You will hear two friends, Rachel and Paul, discussing studying with the Open University. Rachel has already completed a course. Listen and complete the sentences.",
+    audio: '/audio/ielts-sentence-completion.mp3',
+    diff: 'B2', source: 'IELTS Academic',
+    qs: [
+      { q: "Q27. Studying with the Open University demanded a great deal of:", type:'fill', a:'MOTIVATION' },
+      { q: "Q28. Studying and working at the same time improved Rachel's:", type:'fill', a:'TIME-MANAGEMENT' },
+      { q: "Q29. It was helpful that the course was structured in:", type:'fill', a:'MODULES' },
+      { q: "Q30. She enjoyed meeting other students at:", type:'fill', a:'TUTORIALS' },
+    ]
+  },
+  {
+    id: 'li5',
+    title: 'University Course Options',
+    intro: "You will hear a Communication Studies student, Jack, talking to his tutor about optional courses for next semester. What does Jack say about each course option?",
+    audio: '/audio/ielts-multiple-choice.mp3',
+    diff: 'C1', source: 'IELTS Academic',
+    qs: [
+      { q: "Q21. Media Studies — Jack will:", opts:["A. Definitely do it","B. May or may not do it","C. Won't do it"], a:2 },
+      { q: "Q22. Women and Power — Jack will:", opts:["A. Definitely do it","B. May or may not do it","C. Won't do it"], a:0 },
+      { q: "Q23. Culture and Society — Jack will:", opts:["A. Definitely do it","B. May or may not do it","C. Won't do it"], a:1 },
+      { q: "Q24. Identity and Popular Culture — Jack will:", opts:["A. Definitely do it","B. May or may not do it","C. Won't do it"], a:0 },
+      { q: "Q25. Introduction to Cultural Theory — Jack will:", opts:["A. Definitely do it","B. May or may not do it","C. Won't do it"], a:1 },
+    ]
+  },
+  {
+    id: 'li6',
+    title: 'Hotel Information',
+    intro: "You will hear a man asking for hotel information at a tourist information office. Match each description to the correct hotel.",
+    audio: '/audio/ielts-matching-hotels.mp3',
+    diff: 'B2', source: 'IELTS Academic',
+    qs: [
+      { q: "Q1. Which hotel is in a rural area?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:4 },
+      { q: "Q2. Which hotel only opened recently?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:3 },
+      { q: "Q3. Which hotel offers facilities for business functions?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:1 },
+      { q: "Q4. Which hotel has an indoor swimming pool?", opts:["A. The Bridge Hotel","B. Carlton House","C. The Imperial","D. The Majestic","E. The Royal Oak"], a:2 },
+    ]
+  },
+]
