@@ -122,8 +122,13 @@ export default async function handler(req) {
   const SB_URL     = process.env.VITE_SUPABASE_URL
   const SB_KEY     = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
   const authHeader = req.headers.get('authorization')
+  const secret = process.env.CRON_SECRET
 
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // HIGH-14 fix: prevent undefined bypass
+  if (!secret) {
+    return new Response('CRON_SECRET not configured on server', { status: 500 })
+  }
+  if (authHeader !== `Bearer ${secret}`) {
     return new Response('Unauthorized', { status: 401 })
   }
   if (!RESEND_KEY) {
