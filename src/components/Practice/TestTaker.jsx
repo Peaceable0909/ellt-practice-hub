@@ -18,6 +18,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
     return test.qs.reduce((s, q, i) => {
       const ans = answers[i]
       if (q.type === 'fill') return s + (typeof ans === 'string' && ans.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
+      if (Array.isArray(q.a)) return s + (q.a.includes(ans) ? 1 : 0)
       return s + (ans === q.a ? 1 : 0)
     }, 0)
   }, [submitted, answers, test.qs])
@@ -109,7 +110,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
         {test.qs.map((q, qi) => {
           const userAns = answers[qi]
           const isFill = q.type === 'fill'
-          const isCorrect = submitted && (isFill ? (typeof userAns==='string' && userAns.toUpperCase().trim()===q.a.toUpperCase()) : userAns===q.a)
+          const isCorrect = submitted && (isFill ? (typeof userAns==='string' && userAns.toUpperCase().trim()===q.a.toUpperCase()) : Array.isArray(q.a) ? q.a.includes(userAns) : userAns===q.a)
           const isWrong = submitted && !isCorrect
 
           return (
@@ -135,10 +136,10 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                       {q.opts.map((opt, oi) => {
                         const isSel = userAns===oi
-                        const isAns = oi===q.a
+                        const isAns = Array.isArray(q.a) ? q.a.includes(oi) : oi===q.a
                         let cls = 'q-option'
                         if (!submitted && isSel) cls += ' selected'
-                        if (submitted && isAns) cls += ' correct'
+                        if (submitted && (Array.isArray(q.a) ? q.a.includes(oi) : isAns)) cls += ' correct'
                         if (submitted && isSel && !isAns) cls += ' incorrect'
                         return (
                           <div key={oi} className={cls} onClick={() => !submitted && setAnswers(a => ({...a,[qi]:oi}))}>
