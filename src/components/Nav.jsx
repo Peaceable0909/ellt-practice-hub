@@ -1,4 +1,4 @@
-import { LayoutDashboard, BarChart2, Radio, Menu, X, BookOpen,
+import { LayoutDashboard, BarChart2, BookOpen,
          Flame, Zap, Sun, Moon, LogOut, User, ChevronDown,
          Calendar, ClipboardList } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
@@ -6,17 +6,15 @@ import { signOut } from '../lib/supabase'
 
 const NAV_ITEMS = [
   { key: 'Plan',      icon: LayoutDashboard, label: 'My Plan'  },
+  { key: 'Practice',  icon: BookOpen,        label: 'Practice' },
+  { key: 'MockTest',  icon: ClipboardList,   label: 'Mock Test'},
   { key: 'Progress',  icon: BarChart2,       label: 'Progress' },
-  { key: 'Live',      icon: Radio,           label: 'Live'     },
 ]
 
-export default function Nav({ page, setPage, dark, setDark, user, profile, results = [] }) {
+export default function Nav({ page, setPage, dark, setDark, user, profile, results = [], streak = 0 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [moreOpen, setMoreOpen] = useState(false)
   const dropRef = useRef(null)
-  const moreRef = useRef(null)
 
-  const streak = 1
   const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student'
   const initials = displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
@@ -24,7 +22,6 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
   useEffect(() => {
     function handleClick(e) {
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false)
-      if (moreRef.current && !moreRef.current.contains(e.target)) setMoreOpen(false)
     }
     document.addEventListener('mousedown', handleClick)
     return () => document.removeEventListener('mousedown', handleClick)
@@ -58,37 +55,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
               </button>
             ))}
 
-            {/* More menu on desktop */}
-            <div ref={moreRef} style={{ position: 'relative' }}>
-              <button onClick={() => setMoreOpen(o => !o)} style={{
-                padding: '7px 12px', borderRadius: 10, border: 'none',
-                background: ['Practice','MockTest'].includes(page) ? 'var(--blueBg)' : 'transparent',
-                color: ['Practice','MockTest'].includes(page) ? 'var(--blue)' : 'var(--textM)',
-                fontWeight: 600, fontSize: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
-                display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
-              }}>
-                <Menu size={14} /> More
-              </button>
-              {moreOpen && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, minWidth: 180, background: 'var(--bg2)', border: '2px solid var(--border)', borderBottom: '4px solid var(--borderB)', borderRadius: 14, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 200 }}>
-                  {[
-                    { key: 'Practice', icon: BookOpen,      label: 'All Practice Materials' },
-                    { key: 'MockTest', icon: ClipboardList, label: 'Mock Tests'              },
-                  ].map(({ key, icon: Icon, label }) => (
-                    <button key={key} onClick={() => { setPage(key); setMoreOpen(false) }} style={{
-                      width: '100%', padding: '12px 16px', border: 'none', background: 'transparent',
-                      display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer',
-                      fontFamily: 'Nunito, sans-serif', fontSize: 13, fontWeight: 700,
-                      color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left',
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                      <Icon size={15} color="var(--textM)" />{label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+
           </div>
 
           <div style={{ flex: 1 }} className="show-mobile-only" />
@@ -147,9 +114,9 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
       <div className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
           { key: 'Plan',     icon: LayoutDashboard, label: 'My Plan'  },
-          { key: 'Progress', icon: BarChart2,       label: 'Progress' },
-          { key: 'Live',     icon: Radio,           label: 'Live'     },
           { key: 'Practice', icon: BookOpen,        label: 'Practice' },
+          { key: 'MockTest', icon: ClipboardList,   label: 'Mock Test'},
+          { key: 'Progress', icon: BarChart2,       label: 'Progress' },
         ].map(({ key, icon: Icon, label }) => {
           const active = page === key
           return (
