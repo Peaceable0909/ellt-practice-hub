@@ -69,7 +69,7 @@ export default function App() {
   if (isPasswordRecovery) return <Auth isPasswordRecovery={true} />
   if (!session) return <Auth />
 
-  const sharedProps = { results, addResult, userId: session.user.id }
+  const sharedProps = { results, addResult, userId: session.user.id, userEmail: session.user.email }
 
   return (
     <div style={{ background:'var(--bg)', minHeight:'100vh', color:'var(--text)' }}>
