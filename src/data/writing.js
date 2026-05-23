@@ -153,3 +153,58 @@ A more balanced approach would involve incentivising greener alternatives rather
 In conclusion, while I support encouraging alternative forms of transport, I believe international laws restricting car ownership would be impractical and potentially unjust. Policy should focus on changing behaviour through incentives rather than prohibition.`
   }
 ]
+
+// ─── Official IELTS 2023 — Additional Tasks ───────────────────────────────────
+
+export const WRITING_OFFICIAL_2023 = [
+  {
+    id: 'wo1',
+    title: 'Radio and TV Audiences 1992',
+    source: 'IELTS Official Sample — Task 1',
+    prompt: 'The graph below shows radio and television audiences throughout the day in 1992.',
+    task: 'Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
+    minWords: 150, band: 7,
+    chartDescription: 'Line graph showing the percentage of the UK population watching TV or listening to radio at different times of day in 1992. Radio peaks in the morning (around 7-8am). TV audience grows through the day, peaking in the evening (around 8-9pm). The two lines cross mid-morning and again in the early afternoon. Radio audience is higher than TV from early morning until around midday. TV overtakes radio from lunchtime onwards.',
+    model: `The line graph illustrates the proportion of the UK population who listened to the radio or watched television at various points throughout the day in 1992.
+
+Overall, the two media had contrasting patterns of popularity. Radio dominated in the morning, while television attracted progressively larger audiences as the day progressed, reaching its peak in the evening.
+
+Radio audiences were notably high in the early morning, peaking at around 7 to 8 am when approximately 25 to 30 percent of the population tuned in, presumably during the breakfast and commuting period. However, radio listenership declined steadily throughout the rest of the day, falling to very low levels by the evening.
+
+Television, by contrast, attracted relatively few viewers in the morning but grew steadily from midday onwards. The two audiences were roughly equal in the late morning before television overtook radio during the afternoon. TV viewing reached its highest point in the late evening, at around 8 to 9 pm, when it attracted the largest proportion of the population of any medium at any time of day.
+
+In conclusion, radio was the dominant medium in the mornings while television clearly dominated afternoons and evenings in 1992.`
+  },
+  {
+    id: 'wo2',
+    title: 'Children, Wealth and Adult Life',
+    source: 'IELTS Official Sample — Task 2',
+    prompt: 'Children who are brought up in families that do not have large amounts of money are better prepared to deal with the problems of adult life than children brought up by wealthy parents.',
+    task: 'To what extent do you agree or disagree with this opinion? Give reasons for your answer and include any relevant examples from your own knowledge or experience. Write at least 250 words.',
+    minWords: 250, band: 7,
+    model: `The idea that children raised in less affluent households are better equipped for the challenges of adult life is a view held by many, and while there is some truth to it, I believe the relationship between wealth and life preparation is more nuanced than this statement suggests.
+
+On the one hand, children from lower-income families may indeed develop important qualities that help them navigate adult life. Growing up with limited resources can foster resilience, resourcefulness, and a strong work ethic. These children often learn from an early age to manage money carefully, to persevere through difficulty, and to appreciate what they have. Such qualities can be invaluable in adulthood, particularly when facing financial hardship or professional setbacks. Furthermore, having experienced real-world challenges as children, they may be less likely to feel overwhelmed by the demands of independent adult life.
+
+On the other hand, it would be simplistic and unfair to conclude that wealth automatically produces poorly prepared adults. Much depends on the values instilled by parents and the environment in which children are raised. Wealthy families who teach their children responsibility, the value of hard work, and empathy for others can produce adults who are equally well-prepared for life's challenges. Moreover, access to better education, healthcare, and opportunities can provide advantages that help children thrive in adulthood regardless of whether they face financial hardship.
+
+In conclusion, while growing up without financial privilege can build certain character strengths, I do not fully agree that it is a prerequisite for being well-prepared for adult life. Parenting style, values, and the cultivation of resilience matter far more than the size of a family's bank account.`
+  },
+  {
+    id: 'wo3',
+    title: 'International Tourism: Advantages vs Disadvantages',
+    source: 'IELTS Official Sample — Task 2',
+    prompt: 'International tourism has brought enormous benefit to many places. At the same time, there is concern about its impact on local inhabitants and the environment.',
+    task: 'Do the disadvantages of international tourism outweigh the advantages? Give reasons for your answer and include any relevant examples. Write at least 250 words.',
+    minWords: 250, band: 7,
+    model: `International tourism has become one of the world's largest industries, generating significant economic benefits while simultaneously raising serious concerns about its environmental and social impact. In my view, the advantages of international tourism still outweigh the disadvantages, provided that it is managed responsibly.
+
+The economic benefits of tourism are substantial and wide-ranging. It creates employment across numerous sectors including hospitality, transport, retail, and entertainment. In many developing nations, tourism revenue is a vital source of foreign exchange and government income. Countries such as Thailand, Greece, and Kenya rely heavily on tourism to sustain their economies and fund public services. Additionally, tourism can help preserve cultural heritage by providing funding for the restoration of historic sites and encouraging communities to maintain their traditions.
+
+However, the negative consequences of mass tourism are increasingly difficult to ignore. Overcrowding at popular destinations — such as Venice, Barcelona, and Machu Picchu — has strained local infrastructure, driven up housing costs, and created tension between residents and visitors. The environmental impact is also a serious concern, as increased air travel contributes significantly to carbon emissions, while coastal and natural destinations often suffer from pollution, littering, and damage to ecosystems.
+
+Despite these drawbacks, I believe the solution lies in sustainable tourism practices rather than in restricting tourism altogether. Governments and businesses can limit visitor numbers, promote less popular destinations, and invest in eco-friendly infrastructure to mitigate the negative effects while preserving the economic and cultural benefits.
+
+In conclusion, while the disadvantages of international tourism are real and growing, they do not yet outweigh the advantages, provided that the industry embraces a more responsible approach.`
+  }
+]
