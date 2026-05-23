@@ -48,11 +48,18 @@ export default function Plan({ userId, userEmail, results, addResult }) {
       .eq('user_id', userId)
   }
 
-  async function saveSchedule() {
+  async function saveSchedule(isNewPlan) {
     setSaving(true)
-    const row = { user_id: userId, user_email: userEmail, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: {}, updated_at: new Date().toISOString() }
-    const { data } = await supabase.from('student_schedules').upsert([row]).select().single()
-    if (data) { setSchedule(data); setCompleted({}) }
+    // BUG-06 fix: only reset completed_sessions when starting a BRAND NEW plan
+    const keepCompleted = !isNewPlan && schedule ? (schedule.completed_sessions || {}) : {}
+    const row = { user_id: userId, user_email: userEmail, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: keepCompleted, updated_at: new Date().toISOString() }
+    const { data, error } = await supabase.from('student_schedules').upsert([row]).select().single()
+    if (error) {
+      setSaving(false)
+      alert('Could not save your plan. Please check your connection and try again.')
+      return
+    }
+    if (data) { setSchedule(data); setCompleted(keepCompleted) }
     setSaving(false)
     setView('plan')
   }
@@ -85,7 +92,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
     return <SetupView period={period} setPeriod={setPeriod} startDate={startDate} setStartDate={setStartDate}
       morningTime={morningTime} setMorning={setMorning} eveningTime={eveningTime} setEvening={setEvening}
       timezone={timezone} setTimezone={setTimezone} emailReminders={emailReminders} setEmail={setEmail}
-      saving={saving} onSave={saveSchedule} existing={!!schedule} onCancel={() => setView('plan')} />
+      saving={saving} onSave={(isNew) => saveSchedule(isNew)} existing={!!schedule} onCancel={() => setView('plan')} />
   }
 
   // ── PLAN VIEW ──────────────────────────────────────────────
@@ -111,6 +118,22 @@ export default function Plan({ userId, userEmail, results, addResult }) {
   }
 
   const isDone = (day, which) => !!completed[`day_${day}_${which}`]
+
+  // BUG-02 fix: real streak calculation
+  function calcStreak() {
+    let streak = 0
+    const today = new Date(); today.setHours(0,0,0,0)
+    const start = new Date(schedule.start_date); start.setHours(0,0,0,0)
+    for (let d = dayNum; d >= 1; d--) {
+      const dayDate = new Date(start.getTime() + (d-1)*86400000)
+      dayDate.setHours(0,0,0,0)
+      if (dayDate > today) continue
+      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`]
+      if (hasDone) { streak++ } else if (d < dayNum) { break } // gap resets
+    }
+    return streak
+  }
+  const streak = calcStreak()
 
   return (
     <div className="app-container anim-fadeUp">
@@ -357,8 +380,8 @@ function SetupView({ period, setPeriod, startDate, setStartDate, morningTime, se
         </div>
       </div>
 
-      <button onClick={onSave} disabled={saving} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:`4px solid ${saving?'var(--border)':'var(--greenD)'}`, background:saving?'var(--bg3)':'var(--green)', color:saving?'var(--textM)':'#fff', fontWeight:900, fontSize:15, cursor:saving?'not-allowed':'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
-        {saving ? 'Saving...' : `Start My ${PERIOD_CONFIG[period].label} Plan →`}
+      <button onClick={() => onSave(!existing)} disabled={saving} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:`4px solid ${saving?'var(--border)':'var(--greenD)'}`, background:saving?'var(--bg3)':'var(--green)', color:saving?'var(--textM)':'#fff', fontWeight:900, fontSize:15, cursor:saving?'not-allowed':'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
+        {saving ? 'Saving...' : existing ? `Save Changes →` : `Start My ${PERIOD_CONFIG[period].label} Plan →`}
       </button>
     </div>
   )
