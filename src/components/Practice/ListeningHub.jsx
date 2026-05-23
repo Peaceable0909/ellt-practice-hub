@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1 } from '../../data/listening'
+import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM16_T1 } from '../../data/listening'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
 import { Headphones } from 'lucide-react'
 
-const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1]
+const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1, ...LISTENING_CAM16_T1]
 
 export default function ListeningHub({ results, addResult, userId }) {
   const [test, setTest] = useState(null)
