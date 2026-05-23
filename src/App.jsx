@@ -72,11 +72,27 @@ export default function App() {
   if (isPasswordRecovery) return <Auth isPasswordRecovery={true} />
   if (!session) return <Auth />
 
+  // BUG-02: Compute real streak from schedule completed_sessions
+  function calcStreak(sched) {
+    if (!sched) return 0
+    const completed = sched.completed_sessions || {}
+    const start = new Date(sched.start_date); start.setHours(0,0,0,0)
+    const today = new Date(); today.setHours(0,0,0,0)
+    const dayNum = Math.floor((today - start) / 86400000) + 1
+    let streak = 0
+    for (let d = dayNum; d >= 1; d--) {
+      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`]
+      if (hasDone) streak++
+      else if (d < dayNum) break
+    }
+    return streak
+  }
+
   const sharedProps = { results, addResult, userId: session.user.id, userEmail: session.user.email }
 
   return (
     <div style={{ background:'var(--bg)', minHeight:'100vh', color:'var(--text)' }}>
-      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} />
+      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} />
 
       {loadingResults && (
         <div style={{ position:'fixed', top:70, right:16, zIndex:999, background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, padding:'8px 14px', fontSize:12, fontWeight:700, color:'var(--textM)', display:'flex', alignItems:'center', gap:8, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}>
@@ -90,7 +106,7 @@ export default function App() {
       {page === 'Plan'     && <Plan {...sharedProps} />}
       {page === 'Practice' && <Practice {...sharedProps} />}
       {page === 'MockTest' && <MockTests {...sharedProps} />}
-      {page === 'Progress' && <Progress {...sharedProps} loading={loadingResults} />}
+      {page === 'Progress' && <Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />}
       {page === 'Live'     && <LiveSessions />}
     </div>
   )
