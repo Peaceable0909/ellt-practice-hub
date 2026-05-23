@@ -111,3 +111,45 @@ However, there are notable drawbacks to consider. Excessive screen time has been
 In conclusion, while the integration of tablets and laptops into schools offers exciting possibilities for learning, it must be managed carefully. Clear guidelines, appropriate supervision, and equitable access are essential if schools are to harness the benefits while minimising the risks associated with this digital transition.`
   }
 ]
+
+// ─── NEW: Additional IELTS Writing Tasks ──────────────────────────────────────
+
+export const WRITING_IELTS_2 = [
+  {
+    id: 'wi2',
+    title: 'Further Education in Britain',
+    source: 'IELTS Academic — Task 1',
+    prompt: 'The chart below shows the number of men and women in further education in Britain in three periods and whether they were studying full-time or part-time.',
+    task: 'Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
+    minWords: 150,
+    band: 7,
+    chartDescription: 'Bar chart showing men and women in further education in Britain across three time periods. Data split by full-time and part-time study. Key trends: women increasingly outnumber men in part-time study; full-time numbers rise for both genders over the periods; women show the most dramatic growth in participation.',
+    model: `The bar chart illustrates the participation of men and women in further education in Britain across three time periods, comparing those studying full-time and part-time.
+
+Overall, the number of both men and women in further education increased over the three periods, with part-time study showing particularly notable growth, especially among women.
+
+In the earliest period, men outnumbered women in both categories. However, this trend shifted significantly over time. In terms of full-time study, both genders saw steady increases, with men consistently representing a slightly higher proportion. By the final period, the gap between male and female full-time students had narrowed considerably.
+
+The most striking change can be observed in part-time education. Women's participation in part-time study grew dramatically across the three periods, eventually surpassing that of men. This suggests a significant shift in the profile of the female student population, with more women balancing education alongside other commitments such as work or family responsibilities.
+
+In conclusion, while male participation remained relatively stable, the most significant development was the substantial rise in female participation, particularly in part-time further education.`
+  },
+  {
+    id: 'wi3',
+    title: 'Car Ownership and Alternative Transport',
+    source: 'IELTS Academic — Task 2',
+    prompt: 'The first car appeared on British roads in 1888. By the year 2000 there may be as many as 29 million vehicles on British roads. Alternative forms of transport should be encouraged and international laws introduced to control car ownership and use.',
+    task: 'To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your knowledge or experience. Write at least 250 words.',
+    minWords: 250,
+    band: 7,
+    model: `The rapid rise in car ownership over the past century has undeniably transformed society, bringing both convenience and serious consequences. While I largely agree that alternative transport should be encouraged and that some regulation of car use is necessary, I believe that introducing international laws to control car ownership may be an overly restrictive approach.
+
+The environmental case for reducing car dependency is compelling. Vehicles remain one of the leading contributors to carbon dioxide emissions and air pollution in urban areas. Cities such as Oslo and Amsterdam have demonstrated that investing in public transport, cycling infrastructure, and pedestrianised zones can significantly reduce traffic congestion while improving public health. Encouraging such alternatives through subsidies, improved public transport networks, and urban planning is a practical and broadly supported policy direction.
+
+However, the proposal to introduce international laws controlling car ownership raises significant concerns. Car ownership is closely tied to personal freedom, particularly in rural areas where public transport is inadequate or non-existent. Restricting the right to own a vehicle could disproportionately affect lower-income individuals and those living outside major cities. Furthermore, enforcing such laws across different nations with varying infrastructure, economies, and cultural attitudes towards the car would be extraordinarily complex.
+
+A more balanced approach would involve incentivising greener alternatives rather than restricting ownership outright. Governments could introduce congestion charges, invest heavily in electric vehicle infrastructure, and make public transport more affordable and reliable. These measures would reduce the impact of cars without infringing on individual freedoms.
+
+In conclusion, while I support encouraging alternative forms of transport, I believe international laws restricting car ownership would be impractical and potentially unjust. Policy should focus on changing behaviour through incentives rather than prohibition.`
+  }
+]
