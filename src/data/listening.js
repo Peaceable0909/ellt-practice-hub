@@ -133,7 +133,7 @@ export const LISTENING_IELTS = [
       { q: "Q5. Container height", type:'fill', a:'0.5M' },
       { q: "Q6. Second item in contents (after clothes)", type:'fill', a:'BOOKS' },
       { q: "Q7. Third item in contents", type:'fill', a:'TOYS' },
-      { q: "Q8. Total estimated value (£)", type:'fill', a:'600' },
+      { q: "Q8. Total estimated value (£)", type:'fill', a:'1700' },
       { q: "Q9. Type of insurance chosen:", opts:['A. Economy','B. Standard','C. Premium'], a:2 },
       { q: "Q10. Customer wants goods delivered to:", opts:['A. Port','B. Home','C. Depot'], a:0 },
     ]
@@ -224,6 +224,89 @@ export const LISTENING_IELTS = [
       { q: "Q13. What collection is on the far wall of the main library area?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:3 },
       { q: "Q14. What is next door to the seminar room?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:1 },
       { q: "Q15. What is in the large room to the right of the main library area?", opts:["A. Art collection","B. Children's books","C. Computers","D. Local history collection","E. Meeting room","F. Multimedia","G. Periodicals","H. Reference books","I. Tourist information"], a:5 },
+    ]
+  },
+]
+
+
+// ─── Cambridge IELTS 17 — Test 1 (Full 4-part test) ─────────────────────────
+
+const CAM17_OPINIONS = [
+  "A. Tim found this easier than expected.",
+  "B. Tim thought this was not very clearly organised.",
+  "C. Diana may do some further study on this.",
+  "D. They both found the reading required for this was difficult.",
+  "E. Tim was shocked at something he learned on this module.",
+  "F. They were both surprised how little is known about some aspects of this."
+]
+
+export const LISTENING_CAM17_T1 = [
+  {
+    id: 'lc1', title: 'Cambridge IELTS 17 — Test 1 Part 1',
+    intro: 'You will hear a conversation between a woman and a man about a local conservation group. Complete the notes.',
+    audio: '/audio/cam17-t1-p1.mp3', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q1. Regular beach activity: making sure the beach does not have ___ on it", type:'fill', a:'LITTER' },
+      { q: "Q2. Regular beach activity: checking there are no ___ on the beach", type:'fill', a:'DOGS' },
+      { q: "Q3. Nature reserve — next task: taking action to attract ___ to the place", type:'fill', a:'INSECTS' },
+      { q: "Q4. Nature reserve — ongoing task: identifying types of ___", type:'fill', a:'BUTTERFLIES' },
+      { q: "Q5. Nature reserve — upcoming project: building a new ___", type:'fill', a:'WALL' },
+      { q: "Q6. Saturday forthcoming event: walk across the sands and reach the ___", type:'fill', a:'ISLAND' },
+      { q: "Q7. Saturday event — clothing requirement: wear appropriate ___", type:'fill', a:'BOOTS' },
+      { q: "Q8. Woodwork session — suitable for ___ to participate in", type:'fill', a:'BEGINNERS' },
+      { q: "Q9. Woodwork session — activity: making ___ out of wood", type:'fill', a:'SPOONS' },
+      { q: "Q10. Woodwork session cost (no camping): £___", type:'fill', a:'35' },
+    ]
+  },
+  {
+    id: 'lc2', title: 'Cambridge IELTS 17 — Test 1 Part 2',
+    intro: 'You will hear a tour guide talking to a group about a boat trip around Tasmania. Answer the questions.',
+    audio: '/audio/cam17-t1-p2.mp3', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q11. What is the maximum number of people who can stand on each side of the boat?", opts:["A. 9","B. 15","C. 18"], a:0 },
+      { q: "Q12. What colour are the tour boats?", opts:["A. Dark red","B. Jet black","C. Light green"], a:2 },
+      { q: "Q13. Which lunchbox is suitable for someone who doesn't eat meat or fish?", opts:["A. Lunchbox 1","B. Lunchbox 2","C. Lunchbox 3"], a:1 },
+      { q: "Q14. What should people do with their litter?", opts:["A. Take it home","B. Hand it to a member of staff","C. Put it in the bins provided on the boat"], a:1 },
+      { q: "Q15. Which is ONE of the TWO features of the lighthouse that Lou mentions?", opts:["A. Why it was built","B. Who built it","C. How long it took to build","D. Who staffed it","E. What it was built with"], a:[0,3] },
+      { q: "Q16. Which is the OTHER feature of the lighthouse that Lou mentions?", opts:["A. Why it was built","B. Who built it","C. How long it took to build","D. Who staffed it","E. What it was built with"], a:[0,3] },
+      { q: "Q17. Which is ONE of the TWO types of creature that might come close to the boat?", opts:["A. Sea eagles","B. Fur seals","C. Dolphins","D. Whales","E. Penguins"], a:[1,2] },
+      { q: "Q18. Which is the OTHER type of creature that might come close to the boat?", opts:["A. Sea eagles","B. Fur seals","C. Dolphins","D. Whales","E. Penguins"], a:[1,2] },
+      { q: "Q19. Which is ONE of the TWO points Lou makes about the caves?", opts:["A. Only large tourist boats can visit them","B. The entrances are often blocked","C. It is too dangerous for individuals to go near them","D. Someone will explain what is inside them","E. They cannot be reached on foot"], a:[3,4] },
+      { q: "Q20. Which is the OTHER point Lou makes about the caves?", opts:["A. Only large tourist boats can visit them","B. The entrances are often blocked","C. It is too dangerous for individuals to go near them","D. Someone will explain what is inside them","E. They cannot be reached on foot"], a:[3,4] },
+    ]
+  },
+  {
+    id: 'lc3', title: 'Cambridge IELTS 17 — Test 1 Part 3',
+    intro: 'You will hear two veterinary science students, Diana and Tim, discussing their work experience on farms.',
+    audio: '/audio/cam17-t1-p3.mp3', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q21. What problem did BOTH Diana and Tim have when arranging work experience?", opts:["A. Making initial contact with suitable farms","B. Organising transport to and from the farm","C. Finding a placement for the required length of time"], a:1 },
+      { q: "Q22. Tim was pleased to be able to help:", opts:["A. A lamb that had a broken leg","B. A sheep having difficulty giving birth","C. A newly born lamb having trouble feeding"], a:1 },
+      { q: "Q23. Diana says the sheep on her farm:", opts:["A. Were of various different varieties","B. Were mainly reared for their meat","C. Had better quality wool than sheep on the hills"], a:0 },
+      { q: "Q24. What did the students learn about adding supplements to chicken feed?", opts:["A. These should only be given if specially needed","B. It is worth paying extra for the most effective ones","C. The amount given at one time should be limited"], a:0 },
+      { q: "Q25. What happened when Diana was working with dairy cows?", opts:["A. She identified some cows incorrectly","B. She accidentally threw some milk away","C. She made a mistake when storing milk"], a:1 },
+      { q: "Q26. What did BOTH farmers mention about vets and farming?", opts:["A. Vets are failing to cope with some aspects of animal health","B. There needs to be a fundamental change in the training of vets","C. Some jobs could be done by the farmer rather than by a vet"], a:2 },
+      { q: "Q27. Medical terminology — which opinion matches?", opts: CAM17_OPINIONS, a:0 },
+      { q: "Q28. Diet and nutrition — which opinion matches?", opts: CAM17_OPINIONS, a:4 },
+      { q: "Q29. Animal disease — which opinion matches?", opts: CAM17_OPINIONS, a:5 },
+      { q: "Q30. Wildlife medication — which opinion matches?", opts: CAM17_OPINIONS, a:3 },
+    ]
+  },
+  {
+    id: 'lc4', title: 'Cambridge IELTS 17 — Test 1 Part 4',
+    intro: 'You will hear a lecturer talking about labyrinths. Complete the notes. Write ONE WORD ONLY for each answer.',
+    audio: '/audio/cam17-t1-p4.mp3', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q31. Mazes compared with labyrinths — Mazes are a type of ___", type:'fill', a:'PUZZLE' },
+      { q: "Q32. ___ is needed to navigate through a maze", type:'fill', a:'LOGIC' },
+      { q: "Q33. The word 'maze' is derived from a word meaning a feeling of ___", type:'fill', a:'CONFUSION' },
+      { q: "Q34. The earliest examples of the labyrinth spiral pattern have been found carved in ___", type:'fill', a:'STONE' },
+      { q: "Q35. In Ancient Greece, the labyrinth spiral was used on ___", type:'fill', a:'COINS' },
+      { q: "Q36. In Northern Europe, actual physical labyrinths were made using ___", type:'fill', a:'TREE' },
+      { q: "Q37. Walking labyrinths can help with ___ and relaxation", type:'fill', a:'BREATHING' },
+      { q: "Q38. Mini labyrinths used on ___ allow finger meditation", type:'fill', a:'PAPER' },
+      { q: "Q39. Labyrinths have been used to help manage ___", type:'fill', a:'ANXIETY' },
+      { q: "Q40. Today, labyrinths are widely used for ___ and prayer", type:'fill', a:'MEDITATION' },
     ]
   },
 ]
