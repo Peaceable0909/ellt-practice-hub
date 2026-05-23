@@ -96,10 +96,14 @@ EXAMINER NOTE: [One practical exam strategy tip — 2 sentences max]`
       const transcriptMatch = text.match(/TRANSCRIPTION:\n([\s\S]*?)(?=\n\nBAND:|$)/)
       if (transcriptMatch) setTranscript(transcriptMatch[1].trim())
 
-      // Save result
-      const bandMatch = text.match(/BAND:\s*([A-Z0-9+]+)/)
-      const band = bandMatch?.[1] || 'B2'
-      const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
+      // Save result — BUG-07 fix: fuzzy band parsing
+      const bandMatch = text.match(/BAND:\s*([A-Z0-9+\/\s]+)/)
+      const bandRaw = (bandMatch?.[1] || '').toUpperCase()
+      const bandScore = bandRaw.includes('C2') ? 9
+                      : bandRaw.includes('C1') ? 7.5
+                      : bandRaw.includes('B2') ? 6
+                      : bandRaw.includes('B1') ? 5
+                      : 6 // safe fallback
       const row = { skill:'writing', test_id:testId, test_title:taskTitle, band_score:bandScore }
       await saveResult(row)
       addResult(row)
