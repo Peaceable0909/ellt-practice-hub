@@ -105,3 +105,40 @@ export const SPEAKING = [
     ],
   },
 ]
+
+// ─── NEW: IELTS Speaking Topics ───────────────────────────────────────────────
+
+export const SPEAKING_IELTS = [
+  {
+    id: 'si1',
+    title: 'A Treasured Possession',
+    stage: 'IELTS Speaking Part 2',
+    duration: '1-2 minutes',
+    source: 'Describe something you own which is very important to you.',
+    task: 'Talk about a personal possession that is important to you. Describe it and explain why it matters.',
+    modelAudio: '/audio/ielts-speaking-part2.mp3',
+    structure: [
+      'Introduction: name the object and where you got it from',
+      'How long you have had it',
+      'What you use it for (practical and personal uses)',
+      'Why it is emotionally or practically important to you',
+      'Rounding off: Is it valuable in money terms? Would it be easy to replace?',
+    ]
+  },
+  {
+    id: 'si2',
+    title: 'Values, Status and Advertising',
+    stage: 'IELTS Speaking Part 3',
+    duration: '4-5 minutes',
+    source: 'A two-way discussion on values and the role of advertising in society.',
+    task: 'Discuss values, status symbols, and how advertising influences consumer behaviour.',
+    modelAudio: '/audio/ielts-speaking-part3.mp3',
+    structure: [
+      'What kinds of things give status to people in your country?',
+      'Have these status symbols changed since your parents\' time?',
+      'Why do values change across generations?',
+      'Do you think advertising influences what people buy?',
+      'Is advertising ever harmful to society? Give examples.',
+    ]
+  },
+]
