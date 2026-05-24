@@ -44,7 +44,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
       score: actualScore,
       total: test.qs.length,
       band_score: parseFloat((actualScore / test.qs.length * 9).toFixed(1)),
-      answers: JSON.stringify(answers)
+      answers: answers
     }
     try {
       const ok = await saveResult(row)
