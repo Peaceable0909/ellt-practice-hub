@@ -60,14 +60,21 @@ export function onAuthChange(callback) {
  * We still accept userId as a fallback label — but the DB decides the real value.
  */
 export async function saveResult(data) {
-  // The DB trigger sets user_id = auth.uid() automatically.
-  // We just need the user to be authenticated (session active).
+  // Get current user and include user_id explicitly — belt + suspenders alongside trigger
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    console.error('[ELLTPulse] saveResult: no authenticated user')
+    return false
+  }
+
+  const row = { ...data, user_id: user.id }
+
   const { error } = await supabase
     .from('ellt_test_results')
-    .insert([data])
+    .insert([row])
 
   if (error) {
-    console.error('[ELLTPulse] saveResult failed:', error.message, error.details)
+    console.error('[ELLTPulse] saveResult failed:', error.message, error.code, error.details, error.hint)
   }
   return !error
 }
