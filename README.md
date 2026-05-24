@@ -2,6 +2,5 @@
 
 Live at: https://ellt-practice-hub.vercel.app
 
-Built with React + Vite + Supabase + Vercel.
-
-Last updated: 2026-05-22 22:14 UTC
+Supabase project: elltpulse (eu-west-1, dedicated)
+Last updated: 2026-05-24 09:24 UTC
