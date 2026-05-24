@@ -100,7 +100,7 @@ function buildEmail({ name, email, dayNum, totalDays, morningTime, eveningTime, 
   </div>
 
   <table width="100%"><tr><td align="center">
-    <a href="https://ellt-practice-hub.vercel.app"
+    <a href="https://applicationvisa.com"
        style="display:inline-block;background:#58CC02;color:#fff;text-decoration:none;font-size:15px;font-weight:900;padding:14px 36px;border-radius:12px;border-bottom:4px solid #46A302;text-transform:uppercase;letter-spacing:0.8px;">
       Open ELLTPulse →
     </a>
