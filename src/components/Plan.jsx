@@ -206,7 +206,15 @@ export default function Plan({ userId, userEmail, results, addResult }) {
                         {done && <span style={{ fontSize:10, fontWeight:900, color:'var(--green)', textTransform:'uppercase', background:'var(--greenBg)', padding:'2px 7px', borderRadius:99 }}>Done</span>}
                       </div>
                       <div style={{ fontSize:15, fontWeight:900, color: done ? 'var(--textM)' : 'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
-                      <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:2 }}>{session.duration} mins</div>
+                      {/* Task chips */}
+                      {session.tasks && (
+                        <div style={{ display:'flex', gap:4, marginTop:5, flexWrap:'wrap' }}>
+                          {session.tasks.map((task, ti) => {
+                            const ec = { listening:'🎧', reading:'📖', writing:'✍️', speaking:'🎤', review:'⭐', vocab:'🧠', mock:'📝' }
+                            return <span key={ti} style={{ fontSize:10, fontWeight:700, color:'var(--textM)', background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:99, padding:'2px 8px' }}>{ec[task.skill]||'📚'} {task.label}</span>
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {/* Action button */}
