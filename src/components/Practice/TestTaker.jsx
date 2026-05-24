@@ -17,15 +17,15 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
   const [animKey, setAnimKey] = useState(0)
   const isReading = skill === 'reading'
 
-  const score = useMemo(() => {
-    if (!submitted) return 0
-    return test.qs.reduce((s, q, i) => {
-      const ans = answers[i]
-      if (q.type === 'fill') return s + (typeof ans === 'string' && ans.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
-      if (Array.isArray(q.a)) return s + (q.a.includes(ans) ? 1 : 0)
-      return s + (ans === q.a ? 1 : 0)
-    }, 0)
-  }, [submitted, answers, test.qs])
+  // Compute score from answers at any time (not gated by submitted state)
+  const calcScore = (ans) => test.qs.reduce((s, q, i) => {
+    const a = ans[i]
+    if (q.type === 'fill') return s + (typeof a === 'string' && a.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
+    if (Array.isArray(q.a)) return s + (q.a.includes(a) ? 1 : 0)
+    return s + (a === q.a ? 1 : 0)
+  }, 0)
+
+  const score = useMemo(() => submitted ? calcScore(answers) : 0, [submitted, answers, test.qs])
 
   const band = submitted ? (score / test.qs.length * 9).toFixed(1) : null
   const answered = Object.keys(answers).length
@@ -37,10 +37,13 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
   const submit = async () => {
     setSaving(true)
     setSaveError(false)
+    // Compute actual score NOW (submitted is still false at this point — useMemo would return 0)
+    const actualScore = calcScore(answers)
     const row = {
       skill, test_id: test.id, test_title: test.title,
-      score, total: test.qs.length,
-      band_score: parseFloat((score / test.qs.length * 9).toFixed(1)),
+      score: actualScore,
+      total: test.qs.length,
+      band_score: parseFloat((actualScore / test.qs.length * 9).toFixed(1)),
       answers: JSON.stringify(answers)
     }
     try {
@@ -49,7 +52,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
       addResult(row)
       try { localStorage.removeItem(draftKey) } catch {}
       setSubmitted(true)
-      if (score / total >= 0.7) setShowConfetti(true)
+      if (actualScore / test.qs.length >= 0.7) setShowConfetti(true)
     } catch {
       setSaveError(true)
     } finally {
