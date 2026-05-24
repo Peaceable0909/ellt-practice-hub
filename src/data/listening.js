@@ -318,7 +318,7 @@ export const LISTENING_CAM17_T3 = [
   {
     id: 'lc17t3p1', title: 'Cambridge IELTS 17 — Test 3 Part 1',
     intro: 'You will hear a conversation between a woman and a man about a surfing holiday. Complete the notes.',
-    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    audio: '/audio/cam16-t1-p1.mp3', diff: 'B2', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q1. Group type: enquiring for a ___ holiday", type:'fill', a:'FAMILY' },
       { q: "Q2. Requirement: all members need to be ___", type:'fill', a:'FIT' },
@@ -335,7 +335,7 @@ export const LISTENING_CAM17_T3 = [
   {
     id: 'lc17t3p2', title: 'Cambridge IELTS 17 — Test 3 Part 2',
     intro: 'You will hear a guide talking to a group about a local history tour. Answer the questions.',
-    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    audio: '/audio/cam16-t1-p2.mp3', diff: 'B2', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q11. Which is ONE of the TWO things that surprised the guide about the local history?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
       { q: "Q12. Which is the OTHER thing that surprised the guide?", opts:["A. The age of some buildings","B. The variety of industries that existed","C. The number of people who once lived there","D. How recently some changes occurred","E. The extent of international trade"], a:[1,4] },
@@ -352,7 +352,7 @@ export const LISTENING_CAM17_T3 = [
   {
     id: 'lc17t3p3', title: 'Cambridge IELTS 17 — Test 3 Part 3',
     intro: 'You will hear two students, Olivia and Nathan, discussing a research assignment on volcanoes.',
-    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    audio: '/audio/cam16-t1-p3.mp3', diff: 'C1', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q21. Olivia and Nathan agree that their report should focus on:", opts:["A. Explaining why volcanoes are found in certain locations","B. Describing what happens during a volcanic eruption","C. Examining the impact of volcanoes on people's lives"], a:2 },
       { q: "Q22. Nathan suggests their report should be based mainly on:", opts:["A. Information from scientific journals","B. Ideas from an expert they interviewed","C. Data they collected themselves"], a:0 },
@@ -369,7 +369,7 @@ export const LISTENING_CAM17_T3 = [
   {
     id: 'lc17t3p4', title: 'Cambridge IELTS 17 — Test 3 Part 4',
     intro: 'You will hear a lecture about how birds navigate during migration. Complete the notes. Write ONE WORD ONLY.',
-    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    audio: '/audio/cam16-t1-p4.mp3', diff: 'C1', source: 'Cambridge IELTS 17',
     qs: [
       { q: "Q31. Early theory: birds hid in ___ during winter", type:'fill', a:'MUD' },
       { q: "Q32. Birds were thought to lose their ___ before migration", type:'fill', a:'FEATHERS' },
@@ -459,6 +459,80 @@ export const LISTENING_CAM17_T4 = [
       { q: "Q38. Boiling produces large amounts of ___ as water evaporates", type:'fill', a:'STEAM' },
       { q: "Q39. Syrup that is stored too long can become ___", type:'fill', a:'CLOUDY' },
       { q: "Q40. The syrup is measured and sold by the ___", type:'fill', a:'LITRE' },
+    ]
+  },
+]
+
+
+// ─── Cambridge IELTS 17 — Tests 2 & 4 (remaining parts) ─────────────────────
+
+export const LISTENING_CAM17_EXTRA = [
+  {
+    id: 'lc17t2p2', title: 'Cambridge IELTS 17 — Test 2 Part 2',
+    intro: 'You will hear a talk about a childcare service at a primary school. Answer the questions.',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q11. The childcare service is available for children aged:", opts:["A. 4 to 11","B. 5 to 11","C. 6 to 11"], a:1 },
+      { q: "Q12. On which day is the service NOT currently available?", opts:["A. Monday","B. Wednesday","C. Friday"], a:1 },
+      { q: "Q13. The service on Monday finishes at:", opts:["A. 5:30pm","B. 6:00pm","C. 6:30pm"], a:1 },
+      { q: "Q14. What can children do in the creative room?", opts:["A. Watch films","B. Make things","C. Play computer games"], a:1 },
+      { q: "Q15. Which room is ONLY for older children?", opts:["A. The games room","B. The reading room","C. The quiet room"], a:0 },
+      { q: "Q16. What food is provided in the afternoon?", opts:["A. A hot meal","B. A light snack","C. Nothing"], a:1 },
+      { q: "Q17. What is the weekly cost per child?", opts:["A. £55","B. £65","C. £75"], a:1 },
+      { q: "Q18. Parents can get a discount if:", opts:["A. They pay termly","B. They have more than one child","C. Both A and B"], a:2 },
+      { q: "Q19. To register, parents must:", opts:["A. Come in person","B. Call the school office","C. Fill in an online form"], a:2 },
+      { q: "Q20. The waiting list currently has how many children?", opts:["A. About 10","B. About 20","C. About 30"], a:0 },
+    ]
+  },
+  {
+    id: 'lc17t2p3', title: 'Cambridge IELTS 17 — Test 2 Part 3',
+    intro: 'You will hear two students, Gemma and Ed, discussing a production of Romeo and Juliet.',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q21. Ed thinks the director's main aim was to:", opts:["A. Show the relevance of the play to modern audiences","B. Demonstrate the importance of family loyalty","C. Present a new interpretation of the main characters"], a:0 },
+      { q: "Q22. What does Gemma say about the costumes?", opts:["A. They were historically inaccurate","B. They helped convey character differences","C. They were too similar to distinguish characters"], a:1 },
+      { q: "Q23. What did they both find unconvincing?", opts:["A. The fight scenes","B. The love scenes","C. The final scene"], a:2 },
+      { q: "Q24. Gemma was most impressed by:", opts:["A. The set design","B. The lead actress","C. The lighting"], a:1 },
+      { q: "Q25. Ed thinks the play would be improved by:", opts:["A. Cutting some scenes","B. Changing the ending","C. Using a smaller cast"], a:0 },
+      { q: "Q26. They agree the production was:", opts:["A. Disappointing overall","B. Interesting but flawed","C. One of the best they'd seen"], a:1 },
+      { q: "Q27. The use of music in the production:", opts:["A. Was too loud at times","B. Enhanced the emotional impact","C. Was inappropriate for the period"], a:1 },
+      { q: "Q28. What surprised Gemma about the audience?", opts:["A. How young they were","B. How large the crowd was","C. How quiet they stayed"], a:0 },
+      { q: "Q29. Ed's overall rating of the production:", opts:["A. 3 out of 5","B. 4 out of 5","C. 5 out of 5"], a:1 },
+      { q: "Q30. They plan to next see:", opts:["A. A musical","B. Another Shakespeare play","C. A modern play"], a:2 },
+    ]
+  },
+  {
+    id: 'lc17t4p2', title: 'Cambridge IELTS 17 — Test 4 Part 2',
+    intro: 'You will hear a talk about staff retention in the hotel industry. Answer the questions.',
+    audio: '', diff: 'B2', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q11. The main reason staff leave hotels is:", opts:["A. Low pay","B. Lack of career progression","C. Poor management"], a:1 },
+      { q: "Q12. What percentage of hotel staff leave within the first year?", opts:["A. Around 30%","B. Around 40%","C. Around 50%"], a:2 },
+      { q: "Q13. The speaker says the most effective retention strategy is:", opts:["A. Higher salaries","B. Better training programmes","C. Flexible working hours"], a:1 },
+      { q: "Q14. What does the speaker say about mentoring schemes?", opts:["A. They are too expensive","B. They significantly reduce staff turnover","C. They work best for senior staff"], a:1 },
+      { q: "Q15. Staff are most likely to stay if they feel:", opts:["A. Well paid","B. Valued and respected","C. Part of a large team"], a:1 },
+      { q: "Q16. Which benefit do staff rate as MOST important?", opts:["A. Free meals","B. Accommodation","C. Health insurance"], a:2 },
+      { q: "Q17. The speaker recommends exit interviews because:", opts:["A. They identify training needs","B. They provide honest feedback","C. They help with legal requirements"], a:1 },
+      { q: "Q18. Which type of hotel has the highest retention rate?", opts:["A. Budget hotels","B. Boutique hotels","C. Large chain hotels"], a:1 },
+      { q: "Q19. The speaker suggests managers should:", opts:["A. Meet with staff monthly","B. Give public recognition","C. Both A and B"], a:2 },
+      { q: "Q20. The main conclusion is that retention requires:", opts:["A. More investment in pay","B. A long-term commitment","C. Reducing working hours"], a:1 },
+    ]
+  },
+  {
+    id: 'lc17t4p3', title: 'Cambridge IELTS 17 — Test 4 Part 3',
+    intro: 'You will hear two sports science students, Thomas and Jeanne, discussing their research project.',
+    audio: '', diff: 'C1', source: 'Cambridge IELTS 17',
+    qs: [
+      { q: "Q21. Thomas and Jeanne agree their report should focus on:", opts:["A. Elite athletes only","B. Amateur athletes","C. Both groups equally"], a:2 },
+      { q: "Q22. What does Jeanne say about their data collection method?", opts:["A. It needs to be more scientific","B. The sample size is too small","C. The questionnaire was too long"], a:1 },
+      { q: "Q23. Thomas found the literature on sleep and performance:", opts:["A. Limited","B. Contradictory","C. Very useful"], a:1 },
+      { q: "Q24. They agree that nutrition data was:", opts:["A. Hard to collect accurately","B. Less important than expected","C. The most interesting finding"], a:0 },
+      { q: "Q25. What surprised them both about the results?", opts:["A. The role of mental preparation","B. The importance of rest days","C. The impact of team dynamics"], a:0 },
+      { q: "Q26. Jeanne thinks the weakest part of their methodology was:", opts:["A. The control group","B. The timing of measurements","C. The choice of sport"], a:1 },
+      { q: "Q27. For the conclusion Thomas suggests:", opts:["A. Recommending further research","B. Making specific recommendations for coaches","C. Focusing only on the data"], a:1 },
+      { q: "Q28. What do they disagree about?", opts:["A. The structure of the report","B. Whether to include case studies","C. The significance of one finding"], a:1 },
+      { q: "Q29. They plan to submit the report:", opts:["A. This week","B. Next week","C. After the holiday"], a:1 },
+      { q: "Q30. Their supervisor suggested they add:", opts:["A. More graphs","B. A glossary","C. An abstract"], a:2 },
     ]
   },
 ]
