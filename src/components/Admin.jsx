@@ -10,7 +10,7 @@ const SKILL_ICON  = { listening:Headphones, reading:BookOpen, writing:PenLine, s
 
 export default function Admin({ user }) {
   // ── ALL hooks at top — no hooks after conditional returns ──
-  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ellt-admin-auth') === 'true')
+  const [unlocked, setUnlocked] = useState(false) // Always start with password gate
   const [pw, setPw]             = useState('')
   const [pwError, setPwError]   = useState(false)
   const [tab, setTab]           = useState('overview')
