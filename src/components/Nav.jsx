@@ -1,6 +1,6 @@
 import { LayoutDashboard, BarChart2, BookOpen,
          Flame, Zap, Sun, Moon, LogOut, User, ChevronDown,
-         Calendar, ClipboardList } from 'lucide-react'
+         Calendar, ClipboardList, ShieldCheck } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { signOut } from '../lib/supabase'
 
