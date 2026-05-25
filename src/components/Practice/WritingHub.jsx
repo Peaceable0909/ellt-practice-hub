@@ -3,6 +3,7 @@ import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2, WRITING_OFFICIA
 import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 import { Camera, Upload, X, Image, PenLine, ChevronLeft, Eye, EyeOff, FileText } from 'lucide-react'
+import DiagramRenderer from './DiagramRenderer'
 
 const ALL_WRITING = [...WRITING, ...WRITING_IELTS, ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[])]
 
