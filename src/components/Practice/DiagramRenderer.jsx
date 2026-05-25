@@ -261,6 +261,112 @@ function BrickProcess() {
   )
 }
 
+
+// ─── New Task 1 Charts ─────────────────────────────────────────────────────────
+
+// wi4 — Consumer Expenditure UK vs France 2010
+function ConsumerExpenditureChart() {
+  const data = [
+    { good:'Cars',      UK:450, France:400 },
+    { good:'Computers', UK:350, France:360 },
+    { good:'Books',     UK:400, France:300 },
+    { good:'Perfume',   UK:145, France:200 },
+    { good:'Cameras',   UK:360, France:150 },
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Consumer Expenditure — UK vs France (2010)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Amount spent in thousands of pounds sterling (£000s)</div>
+      <ResponsiveContainer width="100%" height={220}>
+        <BarChart data={data} margin={{top:5,right:10,left:0,bottom:5}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="good" tick={{fontSize:10,fill:'var(--textM)'}} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`£${v}k`} domain={[0,500]} />
+          <Tooltip formatter={v=>`£${v},000`} />
+          <Legend wrapperStyle={{fontSize:11}} />
+          <Bar dataKey="UK"     fill="#1CB0F6" name="UK" />
+          <Bar dataKey="France" fill="#CE82FF" name="France" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi5 — Consumption of Spreads 1981-2007
+function SpreadsChart() {
+  const data = [
+    {year:'1981',butter:140,margarine:90,lowfat:0},
+    {year:'1984',butter:130,margarine:92,lowfat:0},
+    {year:'1986',butter:160,margarine:88,lowfat:0},
+    {year:'1989',butter:120,margarine:85,lowfat:0},
+    {year:'1991',butter:110,margarine:80,lowfat:0},
+    {year:'1993',butter:95, margarine:75,lowfat:0},
+    {year:'1996',butter:85, margarine:70,lowfat:10},
+    {year:'1998',butter:75, margarine:65,lowfat:35},
+    {year:'2001',butter:70, margarine:55,lowfat:82},
+    {year:'2004',butter:60, margarine:48,lowfat:75},
+    {year:'2007',butter:50, margarine:40,lowfat:70},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Consumption of Spreads (1981–2007)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Grams per person per week</div>
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{top:5,right:10,left:0,bottom:5}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="year" tick={{fontSize:9,fill:'var(--textM)'}} interval={1} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`${v}g`} />
+          <Tooltip formatter={v=>`${v}g`} />
+          <Legend wrapperStyle={{fontSize:11}} />
+          <Line type="monotone" dataKey="butter"    stroke="#FF9600" strokeWidth={2.5} dot={false} name="Butter" />
+          <Line type="monotone" dataKey="margarine" stroke="#1CB0F6" strokeWidth={2.5} dot={false} name="Margarine" />
+          <Line type="monotone" dataKey="lowfat"    stroke="#58CC02" strokeWidth={2.5} dot={false} name="Low-fat spreads" strokeDasharray="5 3" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi6 — Indian Students in British Universities
+function IndianStudentsTable() {
+  const rows = [
+    { uni:'Coventry University',   y1:2390, y2:5290, change:2900,  pct:121.3 },
+    { uni:'BBP University',        y1:3505, y2:5145, change:1640,  pct:46.8  },
+    { uni:'Sheffield University',  y1:815,  y2:2345, change:1530,  pct:187.7 },
+    { uni:'Leicester University',  y1:1175, y2:2390, change:1215,  pct:103.4 },
+    { uni:'Univ of Greenwich',     y1:2455, y2:4540, change:2085,  pct:84.9  },
+    { uni:'Anglia Ruskin Univ',    y1:1925, y2:3265, change:1340,  pct:69.6  },
+  ].sort((a,b)=>b.pct-a.pct)
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Indian Full-time Students in UK Universities</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:10}}>Academic years 2020/21 and 2021/22</div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+          <thead>
+            <tr style={{background:'var(--bg3)'}}>
+              {['University','2020/21','2021/22','Change','% Rise'].map(h=>(
+                <th key={h} style={{padding:'8px 6px',textAlign:'left',fontWeight:800,color:'var(--text)',borderBottom:'2px solid var(--border)',whiteSpace:'nowrap'}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r,i)=>(
+              <tr key={i} style={{background:i%2===0?'var(--bg2)':'var(--bg3)'}}>
+                <td style={{padding:'8px 6px',color:'var(--text)',fontWeight:700}}>{r.uni}</td>
+                <td style={{padding:'8px 6px',color:'var(--textM)',fontWeight:600}}>{r.y1.toLocaleString()}</td>
+                <td style={{padding:'8px 6px',color:'var(--text)',fontWeight:800}}>{r.y2.toLocaleString()}</td>
+                <td style={{padding:'8px 6px',color:'var(--green)',fontWeight:700}}>+{r.change.toLocaleString()}</td>
+                <td style={{padding:'8px 6px',fontWeight:900,color:r.pct>100?'var(--green)':r.pct>70?'var(--amber)':'var(--textM)'}}>{r.pct}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 // ─── Register all diagrams ─────────────────────────────────────────────────────
 const DIAGRAMS = {
   // Writing tasks
@@ -273,4 +379,8 @@ const DIAGRAMS = {
   'lc17t3p2': HistoryTourMap,
   // Process diagram
   'w_process': BrickProcess,
+  // New Task 1 charts
+  'wi4': ConsumerExpenditureChart,
+  'wi5': SpreadsChart,
+  'wi6': IndianStudentsTable,
 }
