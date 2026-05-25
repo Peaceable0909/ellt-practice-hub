@@ -12,6 +12,8 @@ const NAV_ITEMS = [
 ]
 
 export default function Nav({ page, setPage, dark, setDark, user, profile, results = [], streak = 0, isAdmin = false }) {
+  // Compute directly from user prop as a safety net
+  const adminAccess = isAdmin || user?.email === 'myinterviewhub@gmail.com'
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropRef = useRef(null)
 
