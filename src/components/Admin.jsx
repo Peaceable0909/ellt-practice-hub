@@ -7,7 +7,61 @@ import { Users, BarChart2, AlertTriangle, CheckCircle, Clock,
 const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--green)', speaking:'var(--purple)' }
 const SKILL_ICON  = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
 
+const ADMIN_PASSWORD = 'ELLTPulse#2026'
+
 export default function Admin({ user }) {
+  const [unlocked, setUnlocked] = useState(() => localStorage.getItem('ellt-admin-auth') === 'true')
+  const [pw, setPw] = useState('')
+  const [error, setError] = useState(false)
+
+  function tryUnlock() {
+    if (pw === ADMIN_PASSWORD) {
+      localStorage.setItem('ellt-admin-auth', 'true')
+      setUnlocked(true)
+      setError(false)
+    } else {
+      setError(true)
+      setPw('')
+    }
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="app-container" style={{ maxWidth:400, paddingTop:60 }}>
+        <div style={{ textAlign:'center', marginBottom:32 }}>
+          <div style={{ fontSize:40, marginBottom:12 }}>🛡️</div>
+          <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', marginBottom:6 }}>Admin Access</div>
+          <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600 }}>Enter the admin password to continue</div>
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+          <input
+            type="password"
+            value={pw}
+            onChange={e => { setPw(e.target.value); setError(false) }}
+            onKeyDown={e => e.key === 'Enter' && tryUnlock()}
+            placeholder="Admin password"
+            autoFocus
+            style={{
+              padding:'14px 16px', borderRadius:12, fontSize:15, fontWeight:600,
+              border: error ? '2px solid var(--coral)' : '2px solid var(--border)',
+              borderBottom: error ? '3px solid var(--coralBdr)' : '3px solid var(--borderB)',
+              background:'var(--bg2)', color:'var(--text)', fontFamily:'Nunito, sans-serif',
+              outline:'none', width:'100%', boxSizing:'border-box',
+            }}
+          />
+          {error && <div style={{ fontSize:12, color:'var(--coral)', fontWeight:700, textAlign:'center' }}>Incorrect password</div>}
+          <button onClick={tryUnlock} style={{
+            padding:'14px', borderRadius:12, border:'none', borderBottom:'4px solid var(--blueD)',
+            background:'var(--blue)', color:'#fff', fontWeight:900, fontSize:15,
+            cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.5px',
+          }}>
+            Enter Admin Panel
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const [tab, setTab] = useState('overview')
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
