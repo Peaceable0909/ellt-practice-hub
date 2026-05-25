@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { key: 'Progress',  icon: BarChart2,       label: 'Progress' },
 ]
 
-export default function Nav({ page, setPage, dark, setDark, user, profile, results = [], streak = 0 }) {
+export default function Nav({ page, setPage, dark, setDark, user, profile, results = [], streak = 0, isAdmin = false }) {
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropRef = useRef(null)
 
