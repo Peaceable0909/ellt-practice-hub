@@ -114,6 +114,7 @@ export default function App() {
       {page === 'MockTest' && <MockTests {...sharedProps} />}
       {page === 'Progress' && <Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />}
       {page === 'Live'     && <LiveSessions />}
+      {page === 'Admin'    && <Admin user={session.user} />}
     </div>
   )
 }
