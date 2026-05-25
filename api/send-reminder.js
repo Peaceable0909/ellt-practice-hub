@@ -100,9 +100,9 @@ function buildEmail({ name, email, dayNum, totalDays, morningTime, eveningTime, 
   </div>
 
   <table width="100%"><tr><td align="center">
-    <a href="mailto:myinterviewhub@gmail.com"
+    <a href="https://ellt-practice-hub.vercel.app"
        style="display:inline-block;background:#58CC02;color:#fff;text-decoration:none;font-size:15px;font-weight:900;padding:14px 36px;border-radius:12px;border-bottom:4px solid #46A302;text-transform:uppercase;letter-spacing:0.8px;">
-      Contact us: myinterviewhub@gmail.com
+      Open ELLTPulse →
     </a>
   </td></tr></table>
 
@@ -199,7 +199,6 @@ export default async function handler(req) {
         headers: { 'Authorization':`Bearer ${RESEND_KEY}`, 'Content-Type':'application/json' },
         body: JSON.stringify({
           from: 'ELLTPulse <onboarding@resend.dev>',
-          reply_to: 'myinterviewhub@gmail.com',
           to: [email],
           subject: `📅 Day ${dayNum} of ${totalDays} — sessions at ${s.morning_time?.slice(0,5)} & ${s.evening_time?.slice(0,5)}`,
           html,
@@ -217,4 +216,3 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: err.message }), { status:500, headers:{'Content-Type':'application/json'} })
   }
 }
-
