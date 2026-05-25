@@ -7,6 +7,7 @@ import Practice from './components/Practice'
 import MockTests from './components/MockTests'
 import Progress from './components/Progress'
 import LiveSessions from './components/LiveSessions'
+import Admin from './components/Admin'
 import SessionReminder from './components/SessionReminder'
 
 export default function App() {
@@ -19,6 +20,7 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
   const [schedule, setSchedule] = useState(null)
+  const isAdmin = session?.user?.email === 'myinterviewhub@gmail.com'
 
   useEffect(() => {
     document.body.className = dark ? 'dark' : ''
@@ -92,7 +94,7 @@ export default function App() {
 
   return (
     <div style={{ background:'var(--bg)', minHeight:'100vh', color:'var(--text)' }}>
-      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} />
+      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} isAdmin={isAdmin} />
 
       {loadingResults && (
         <div style={{ position:'fixed', top:70, right:16, zIndex:999, background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, padding:'8px 14px', fontSize:12, fontWeight:700, color:'var(--textM)', display:'flex', alignItems:'center', gap:8, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}>
