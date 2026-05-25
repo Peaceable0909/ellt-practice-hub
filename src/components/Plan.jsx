@@ -96,7 +96,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
   }
 
   // ── PLAN VIEW ──────────────────────────────────────────────
-  const plan = buildPlan(schedule.period)
+  const plan = buildPlan(schedule.period, schedule.start_date)
   const startD = new Date(schedule.start_date)
   const todayD = new Date()
   todayD.setHours(0,0,0,0)
