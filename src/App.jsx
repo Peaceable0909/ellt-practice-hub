@@ -12,7 +12,11 @@ import SessionReminder from './components/SessionReminder'
 
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem('ellt-theme') !== 'light')
-  const [page, setPage] = useState('Plan')
+  const [page, setPage] = useState(() => {
+    if (window.location.hash === '#admin') return 'Admin'
+    const saved = localStorage.getItem('ellt-page')
+    return saved || 'Plan'
+  })
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [results, setResults] = useState([])
