@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Mail, Lock, User, Eye, EyeOff, Chrome } from 'lucide-react'
+import { Mail, Lock, User, Eye, EyeOff, Globe } from 'lucide-react'
 import { signIn, signUp, signInWithGoogle, sendPasswordReset, updatePassword } from '../lib/supabase'
 
 function Field({ label, type, placeholder, value, onChange, icon: Icon, action }) {
