@@ -100,9 +100,9 @@ function buildEmail({ name, email, dayNum, totalDays, morningTime, eveningTime, 
   </div>
 
   <table width="100%"><tr><td align="center">
-    <a href="https://ellt-practice-hub.vercel.app"
+    <a href="mailto:myinterviewhub@gmail.com"
        style="display:inline-block;background:#58CC02;color:#fff;text-decoration:none;font-size:15px;font-weight:900;padding:14px 36px;border-radius:12px;border-bottom:4px solid #46A302;text-transform:uppercase;letter-spacing:0.8px;">
-      Open ELLTPulse →
+      Contact us: myinterviewhub@gmail.com
     </a>
   </td></tr></table>
 
@@ -118,21 +118,18 @@ function buildEmail({ name, email, dayNum, totalDays, morningTime, eveningTime, 
 }
 
 export default async function handler(req) {
-  const RESEND_KEY = process.env.RESEND_API_KEY
+  const APPS_SCRIPT_URL    = process.env.APPS_SCRIPT_URL    || 'https://script.google.com/macros/s/AKfycbwzfw0WRP3EFiQivv7-jF021Dxm5nOjZRbpXB5QFCBf5jQBrKJZgXN52N_fUl5OEvzz/exec'
+  const APPS_SCRIPT_SECRET = process.env.APPS_SCRIPT_SECRET || 'WR-2026-hub-secret'
   const SB_URL     = process.env.VITE_SUPABASE_URL
   const SB_KEY     = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
   const authHeader = req.headers.get('authorization')
   const secret = process.env.CRON_SECRET
 
-  // HIGH-14 fix: prevent undefined bypass
   if (!secret) {
     return new Response('CRON_SECRET not configured on server', { status: 500 })
   }
   if (authHeader !== `Bearer ${secret}`) {
     return new Response('Unauthorized', { status: 401 })
-  }
-  if (!RESEND_KEY) {
-    return new Response('Missing RESEND_API_KEY — set it in Vercel environment variables', { status: 500 })
   }
   if (!SB_URL || !SB_KEY) {
     return new Response('Missing Supabase env vars', { status: 500 })
@@ -194,19 +191,22 @@ export default async function handler(req) {
         xp,
       })
 
-      const r = await fetch('https://api.resend.com/emails', {
+      const r = await fetch(APPS_SCRIPT_URL, {
         method: 'POST',
-        headers: { 'Authorization':`Bearer ${RESEND_KEY}`, 'Content-Type':'application/json' },
+        redirect: 'follow',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          from: 'ELLTPulse <onboarding@resend.dev>',
+          secret: APPS_SCRIPT_SECRET,
           to: [email],
           subject: `📅 Day ${dayNum} of ${totalDays} — sessions at ${s.morning_time?.slice(0,5)} & ${s.evening_time?.slice(0,5)}`,
           html,
         })
       })
 
-      if (r.ok) { sent++ }
-      else { errors.push({ email, status: r.status, body: await r.text() }) }
+      let rJson = {}
+      try { rJson = await r.json() } catch { /* ignore */ }
+      if (!rJson.error) { sent++ }
+      else { errors.push({ email, error: rJson.error }) }
     }
 
     return new Response(JSON.stringify({ sent, errors: errors.length, errorDetails: errors }), {
@@ -216,3 +216,4 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: err.message }), { status:500, headers:{'Content-Type':'application/json'} })
   }
 }
+
