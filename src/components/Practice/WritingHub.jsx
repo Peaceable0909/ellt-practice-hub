@@ -317,9 +317,10 @@ ${essay}
         {/* Task prompt */}
         <div style={{ background: 'var(--purpleBg)', border: '2px solid var(--purpleBdr)', borderRadius: 16, padding: 16, marginBottom: 16 }}>
           <div style={{ fontSize: 11, color: 'var(--purple)', fontWeight: 900, letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: 6 }}>Writing Task</div>
+          <DiagramRenderer taskId={selected.id} />
           <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{selected.prompt}</p>
           <p style={{ fontSize: 13, color: 'var(--textM)', lineHeight: 1.6, fontWeight: 600 }}>{selected.task}</p>
-          {selected.chartDescription && (
+          {selected.chartDescription && !['wt1','wi2','wo1'].includes(selected.id) && (
             <div style={{ marginTop: 10, padding: '10px 14px', background: 'var(--bg2)', borderRadius: 10, border: '1px solid var(--border)' }}>
               <div style={{ fontSize: 11, color: 'var(--textM)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: 4 }}>Chart Data</div>
               <p style={{ fontSize: 12, color: 'var(--textM)', lineHeight: 1.5 }}>{selected.chartDescription}</p>
