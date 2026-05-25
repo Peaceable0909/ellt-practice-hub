@@ -1,10 +1,10 @@
 // ─── ELLTPulse Study Plan Builder ────────────────────────────────────────────
 
 export const PERIOD_CONFIG = {
-  '1_week':  { label: '1 Week',   days: 7,  desc: 'Intensive crash course — 4hrs daily' },
-  '2_weeks': { label: '2 Weeks',  days: 14, desc: 'Focused preparation — 4hrs daily' },
-  '3_weeks': { label: '3 Weeks',  days: 21, desc: 'Thorough preparation — 4hrs daily' },
-  '1_month': { label: '1 Month',  days: 30, desc: 'Complete preparation — 4hrs daily' },
+  '1_week':  { label: '1 Week',   days: 7,  morningHours: 2, eveningHours: 2, desc: 'Intensive crash course — 4hrs daily', description: 'Best for last-minute preparation. 4 hours of focused study every day.' },
+  '2_weeks': { label: '2 Weeks',  days: 14, morningHours: 2, eveningHours: 2, desc: 'Focused preparation — 4hrs daily',  description: 'Good for students who need a solid final push. Covers all 4 skills.' },
+  '3_weeks': { label: '3 Weeks',  days: 21, morningHours: 2, eveningHours: 2, desc: 'Thorough preparation — 4hrs daily', description: 'Comprehensive preparation with time to improve weak areas significantly.' },
+  '1_month': { label: '1 Month',  days: 30, morningHours: 2, eveningHours: 2, desc: 'Complete preparation — 4hrs daily', description: 'Full preparation with review days, mock tests, and all 4 skills covered deeply.' },
 }
 
 const L = ['l1','l2','l3','l4','l5','l6','li1','li2','li3','li4','li5','li6','lc1','lc2','lc3','lc4','lc17t3p1','lc17t3p2','lc17t3p3','lc17t3p4','lc17t2p1','lc17t4p1']
@@ -94,7 +94,7 @@ function makeEvening(dayType, idx) {
   }
 }
 
-export function buildPlan(period, startDate) {
+export function buildPlan(period, startDate = new Date().toISOString().slice(0,10)) {
   const config = PERIOD_CONFIG[period]
   if (!config) return []
   const schedule = SCHEDULES[period] || SCHEDULE_30
