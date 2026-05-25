@@ -208,3 +208,60 @@ Despite these drawbacks, I believe the solution lies in sustainable tourism prac
 In conclusion, while the disadvantages of international tourism are real and growing, they do not yet outweigh the advantages, provided that the industry embraces a more responsible approach.`
   }
 ]
+
+export const WRITING_IELTS_3 = [
+  {
+    id: 'wi4',
+    title: 'Consumer Expenditure — UK vs France (2010)',
+    source: 'IELTS Academic',
+    type: 'task1',
+    prompt: 'The chart below illustrates the amount of money spent on five consumer goods in France and the UK in 2010. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Bar chart comparing UK and France spending (in £) on cars, computers, books, perfume and cameras in 2010.',
+    minWords: 150,
+    band: 9,
+    model: `The chart illustrates the amount of money spent on five consumer goods (cars, computers, books, perfume and cameras) in France and the UK in 2010. Units are measured in pounds sterling.
+
+Overall, the UK spent more money on consumer goods than France in the period given. Both the British and the French spent most of their money on cars, whereas the least amount was spent on perfume in the UK compared to cameras in France.
+
+In terms of cars, people in the UK spent about £450,000 compared to the French at £400,000. Similarly, British expenditure was higher on books than the French (around £400,000 and £300,000 respectively). Expenditure on cameras in the UK (just over £350,000) was over double that of France at only £150,000.
+
+On the other hand, France spent more on the remaining goods. Above £350,000 was spent by the French on computers, slightly more than the British who spent exactly £350,000. Neither country spent much on perfume — £200,000 in France but under £150,000 in the UK.`
+  },
+  {
+    id: 'wi5',
+    title: 'Consumption of Spreads (1981–2007)',
+    source: 'IELTS Academic',
+    type: 'task1',
+    prompt: 'The graph below shows the consumption of three kinds of spreads (margarine, butter and low-fat/reduced spreads) between 1981 and 2007. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Line graph showing grams consumed per person per week of margarine, butter and low-fat spreads from 1981 to 2007.',
+    minWords: 150,
+    band: 9,
+    model: `The line graph illustrates the amount of three kinds of spreads consumed from 1981 to 2007. Units are measured in grams per person per week.
+
+Overall, the consumption of margarine and butter decreased over the period, while low-fat and reduced spreads rose. At the start, butter was the most popular spread, but by the end low-fat spreads had become most widely consumed.
+
+With regards to butter, consumption began at around 140 grams and peaked at 160 grams in 1986, before falling dramatically to about 50 grams in 2007. Likewise, approximately 90 grams of margarine was consumed in 1981, after which the figure fluctuated and dropped to a low of 40 grams by the final year.
+
+In contrast, low-fat and reduced spreads only appeared in 1996 at around 10 grams. This figure rose to a high of just over 80 grams in 2001, before falling slightly to approximately 70 grams in 2007.`
+  },
+  {
+    id: 'wi6',
+    title: 'Indian Students in British Universities (2020–2022)',
+    source: 'IELTS Academic',
+    type: 'task1',
+    prompt: 'The table below gives information about the number of full-time students from India in six British universities and the percentage increase between 2020/21 and 2021/22. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Table showing Indian full-time students in 6 UK universities in 2020/21 and 2021/22 with % change.',
+    minWords: 150,
+    band: 9,
+    model: `The table gives information about full-time students from India studying at six British universities in two academic years (2020/21 and 2021/22), as well as the percentage increase.
+
+Overall, the greatest increase in Indian students was seen at Sheffield University, while BBP University showed the lowest percentage growth. Coventry University had the most Indian students in the second year.
+
+Sheffield University saw a dramatic rise of 187.7%, reaching 2,345 students in 2021/22. Similarly, Coventry University saw a considerable increase of 121.3%, climbing by 2,900 students to hit 5,290. Leicester University also more than doubled, rising from 1,175 to 2,390 students — a rise of 103.4%.
+
+All other universities saw increases of under 100%. Greenwich and Anglia Ruskin rose by 84.9% and 69.6% respectively. Regarding BBP University, numbers remained high in both years at 3,505 and 5,145, representing a more modest growth of 46.8%.`
+  },
+]
