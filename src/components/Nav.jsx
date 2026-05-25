@@ -100,6 +100,14 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
                       <Icon size={15} color="var(--textM)" />{label}
                     </button>
                   ))}
+                  {adminAccess && (
+                    <button onClick={() => { setPage('Admin'); setDropdownOpen(false) }}
+                      style={{ width:'100%', padding:'12px 16px', border:'none', background:'transparent', display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontFamily:'Nunito, sans-serif', fontSize:14, fontWeight:700, color:'var(--purple)', borderBottom:'1px solid var(--border)', textAlign:'left', transition:'background .15s' }}
+                      onMouseEnter={e => e.currentTarget.style.background='var(--bg3)'}
+                      onMouseLeave={e => e.currentTarget.style.background='transparent'}>
+                      🛡️ Admin Panel
+                    </button>
+                  )}
                   <button onClick={() => { setDropdownOpen(false); signOut() }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 800, color: 'var(--coral)', textAlign: 'left', transition: 'background .15s' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--coralBg)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
