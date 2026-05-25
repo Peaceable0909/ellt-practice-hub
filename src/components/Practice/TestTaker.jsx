@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip } from '../ui'
 import Confetti from '../Confetti'
+import DiagramRenderer from './DiagramRenderer'
 import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones } from 'lucide-react'
 
 export default function TestTaker({ test, skill, prev, addResult, onBack, userId }) {
