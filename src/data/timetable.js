@@ -112,3 +112,24 @@ export function buildPlan(period, startDate) {
     }
   })
 }
+
+// ─── Exported constants used by Plan.jsx ─────────────────────────────────────
+export const SESSION_ICONS = {
+  listening: 'Headphones',
+  reading:   'BookOpen',
+  writing:   'PenLine',
+  speaking:  'Mic',
+  review:    'Star',
+  vocab:     'Brain',
+  mock:      'ClipboardList',
+}
+
+export const SESSION_COLORS = {
+  listening: 'var(--blue)',
+  reading:   'var(--amber)',
+  writing:   'var(--green)',
+  speaking:  'var(--purple)',
+  review:    'var(--coral)',
+  vocab:     'var(--teal)',
+  mock:      'var(--green)',
+}
