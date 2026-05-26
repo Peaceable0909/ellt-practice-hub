@@ -3,7 +3,8 @@ import { supabase } from '../lib/supabase'
 import { buildPlan, PERIOD_CONFIG, SESSION_ICONS, SESSION_COLORS } from '../data/timetable'
 import { Headphones, BookOpen, PenLine, Mic, ClipboardList,
          ChevronRight, CheckCircle, Lock, Flame, Zap,
-         Trophy, Calendar, PlayCircle, RotateCcw, Clock } from 'lucide-react'
+         Trophy, Calendar, PlayCircle, RotateCcw, Clock,
+         Sun, Moon, Star, Brain, RefreshCw, Target } from 'lucide-react'
 import StudySession from './StudySession'
 
 const PERIOD_DAYS = { '1_week':7, '2_weeks':14, '3_weeks':21, '1_month':30 }
@@ -208,10 +209,17 @@ export default function Plan({ userId, userEmail, results, addResult }) {
                       <div style={{ fontSize:15, fontWeight:900, color: done ? 'var(--textM)' : 'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
                       {/* Task chips */}
                       {session.tasks && (
-                        <div style={{ display:'flex', gap:4, marginTop:5, flexWrap:'wrap' }}>
+                        <div style={{ display:'flex', gap:4, marginTop:7, flexWrap:'wrap' }}>
                           {session.tasks.map((task, ti) => {
-                            const ec = { listening:'🎧', reading:'📖', writing:'✍️', speaking:'🎤', review:'⭐', vocab:'🧠', mock:'📝' }
-                            return <span key={ti} style={{ fontSize:10, fontWeight:700, color:'var(--textM)', background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:99, padding:'2px 8px' }}>{ec[task.skill]||'📚'} {task.label}</span>
+                            const skillColor = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)', review:'var(--teal)', vocab:'var(--green)', mock:'var(--green)' }
+                            const SkillIcon = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic, review:Star, vocab:Brain, mock:ClipboardList }
+                            const TI = SkillIcon[task.skill] || BookOpen
+                            const col = skillColor[task.skill] || 'var(--textM)'
+                            return (
+                              <span key={ti} style={{ fontSize:11, fontWeight:700, color:col, background:`color-mix(in srgb, ${col} 10%, var(--bg3))`, border:`1px solid color-mix(in srgb, ${col} 30%, var(--border))`, borderRadius:8, padding:'3px 8px', display:'inline-flex', alignItems:'center', gap:4 }}>
+                                <TI size={10} /> {task.label}
+                              </span>
+                            )
                           })}
                         </div>
                       )}
