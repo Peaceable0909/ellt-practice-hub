@@ -65,7 +65,7 @@ export default function Progress({ results, loading, streak = 0 }) {
           { v: overall,              l: 'Overall Band',    col: 'var(--teal)'   },
           { v: results.length,       l: 'Tests Done',      col: 'var(--amber)'  },
           { v: `${accuracy}%`,       l: 'Avg Accuracy',    col: 'var(--blue)'   },
-          { v: `${streak}d 🔥`,      l: 'Study Streak',    col: 'var(--coral)'  },
+          { v: streak,               l: 'Study Streak',    col: 'var(--coral)',  icon: 'flame'  },
         ].map(s => (
           <Card key={s.l} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 26, fontWeight: 700, color: s.col, marginBottom: 4 }}>{s.v}</div>
