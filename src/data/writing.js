@@ -265,3 +265,134 @@ Sheffield University saw a dramatic rise of 187.7%, reaching 2,345 students in 2
 All other universities saw increases of under 100%. Greenwich and Anglia Ruskin rose by 84.9% and 69.6% respectively. Regarding BBP University, numbers remained high in both years at 3,505 and 5,145, representing a more modest growth of 46.8%.`
   },
 ]
+
+export const WRITING_IELTS_4 = [
+  {
+    id: 'wi7',
+    title: "Teenagers' Activities in Chester (2002–2007)",
+    source: 'IELTS Academic', type: 'task1',
+    prompt: "The bar chart shows the number of hours per week teenagers in Chester spent on various activities in 2002 and 2007. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.",
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Grouped bar chart showing weekly hours spent on 7 activities in 2002 vs 2007.',
+    minWords: 150, band: 9,
+    model: `The bar chart compares the number of hours per week that teenagers in Chester spent on seven activities in 2002 and 2007.
+
+Overall, watching television was by far the most popular activity in both years. While time spent on TV, shopping and going to pubs or discos increased, the hours devoted to homework, sport, reading and cinema all fell over the period.
+
+In 2002, teenagers spent approximately 25 hours per week watching television. This rose significantly to around 40 hours by 2007, the largest increase of any activity. Time spent visiting pubs and discos and going shopping both doubled over the five-year period, rising from roughly 10 to 20 hours and 8 to 16 hours respectively.
+
+In contrast, the hours devoted to homework fell from around 20 to 14, while sport dropped from 18 to 12 hours per week. Reading and cinema both saw modest declines, falling from approximately 8 to 6 hours and 5 to 4 hours respectively.`
+  },
+  {
+    id: 'wi8',
+    title: 'Global Digital Game Sales (2000–2006)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The bar chart below shows global sales of handheld, console, online, and mobile games from 2000 to 2006. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Bar chart showing digital game sales (billions USD) by type from 2000 to 2006.',
+    minWords: 150, band: 9,
+    model: `The bar chart illustrates global sales of four types of digital games — handheld, console, online and mobile — between 2000 and 2006, measured in billions of US dollars.
+
+Overall, handheld games consistently dominated sales throughout the period, while online and mobile games showed the most significant growth toward the end of the period.
+
+Handheld game sales were highest in every year, beginning at approximately $11 billion in 2000 and peaking at around $16 billion in 2005 before falling slightly. Console games were the second most popular category, fluctuating between $8 and $10 billion over the period.
+
+Online and mobile games began with negligible sales but grew considerably. Online sales rose from virtually zero in 2000 to approximately $5 billion by 2006, while mobile game sales followed a similar upward trajectory to reach around $4 billion. Both categories showed the most rapid growth in the final two years of the period.`
+  },
+  {
+    id: 'wi9',
+    title: 'Meat Consumption in a European Country (1979–2004)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The graph shows the weekly consumption in grams of four different types of meat in a European country from 1979 to 2004. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Line graph showing weekly grams consumed of beef, chicken, lamb and fish 1979–2004.',
+    minWords: 150, band: 9,
+    model: `The line graph illustrates the weekly consumption in grams of four types of meat — beef, chicken, lamb and fish — in a European country over a 25-year period from 1979 to 2004.
+
+Overall, the most striking trend is the dramatic rise in chicken consumption and the notable decline in beef and lamb. Fish consumption remained relatively stable throughout the period.
+
+In 1979, beef was the most widely consumed meat at approximately 250 grams per week. However, this figure declined steadily to around 100 grams by 2004. Lamb followed a similar downward trend, falling from about 150 grams to just 50 grams over the same period.
+
+In contrast, chicken saw a dramatic increase. Beginning at approximately 150 grams per week in 1979, it rose sharply to surpass beef in the early 1990s and reached around 250 grams by 2004, making it the most popular meat by the end of the period. Fish consumption hovered consistently between 50 and 60 grams throughout.`
+  },
+  {
+    id: 'wi10',
+    title: 'Underground Railway Systems — 6 Cities',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The table below gives information about the underground railway systems in six cities. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Table: city, year opened, km of route, stations, passengers per year.',
+    minWords: 150, band: 9,
+    model: `The table gives information about the underground railway systems in six cities worldwide, including when they opened, the total route length, number of stations and annual passenger figures.
+
+Overall, London has the oldest and most extensive underground system, while Tokyo carries by far the largest number of passengers each year. The newer systems in Washington DC and Kyoto are comparatively smaller in scale.
+
+London's underground opened in 1863 — the earliest of the six — and now has 394 kilometres of track and 275 stations. Despite its size, it carries 775 million passengers annually, which is fewer than Tokyo. The Tokyo system, opened in 1927, has 155 kilometres of route but an impressive 1,927 million passengers per year.
+
+Paris, which opened in 1900, has 199 kilometres and 297 stations, with 1,191 million annual passengers. Washington DC and Kyoto are smaller and more recently established systems. Los Angeles, opened in 2001, is the newest and smallest, with only 28 kilometres of track.`
+  },
+  {
+    id: 'wi11',
+    title: 'Electricity Generation — Germany vs France (2009)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The pie charts below show the sources of electricity generation in Germany and France in 2009. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Two pie charts comparing electricity sources in Germany and France in 2009.',
+    minWords: 150, band: 9,
+    model: `The pie charts compare the proportions of electricity generated from different energy sources in Germany and France in 2009.
+
+Overall, the most striking difference between the two countries is their reliance on nuclear power. France generated the vast majority of its electricity from nuclear sources, whereas Germany used a much more diverse mix of energy types.
+
+In France, nuclear power accounted for 75% of electricity production — by far the largest share. Hydroelectric power made up 13%, with gas contributing 6% and other sources making up the remaining 6%.
+
+Germany's electricity generation was more evenly distributed. Coal was the largest source at 29%, followed by gas at 24% and nuclear at 22%. Renewable and other sources accounted for the remaining 25%. This contrasts sharply with France, where a single energy source dominated completely. The data suggests that France had a much lower carbon footprint for electricity generation due to its heavy reliance on nuclear power.`
+  },
+  {
+    id: 'wi12',
+    title: 'Goods Transported in the UK (1974–2002)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The graph below shows the amounts of goods transported in the UK between 1974 and 2002 by four different modes of transport. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Line graph showing billion tonne-km transported by road, water, rail, and pipeline 1974–2002.',
+    minWords: 150, band: 9,
+    model: `The line graph shows the quantity of goods transported in the UK from 1974 to 2002 by road, water, rail and pipeline, measured in billion tonne-kilometres.
+
+Overall, road transport was by far the most dominant mode throughout the period and saw the greatest growth. All other forms of transport showed more modest and stable patterns over the same period.
+
+In 1974, road transport accounted for approximately 70 billion tonne-kilometres. This figure rose steadily, reaching around 100 billion by 2002 — an increase of roughly 30 billion over the period. Water transport was the second most common mode, remaining relatively stable between 50 and 60 billion tonne-kilometres throughout.
+
+Rail transport began at approximately 40 billion tonne-kilometres in 1974 and fluctuated with a slight overall decline before recovering slightly toward the end of the period. Pipeline transport remained the least used method, hovering consistently around 5 billion tonne-kilometres with minimal change over the entire period.`
+  },
+  {
+    id: 'wi13',
+    title: 'Turtle Populations in India (1980–2012)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The graph shows the population of three types of turtles (Olive Ridley, Leatherback, and Green) in India between 1980 and 2012. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Line graph showing turtle population trends in India from 1980 to 2012.',
+    minWords: 150, band: 9,
+    model: `The line graph illustrates changes in the populations of three turtle species — Olive Ridley, Leatherback and Green — in India between 1980 and 2012.
+
+Overall, all three species experienced population decline over the period, with Olive Ridley turtles showing the most dramatic fall. Green turtles remained the most stable of the three.
+
+In 1980, Olive Ridley turtles had the largest population at approximately 180,000. However, numbers fell sharply throughout the period, dropping to just under 60,000 by 2012. Leatherback turtles also declined considerably, from around 120,000 in 1980 to approximately 70,000 by the end of the period, though the decline was more gradual than for Olive Ridley turtles.
+
+Green turtle numbers were the most stable of the three species, beginning at around 90,000 in 1980 and declining only slightly to approximately 80,000 by 2012. The data highlights serious conservation concerns, particularly for the Olive Ridley species.`
+  },
+  {
+    id: 'wi14',
+    title: 'Household Expenditure (1950 vs 2010)',
+    source: 'IELTS Academic', type: 'task1',
+    prompt: 'The pie charts show the average household expenditure in 1950 and 2010. Summarise the information by selecting and reporting the main features, and make comparisons where relevant.',
+    task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
+    chartDescription: 'Two pie charts comparing household spending categories in 1950 vs 2010.',
+    minWords: 150, band: 9,
+    model: `The pie charts compare average household expenditure across five categories in 1950 and 2010.
+
+Overall, food spending decreased dramatically over the sixty-year period, while the proportions spent on housing and transport both rose considerably. The share devoted to clothing fell, while other expenditure increased.
+
+In 1950, food accounted for the largest proportion of household spending at 44%. By 2010, this had fallen significantly to just 23%, representing the most notable change across all categories. Clothing also saw a decline, from 12% to 9% over the period.
+
+In contrast, housing costs rose from 25% to 31%, reflecting increased property prices and rents. Transport spending nearly doubled from 10% to 18%, likely due to greater car ownership. Other expenditure also grew from 9% to 19%, suggesting households were spending more on leisure, technology, and services by 2010. Overall, the data reflects a shift away from basic necessities toward housing, transport and discretionary spending.`
+  },
+]
