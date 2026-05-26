@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { ChevronLeft, CheckCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
@@ -38,6 +38,14 @@ export default function StudySession({ session, results, addResult, userId, onCo
 
   const currentTask = tasks[taskIdx]
   const allDone = tasksDone.length >= tasks.length
+
+  // Auto-finish session when all tasks done
+  useEffect(() => {
+    if (allDone && !sessionDone) {
+      const t = setTimeout(() => finishSession(), 1800)
+      return () => clearTimeout(t)
+    }
+  }, [allDone])
   const progress = `${tasksDone.length}/${tasks.length}`
 
   function completeTask() {
@@ -81,9 +89,9 @@ export default function StudySession({ session, results, addResult, userId, onCo
           </div>
         </div>
         {allDone && (
-          <button onClick={finishSession} style={{ padding:'8px 14px', borderRadius:10, border:'none', borderBottom:'3px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif', flexShrink:0, display:'flex', alignItems:'center', gap:6 }}>
-            <CheckCircle size={14} /> Done
-          </button>
+          <div style={{ padding:'6px 12px', borderRadius:10, background:'var(--greenBg)', border:'2px solid var(--green)', color:'var(--green)', fontWeight:800, fontSize:11, flexShrink:0, display:'flex', alignItems:'center', gap:5 }}>
+            <CheckCircle size={13} /> All done!
+          </div>
         )}
       </div>
 
@@ -137,7 +145,14 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
     setTaskCompleted(true)
   }
 
-  // After completing — show next task CTA
+  // Auto-advance after task completes
+  useEffect(() => {
+    if (taskCompleted) {
+      const t = setTimeout(() => onTaskComplete(), 1500)
+      return () => clearTimeout(t)
+    }
+  }, [taskCompleted])
+
   if (taskCompleted) {
     return (
       <div className="anim-bounceIn" style={{ textAlign:'center', padding:'40px 20px' }}>
@@ -145,10 +160,8 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
           <CheckCircle size={32} color="var(--green)" />
         </div>
         <div style={{ fontSize:20, fontWeight:900, color:'var(--text)', marginBottom:6 }}>Task Complete! ✓</div>
-        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginBottom:24 }}>Great work on {label}</div>
-        <button onClick={onTaskComplete} style={{ padding:'13px 32px', borderRadius:12, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:15, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.5px' }}>
-          Next Task →
-        </button>
+        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginBottom:16 }}>Great work on {label}</div>
+        <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600 }}>Moving to next task...</div>
       </div>
     )
   }
