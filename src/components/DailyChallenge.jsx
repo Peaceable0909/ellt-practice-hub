@@ -99,17 +99,17 @@ export default function DailyChallenge({ userId, addResult }) {
       <>
         <Confetti active={showConfetti} onDone={() => setShowConfetti(false)} />
         <div onClick={() => !completed && setStarted(true)}
-          style={{ background: completed ? 'var(--bg2)' : 'var(--amber)', border: completed ? '1.5px solid var(--amberBdr)' : 'none', borderBottom: completed ? '1.5px solid var(--amberBdr)' : '3px solid #CC7700', borderRadius:16, padding:'16px 18px', marginBottom:16, cursor: completed ? 'default' : 'pointer', boxShadow:'var(--shadow)' }}>
+          style={{ background: completed ? 'var(--bg2)' : 'var(--amber)', border: completed ? '1.5px solid var(--amberBdr)' : 'none', borderBottom: completed ? '1.5px solid var(--amberBdr)' : '4px solid #CC7700', borderRadius:18, padding:'20px 22px', marginBottom:20, cursor: completed ? 'default' : 'pointer', boxShadow:'var(--shadow)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ flex:1, minWidth:0 }}>
-              <div style={{ fontSize:10, fontWeight:700, color: completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:3, display:'flex', alignItems:'center', gap:5 }}>
+              <div style={{ fontSize:11, fontWeight:700, color: completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:4, display:'flex', alignItems:'center', gap:5 }}>
                 <Zap size={10} color={completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)'} fill={completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)'} />
                 Daily Challenge — {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
               </div>
-              <div style={{ fontSize:16, fontWeight:900, color: completed ? 'var(--text)' : '#fff' }}>
+              <div style={{ fontSize:18, fontWeight:900, color: completed ? 'var(--text)' : '#fff' }}>
                 {completed ? `${saved?.score}/${saved?.total} correct — well done!` : '5 questions · approx. 5 minutes'}
               </div>
-              {!completed && <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:600, marginTop:3 }}>Resets at midnight — same for all students today</div>}
+              {!completed && <div style={{ fontSize:13, color:'rgba(255,255,255,0.85)', fontWeight:600, marginTop:5 }}>Resets at midnight — same for all students today</div>}
               {completed && (
                 <div style={{ marginTop:8 }}>
                   <div style={{ height:5, background:'var(--bg3)', borderRadius:99, overflow:'hidden' }}>
@@ -120,8 +120,8 @@ export default function DailyChallenge({ userId, addResult }) {
               )}
             </div>
             {!completed && (
-              <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginLeft:12 }}>
-                <Zap size={20} color="#fff" fill="#fff" />
+              <div style={{ width:48, height:48, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginLeft:12 }}>
+                <Zap size={22} color="#fff" fill="#fff" />
               </div>
             )}
             {completed && <CheckCircle size={24} color="var(--amber)" style={{flexShrink:0, marginLeft:12}} />}
