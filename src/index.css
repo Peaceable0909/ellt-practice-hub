@@ -4,11 +4,12 @@
 
 /* ─── LIGHT MODE (default) ──────────────────────────── */
 :root {
-  --bg:       #FFFFFF;
+  --bg:       #F4F6F8;
   --bg2:      #FFFFFF;
-  --bg3:      #F7F7F7;
-  --border:   #E5E5E5;
-  --borderB:  #AFAFAF;
+  --bg3:      #F0F2F5;
+  --border:   #E2E6EA;
+  --borderB:  #C4CAD0;
+  --shadow:   0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
   --green:    #58CC02;
   --greenD:   #46A302;
   --greenBg:  #D7FFB8;
@@ -47,6 +48,7 @@ body.dark {
   --bg3:      #2B3D45;
   --border:   #3A4E57;
   --borderB:  #2A3D47;
+  --shadow:   0 2px 12px rgba(0,0,0,0.25), 0 1px 3px rgba(0,0,0,0.15);
   --green:    #58CC02;
   --greenD:   #46A302;
   --greenBg:  rgba(88,204,2,0.12);
@@ -78,6 +80,8 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   /* space for mobile bottom nav */
   padding-bottom: var(--bottom-nav-h);
 }
@@ -235,3 +239,26 @@ audio { width: 100%; border-radius: 12px; }
   transition: transform .3s, opacity .3s;
 }
 .btn-ripple:active::after { transform:scale(2); opacity:1; transition:none; }
+
+/* ── Utility classes ──────────────────────────────────── */
+.card {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.card-raised {
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-bottom: 3px solid var(--borderB);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+input, select, textarea {
+  font-family: 'Nunito', sans-serif;
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue) !important;
+  outline: none;
+}
