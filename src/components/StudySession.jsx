@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { ChevronLeft, CheckCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star } from 'lucide-react'
+import { ChevronLeft, CheckCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, Sun, Moon } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
@@ -63,8 +63,8 @@ export default function StudySession({ session, results, addResult, userId, onCo
         <div className="anim-bounceIn" style={{ width:80, height:80, borderRadius:'50%', background:'var(--greenBg)', border:'4px solid var(--green)', display:'flex', alignItems:'center', justifyContent:'center' }}>
           <CheckCircle size={40} color="var(--green)" />
         </div>
-        <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', textAlign:'center' }}>Session Complete!</div>
-        <div style={{ fontSize:14, color:'var(--textM)', fontWeight:600 }}>{progress} tasks finished</div>
+        <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', textAlign:'center' }}>Session Complete</div>
+        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginTop:4 }}>All tasks finished — great work</div>
       </div>
     )
   }
@@ -80,7 +80,7 @@ export default function StudySession({ session, results, addResult, userId, onCo
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:900, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
           <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.4px' }}>
-            Day {session.dayNum} · {session.which === 'morning' ? '☀️ Morning' : '🌙 Evening'} · Task {taskIdx+1} of {tasks.length}
+            Day {session.dayNum} · 
           </div>
         </div>
 
