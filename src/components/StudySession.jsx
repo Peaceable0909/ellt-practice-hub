@@ -39,27 +39,22 @@ export default function StudySession({ session, results, addResult, userId, onCo
   const currentTask = tasks[taskIdx]
   const allDone = tasksDone.length >= tasks.length
 
-  // Auto-finish session when all tasks done
-  useEffect(() => {
-    if (allDone && !sessionDone) {
-      const t = setTimeout(() => finishSession(), 1800)
-      return () => clearTimeout(t)
-    }
-  }, [allDone])
-  const progress = `${tasksDone.length}/${tasks.length}`
 
-  function completeTask() {
-    if (!tasksDone.includes(taskIdx)) {
-      setTasksDone(prev => [...prev, taskIdx])
-    }
-    if (taskIdx < tasks.length - 1) {
-      setTaskIdx(taskIdx + 1)
-    }
-  }
+  const progress = `${tasksDone.length}/${tasks.length}`
 
   function finishSession() {
     setSessionDone(true)
     setTimeout(() => onComplete(), 1800)
+  }
+
+  function completeTask() {
+    const newDone = tasksDone.includes(taskIdx) ? tasksDone : [...tasksDone, taskIdx]
+    setTasksDone(newDone)
+    if (taskIdx < tasks.length - 1) {
+      setTaskIdx(taskIdx + 1)  // more tasks — advance
+    } else {
+      finishSession()           // last task — finish session directly
+    }
   }
 
   if (sessionDone) {
@@ -88,11 +83,7 @@ export default function StudySession({ session, results, addResult, userId, onCo
             Day {session.dayNum} · {session.which === 'morning' ? '☀️ Morning' : '🌙 Evening'} · Task {taskIdx+1} of {tasks.length}
           </div>
         </div>
-        {allDone && (
-          <div style={{ padding:'6px 12px', borderRadius:10, background:'var(--greenBg)', border:'2px solid var(--green)', color:'var(--green)', fontWeight:800, fontSize:11, flexShrink:0, display:'flex', alignItems:'center', gap:5 }}>
-            <CheckCircle size={13} /> All done!
-          </div>
-        )}
+
       </div>
 
       {/* Task progress bar */}
