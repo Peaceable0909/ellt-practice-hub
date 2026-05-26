@@ -7,9 +7,27 @@ export const PERIOD_CONFIG = {
   '1_month': { label: '1 Month',  days: 30, morningHours: 2, eveningHours: 2, desc: 'Complete preparation — 4hrs daily', description: 'Full preparation with review days, mock tests, and all 4 skills covered deeply.' },
 }
 
-const L = ['l1','l2','l3','l4','l5','l6','li1','li2','li3','li4','li5','li6','lc1','lc2','lc3','lc4','lc17t3p1','lc17t3p2','lc17t3p3','lc17t3p4','lc17t2p1','lc17t4p1']
+// Listening — 22 tests
+const L = [
+  'l1','l2','l3','l4','l5','l6',          // Oxford ELLT
+  'li1','li2','li3','li4','li5','li6',     // IELTS Official
+  'lc1','lc2','lc3','lc4',                 // Cambridge 17 T1
+  'lc17t3p1','lc17t3p2','lc17t3p3','lc17t3p4', // Cambridge 17 T3
+  'lc17t2p1','lc17t4p1',                   // Cambridge 17 T2/T4
+]
+// Reading — 8 passages
 const R = ['r1','r2','r3','r4','r5','ri1','ri2','ri3']
-const W = ['w1','w2','w3','w4','w5','wi1','wi2','wi3','wo1','wo2','wo3']
+
+// Writing — 23 tasks (Task 2 essays + Task 1 charts, interleaved evenly)
+const W = [
+  // Task 2 essays
+  'w1','w2','w3','w4','w5','wi1',
+  // Task 1 charts (new — all 17)
+  'wt1','wi2','wi3','wo1','wo2','wo3',
+  'wi4','wi5','wi6','wi7','wi8','wi9',
+  'wi10','wi11','wi12','wi13','wi14',
+]
+// Speaking — 9 topics
 const S = ['s1','s2','s3','s4','s5','s6','s7','si1','si2']
 
 function pick(arr, i) { return arr[i % arr.length] }
