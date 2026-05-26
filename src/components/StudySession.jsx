@@ -113,6 +113,7 @@ export default function StudySession({ session, results, addResult, userId, onCo
       {/* Current task content */}
       <div className="app-container" style={{ paddingBottom:80 }}>
         <TaskRenderer
+          key={taskIdx}
           task={currentTask}
           taskIdx={taskIdx}
           results={results}
