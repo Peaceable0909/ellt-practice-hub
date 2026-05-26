@@ -134,15 +134,9 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
   function handleComplete(r) {
     if (r) addResult(r)
     setTaskCompleted(true)
+    // Call directly — more reliable than useEffect-based timer
+    setTimeout(() => onTaskComplete(), 900)
   }
-
-  // Auto-advance after task completes
-  useEffect(() => {
-    if (taskCompleted) {
-      const t = setTimeout(() => onTaskComplete(), 1500)
-      return () => clearTimeout(t)
-    }
-  }, [taskCompleted])
 
   if (taskCompleted) {
     return (
@@ -150,9 +144,8 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
         <div style={{ width:64, height:64, borderRadius:'50%', background:'var(--greenBg)', border:'3px solid var(--green)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
           <CheckCircle size={32} color="var(--green)" />
         </div>
-        <div style={{ fontSize:20, fontWeight:900, color:'var(--text)', marginBottom:6 }}>Task Complete! ✓</div>
-        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginBottom:16 }}>Great work on {label}</div>
-        <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600 }}>Moving to next task...</div>
+        <div style={{ fontSize:20, fontWeight:900, color:'var(--text)', marginBottom:6 }}>Task Complete</div>
+        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600 }}>Great work on {label}</div>
       </div>
     )
   }
