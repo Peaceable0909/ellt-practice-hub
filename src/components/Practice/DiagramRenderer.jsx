@@ -367,6 +367,255 @@ function IndianStudentsTable() {
   )
 }
 
+
+// wi7 — Teenagers' Activities Chester
+function TeenagersChart() {
+  const data = [
+    { activity:"Watching TV",   y2002:25, y2007:40 },
+    { activity:"Pubs/discos",   y2002:10, y2007:20 },
+    { activity:"Shopping",      y2002:8,  y2007:16 },
+    { activity:"Homework",      y2002:20, y2007:14 },
+    { activity:"Sport",         y2002:18, y2007:12 },
+    { activity:"Reading",       y2002:8,  y2007:6  },
+    { activity:"Cinema",        y2002:5,  y2007:4  },
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Teenagers' Activities in Chester — Weekly Hours</div>
+      <ResponsiveContainer width="100%" height={230}>
+        <BarChart data={data} margin={{top:5,right:10,left:0,bottom:30}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="activity" tick={{fontSize:9,fill:'var(--textM)'}} angle={-30} textAnchor="end" interval={0} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} label={{value:'Hours/week',angle:-90,position:'insideLeft',fontSize:9,fill:'var(--textM)'}} />
+          <Tooltip />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Bar dataKey="y2002" fill="#1CB0F6" name="2002" />
+          <Bar dataKey="y2007" fill="#FF9600" name="2007" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi8 — Global Digital Game Sales
+function GameSalesChart() {
+  const data = [
+    {year:'2000',handheld:11,console:8,online:1,mobile:0.5},
+    {year:'2001',handheld:12,console:8.5,online:1.5,mobile:0.8},
+    {year:'2002',handheld:12.5,console:9,online:2,mobile:1},
+    {year:'2003',handheld:13,console:9.5,online:2.5,mobile:1.5},
+    {year:'2004',handheld:14,console:9,online:3,mobile:2},
+    {year:'2005',handheld:16,console:9.5,online:4,mobile:3},
+    {year:'2006',handheld:15,console:9,online:5,mobile:4},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Global Digital Game Sales (2000–2006)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Billions of US dollars</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="year" tick={{fontSize:10,fill:'var(--textM)'}} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`$${v}b`} />
+          <Tooltip formatter={v=>`$${v}b`} />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Bar dataKey="handheld" fill="#1CB0F6" name="Handheld" stackId="a" />
+          <Bar dataKey="console"  fill="#58CC02" name="Console"  stackId="a" />
+          <Bar dataKey="online"   fill="#FF9600" name="Online"   stackId="a" />
+          <Bar dataKey="mobile"   fill="#CE82FF" name="Mobile"   stackId="a" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi9 — Meat Consumption
+function MeatChart() {
+  const data = [
+    {year:'1979',beef:250,chicken:150,lamb:150,fish:55},
+    {year:'1983',beef:230,chicken:165,lamb:130,fish:55},
+    {year:'1987',beef:210,chicken:185,lamb:110,fish:57},
+    {year:'1991',beef:185,chicken:210,lamb:90,fish:58},
+    {year:'1995',beef:155,chicken:230,lamb:70,fish:57},
+    {year:'1999',beef:130,chicken:245,lamb:60,fish:56},
+    {year:'2004',beef:100,chicken:250,lamb:50,fish:55},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Meat Consumption in a European Country (1979–2004)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Grams per person per week</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="year" tick={{fontSize:10,fill:'var(--textM)'}} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`${v}g`} />
+          <Tooltip formatter={v=>`${v}g`} />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Line type="monotone" dataKey="beef"    stroke="#FF4B4B" strokeWidth={2.5} dot={false} name="Beef" />
+          <Line type="monotone" dataKey="chicken" stroke="#FF9600" strokeWidth={2.5} dot={false} name="Chicken" />
+          <Line type="monotone" dataKey="lamb"    stroke="#58CC02" strokeWidth={2.5} dot={false} name="Lamb" />
+          <Line type="monotone" dataKey="fish"    stroke="#1CB0F6" strokeWidth={2.5} dot={false} name="Fish" strokeDasharray="5 3" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi10 — Underground Railway Systems
+function UndergroundTable() {
+  const rows = [
+    {city:'London',       opened:1863, km:394, stations:275, passengers:'775m'},
+    {city:'Paris',        opened:1900, km:199, stations:297, passengers:'1,191m'},
+    {city:'Tokyo',        opened:1927, km:155, stations:158, passengers:'1,927m'},
+    {city:'Washington DC',opened:1976, km:126, stations:86,  passengers:'144m'},
+    {city:'Kyoto',        opened:1981, km:11,  stations:11,  passengers:'45m'},
+    {city:'Los Angeles',  opened:2001, km:28,  stations:16,  passengers:'50m'},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:10,textAlign:'center'}}>Underground Railway Systems — 6 Cities</div>
+      <div style={{overflowX:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',fontSize:11}}>
+          <thead><tr style={{background:'var(--bg3)'}}>
+            {['City','Opened','Route (km)','Stations','Passengers/yr'].map(h=><th key={h} style={{padding:'7px 6px',textAlign:'left',fontWeight:800,color:'var(--text)',borderBottom:'2px solid var(--border)',whiteSpace:'nowrap'}}>{h}</th>)}
+          </tr></thead>
+          <tbody>{rows.map((r,i)=>(
+            <tr key={i} style={{background:i%2===0?'var(--bg2)':'var(--bg3)'}}>
+              <td style={{padding:'7px 6px',color:'var(--text)',fontWeight:700}}>{r.city}</td>
+              <td style={{padding:'7px 6px',color:'var(--textM)',fontWeight:600}}>{r.opened}</td>
+              <td style={{padding:'7px 6px',color:'var(--blue)',fontWeight:800}}>{r.km}</td>
+              <td style={{padding:'7px 6px',color:'var(--textM)',fontWeight:600}}>{r.stations}</td>
+              <td style={{padding:'7px 6px',color:'var(--green)',fontWeight:800}}>{r.passengers}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+// wi11 — Electricity Generation pie charts (using bars for simplicity)
+function ElectricityChart() {
+  const data = [
+    {source:'Nuclear',  germany:22, france:75},
+    {source:'Coal',     germany:29, france:2},
+    {source:'Gas',      germany:24, france:6},
+    {source:'Hydro',    germany:4,  france:13},
+    {source:'Other',    germany:21, france:4},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Electricity Generation — Germany vs France (2009)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>% of total electricity generated</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="source" tick={{fontSize:10,fill:'var(--textM)'}} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`${v}%`} domain={[0,80]} />
+          <Tooltip formatter={v=>`${v}%`} />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Bar dataKey="germany" fill="#1CB0F6" name="Germany" />
+          <Bar dataKey="france"  fill="#CE82FF" name="France"  />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi12 — Goods Transported UK
+function GoodsTransportChart() {
+  const data = [
+    {year:'1974',road:70,water:55,rail:40,pipeline:5},
+    {year:'1978',road:75,water:55,rail:38,pipeline:5},
+    {year:'1982',road:72,water:58,rail:35,pipeline:6},
+    {year:'1986',road:78,water:57,rail:35,pipeline:7},
+    {year:'1990',road:85,water:58,rail:37,pipeline:7},
+    {year:'1994',road:88,water:60,rail:36,pipeline:8},
+    {year:'1998',road:94,water:60,rail:38,pipeline:8},
+    {year:'2002',road:100,water:62,rail:40,pipeline:8},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Goods Transported in the UK (1974–2002)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Billion tonne-kilometres</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="year" tick={{fontSize:10,fill:'var(--textM)'}} interval={1} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} />
+          <Tooltip />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Line type="monotone" dataKey="road"     stroke="#FF9600" strokeWidth={2.5} dot={false} name="Road" />
+          <Line type="monotone" dataKey="water"    stroke="#1CB0F6" strokeWidth={2.5} dot={false} name="Water" />
+          <Line type="monotone" dataKey="rail"     stroke="#58CC02" strokeWidth={2.5} dot={false} name="Rail" />
+          <Line type="monotone" dataKey="pipeline" stroke="#CE82FF" strokeWidth={2.5} dot={false} name="Pipeline" strokeDasharray="5 3" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi13 — Turtle Populations India
+function TurtleChart() {
+  const data = [
+    {year:'1980',olive:180,leatherback:120,green:90},
+    {year:'1984',olive:165,leatherback:115,green:89},
+    {year:'1988',olive:145,leatherback:108,green:88},
+    {year:'1992',olive:120,leatherback:100,green:87},
+    {year:'1996',olive:100,leatherback:92,green:86},
+    {year:'2000',olive:80, leatherback:84,green:84},
+    {year:'2004',olive:65, leatherback:76,green:82},
+    {year:'2008',olive:58, leatherback:72,green:81},
+    {year:'2012',olive:58, leatherback:70,green:80},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Turtle Populations in India (1980–2012)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Population (thousands)</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <LineChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="year" tick={{fontSize:10,fill:'var(--textM)'}} interval={1} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`${v}k`} />
+          <Tooltip formatter={v=>`${v},000`} />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Line type="monotone" dataKey="olive"       stroke="#FF9600" strokeWidth={2.5} dot={false} name="Olive Ridley" />
+          <Line type="monotone" dataKey="leatherback" stroke="#FF4B4B" strokeWidth={2.5} dot={false} name="Leatherback" />
+          <Line type="monotone" dataKey="green"       stroke="#58CC02" strokeWidth={2.5} dot={false} name="Green" strokeDasharray="5 3" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
+// wi14 — Household Expenditure 1950 vs 2010
+function HouseholdChart() {
+  const data = [
+    {category:'Food',      y1950:44, y2010:23},
+    {category:'Housing',   y1950:25, y2010:31},
+    {category:'Transport', y1950:10, y2010:18},
+    {category:'Clothing',  y1950:12, y2010:9},
+    {category:'Other',     y1950:9,  y2010:19},
+  ]
+  return (
+    <div>
+      <div style={{fontSize:13,fontWeight:800,color:'var(--text)',marginBottom:2,textAlign:'center'}}>Average Household Expenditure (1950 vs 2010)</div>
+      <div style={{fontSize:11,color:'var(--textM)',textAlign:'center',marginBottom:8}}>Percentage of total household spending</div>
+      <ResponsiveContainer width="100%" height={200}>
+        <BarChart data={data} margin={{top:5,right:10,left:0,bottom:0}}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+          <XAxis dataKey="category" tick={{fontSize:10,fill:'var(--textM)'}} />
+          <YAxis tick={{fontSize:10,fill:'var(--textM)'}} tickFormatter={v=>`${v}%`} domain={[0,50]} />
+          <Tooltip formatter={v=>`${v}%`} />
+          <Legend wrapperStyle={{fontSize:10}} />
+          <Bar dataKey="y1950" fill="#1CB0F6" name="1950" />
+          <Bar dataKey="y2010" fill="#58CC02" name="2010" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
 // ─── Register all diagrams ─────────────────────────────────────────────────────
 const DIAGRAMS = {
   // Writing tasks
@@ -383,4 +632,12 @@ const DIAGRAMS = {
   'wi4': ConsumerExpenditureChart,
   'wi5': SpreadsChart,
   'wi6': IndianStudentsTable,
+  'wi7': TeenagersChart,
+  'wi8': GameSalesChart,
+  'wi9': MeatChart,
+  'wi10': UndergroundTable,
+  'wi11': ElectricityChart,
+  'wi12': GoodsTransportChart,
+  'wi13': TurtleChart,
+  'wi14': HouseholdChart,
 }
