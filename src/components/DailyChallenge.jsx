@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { CheckCircle, XCircle, Zap, Trophy, RefreshCw } from 'lucide-react'
+import { CheckCircle, XCircle, Zap, Trophy, Star } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
 import Confetti from './Confetti'
@@ -98,35 +98,34 @@ export default function DailyChallenge({ userId, addResult }) {
     return (
       <>
         <Confetti active={showConfetti} onDone={() => setShowConfetti(false)} />
-        <div style={{ background:'linear-gradient(135deg,#FF9600 0%,#FFB340 100%)', border:'none', borderBottom:'4px solid #CC7700', borderRadius:18, padding:'16px 18px', marginBottom:16, cursor: completed ? 'default' : 'pointer' }}
-          onClick={() => !completed && setStarted(true)}>
+        <div onClick={() => !completed && setStarted(true)}
+          style={{ background: completed ? 'var(--bg2)' : 'var(--amber)', border: completed ? '1.5px solid var(--amberBdr)' : 'none', borderBottom: completed ? '1.5px solid var(--amberBdr)' : '3px solid #CC7700', borderRadius:16, padding:'16px 18px', marginBottom:16, cursor: completed ? 'default' : 'pointer', boxShadow:'var(--shadow)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <div>
-              <div style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,0.8)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:3 }}>
-                ⚡ Daily Challenge — {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontSize:10, fontWeight:700, color: completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)', textTransform:'uppercase', letterSpacing:'1px', marginBottom:3, display:'flex', alignItems:'center', gap:5 }}>
+                <Zap size={10} color={completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)'} fill={completed ? 'var(--amber)' : 'rgba(255,255,255,0.85)'} />
+                Daily Challenge — {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
               </div>
-              <div style={{ fontSize:17, fontWeight:900, color:'#fff' }}>
-                {completed ? `✅ Completed! ${saved?.score}/${saved?.total} correct` : '5 questions · ~5 minutes'}
+              <div style={{ fontSize:16, fontWeight:900, color: completed ? 'var(--text)' : '#fff' }}>
+                {completed ? `${saved?.score}/${saved?.total} correct — well done!` : '5 questions · approx. 5 minutes'}
               </div>
-              {!completed && <div style={{ fontSize:12, color:'rgba(255,255,255,0.85)', fontWeight:600, marginTop:3 }}>Refreshes at midnight · Same for all students today</div>}
+              {!completed && <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:600, marginTop:3 }}>Resets at midnight — same for all students today</div>}
+              {completed && (
+                <div style={{ marginTop:8 }}>
+                  <div style={{ height:5, background:'var(--bg3)', borderRadius:99, overflow:'hidden' }}>
+                    <div style={{ height:'100%', width:`${(saved.score/saved.total)*100}%`, background:'var(--amber)', borderRadius:99 }} />
+                  </div>
+                  <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700, marginTop:5 }}>New challenge available tomorrow</div>
+                </div>
+              )}
             </div>
             {!completed && (
-              <div style={{ width:44, height:44, borderRadius:'50%', background:'rgba(255,255,255,0.25)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                <Zap size={22} color="#fff" fill="#fff" />
+              <div style={{ width:42, height:42, borderRadius:'50%', background:'rgba(255,255,255,0.2)', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, marginLeft:12 }}>
+                <Zap size={20} color="#fff" fill="#fff" />
               </div>
             )}
-            {completed && saved?.score >= 3 && <Trophy size={28} color="#fff" />}
+            {completed && <CheckCircle size={24} color="var(--amber)" style={{flexShrink:0, marginLeft:12}} />}
           </div>
-          {completed && (
-            <div style={{ marginTop:10 }}>
-              <div style={{ height:6, background:'rgba(255,255,255,0.3)', borderRadius:99, overflow:'hidden' }}>
-                <div style={{ height:'100%', width:`${(saved.score/saved.total)*100}%`, background:'#fff', borderRadius:99 }} />
-              </div>
-              <div style={{ fontSize:11, color:'rgba(255,255,255,0.85)', fontWeight:700, marginTop:5 }}>
-                Come back tomorrow for a new challenge!
-              </div>
-            </div>
-          )}
         </div>
       </>
     )
@@ -140,9 +139,9 @@ export default function DailyChallenge({ userId, addResult }) {
         <Confetti active={showConfetti} onDone={() => setShowConfetti(false)} />
         <div style={{ background:'var(--bg2)', border:'2px solid var(--border)', borderBottom:'4px solid var(--borderB)', borderRadius:18, padding:20, marginBottom:16 }}>
           <div style={{ textAlign:'center', marginBottom:20 }}>
-            <div style={{ fontSize:36, marginBottom:8 }}>{score===5?'🏆':score>=3?'⭐':'📚'}</div>
+            <div style={{ fontSize:36, marginBottom:8 }}></div>
             <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', marginBottom:4 }}>
-              {score===5?'Perfect!':score>=3?'Well done!':'Keep practising!'}
+              {score===5?'Perfect score!':score>=3?'Great work!':'Keep going!'}
             </div>
             <div style={{ fontSize:15, color:'var(--textM)', fontWeight:700 }}>{score}/{questions.length} correct · {pct}%</div>
           </div>
@@ -234,7 +233,7 @@ export default function DailyChallenge({ userId, addResult }) {
       {chosen !== null && (
         <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
           <div style={{ padding:'10px 14px', background:chosen===current.answer?'var(--greenBg)':'var(--coralBg)', border:`2px solid ${chosen===current.answer?'var(--green)':'var(--coral)'}`, borderRadius:10, fontSize:13, fontWeight:700, color:'var(--text)' }}>
-            {chosen===current.answer ? '✅ Correct!' : `❌ The correct answer is: ${current.opts[current.answer]}`}
+            {chosen===current.answer ? 'Correct!' : `Correct answer: ${current.opts[current.answer]}`}
           </div>
           <button onClick={next} style={{ padding:'12px', borderRadius:12, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:14, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.5px' }}>
             {isLast ? 'See Results →' : 'Next Question →'}
