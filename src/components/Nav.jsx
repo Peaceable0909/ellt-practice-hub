@@ -31,12 +31,12 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
 
   return (
     <>
-      <nav style={{ background: 'var(--bg2)', borderBottom: '2px solid var(--border)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <nav style={{ background: 'var(--bg2)', borderBottom: '1.5px solid var(--border)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: 62, gap: 8 }}>
 
           {/* Logo */}
           <div onClick={() => setPage('Plan')} style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 16, cursor: 'pointer', flexShrink: 0 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#fff', border: '3px solid var(--greenD)' }}>E</div>
+            <div style={{ width: 36, height: 36, borderRadius: 11, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#fff', border: '3px solid var(--greenD)' }}>E</div>
             <span style={{ fontWeight: 900, fontSize: 16, color: 'var(--text)', letterSpacing: '-0.3px' }} className="hide-mobile">ELLTPulse</span>
           </div>
 
@@ -47,9 +47,9 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
                 padding: '7px 12px', borderRadius: 10, border: 'none',
                 background: page === key ? 'var(--greenBg)' : 'transparent',
                 color: page === key ? 'var(--green)' : 'var(--textM)',
-                fontWeight: page === key ? 800 : 600, fontSize: 12,
+                fontWeight: page === key ? 800 : 700, fontSize: 13,
                 cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
-                borderBottom: page === key ? '2px solid var(--greenD)' : '2px solid transparent',
+                borderBottom: '2px solid transparent',
                 display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
               }}>
                 <Icon size={14} />
@@ -63,7 +63,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
           <div style={{ flex: 1 }} className="show-mobile-only" />
 
           {/* Stats */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }} onClick={() => setPage('Progress')}>
               <Flame size={18} color="var(--streak)" fill="var(--streak)" />
               <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--streak)' }}>{streak}</span>
@@ -94,7 +94,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
                     { icon: User,          label: 'My Profile',  action: () => { setPage('Progress'); setDropdownOpen(false) } },
                     { icon: Calendar,      label: 'Edit My Plan',action: () => { setPage('Plan'); setDropdownOpen(false) } },
                   ].map(({ icon: Icon, label, action }) => (
-                    <button key={label} onClick={action} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', transition: 'background .15s' }}
+                    <button key={label} onClick={action} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', transition: 'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <Icon size={15} color="var(--textM)" />{label}
@@ -105,10 +105,10 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
                       style={{ width:'100%', padding:'12px 16px', border:'none', background:'transparent', display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontFamily:'Nunito, sans-serif', fontSize:14, fontWeight:700, color:'var(--purple)', borderBottom:'1px solid var(--border)', textAlign:'left', transition:'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background='var(--bg3)'}
                       onMouseLeave={e => e.currentTarget.style.background='transparent'}>
-                      🛡️ Admin Panel
+                      <ShieldCheck size={15} color="var(--purple)" style={{marginRight:6}}/> Admin Panel
                     </button>
                   )}
-                  <button onClick={() => { setDropdownOpen(false); signOut() }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 800, color: 'var(--coral)', textAlign: 'left', transition: 'background .15s' }}
+                  <button onClick={() => { setDropdownOpen(false); signOut() }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 800, color: 'var(--coral)', textAlign: 'left', transition: 'background .15s' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--coralBg)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <LogOut size={15} />Log Out
@@ -132,7 +132,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
           return (
             <button key={key} onClick={() => setPage(key)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', color: active ? 'var(--green)' : 'var(--textD)', borderTop: active ? '3px solid var(--green)' : '3px solid transparent', transition: 'all .15s' }}>
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize: 9, fontWeight: active ? 900 : 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>{label}</span>
+              <span style={{ fontSize: 10, fontWeight: active ? 900 : 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>{label}</span>
             </button>
           )
         })}
