@@ -120,21 +120,22 @@ export default function Plan({ userId, userEmail, results, addResult }) {
 
   const isDone = (day, which) => !!completed[`day_${day}_${which}`]
 
-  // BUG-02 fix: real streak calculation
+  // Streak = consecutive days with at least one session done (ending today or yesterday)
   function calcStreak() {
     let streak = 0
-    const today = new Date(); today.setHours(0,0,0,0)
-    const start = new Date(schedule.start_date); start.setHours(0,0,0,0)
-    for (let d = dayNum; d >= 1; d--) {
-      const dayDate = new Date(start.getTime() + (d-1)*86400000)
-      dayDate.setHours(0,0,0,0)
-      if (dayDate > today) continue
+    // Check from today backwards — if today has nothing done, start from yesterday
+    const todayDone = completed[`day_${dayNum}_morning`] || completed[`day_${dayNum}_evening`]
+    const startDay = todayDone ? dayNum : dayNum - 1
+    for (let d = startDay; d >= 1; d--) {
       const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`]
-      if (hasDone) { streak++ } else if (d < dayNum) { break } // gap resets
+      if (hasDone) streak++
+      else break // any gap resets streak
     }
     return streak
   }
   const streak = calcStreak()
+  const todayFullyDone = isDone(dayNum, 'morning') && isDone(dayNum, 'evening')
+  const todayPartDone  = isDone(dayNum, 'morning') || isDone(dayNum, 'evening')
 
   return (
     <div className="app-container anim-fadeUp">
@@ -166,8 +167,16 @@ export default function Plan({ userId, userEmail, results, addResult }) {
             <div style={{ height:'100%', width:`${pct}%`, background:'#fff', borderRadius:99, transition:'width .4s' }}/>
           </div>
 
-          <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:700 }}>
-            {cfg?.label} Plan · {schedule.morning_time?.slice(0,5)} & {schedule.evening_time?.slice(0,5)} daily
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
+            <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:700 }}>
+              {cfg?.label} Plan · {schedule.morning_time?.slice(0,5)} & {schedule.evening_time?.slice(0,5)}
+            </div>
+            {streak > 0 && (
+              <div style={{ display:'flex', alignItems:'center', gap:5, background:'rgba(255,255,255,0.2)', borderRadius:99, padding:'4px 10px' }}>
+                <Flame size={13} color="#FFD700" fill="#FFD700" />
+                <span style={{ fontSize:12, fontWeight:900, color:'#fff' }}>{streak} day streak</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -181,8 +190,8 @@ export default function Plan({ userId, userEmail, results, addResult }) {
 
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {[
-              { which:'morning', session:todayPlan.morning, time:schedule.morning_time?.slice(0,5), label:'Morning', timeIcon:'☀️' },
-              { which:'evening', session:todayPlan.evening, time:schedule.evening_time?.slice(0,5), label:'Evening', timeIcon:'🌙' },
+              { which:'morning', session:todayPlan.morning, time:schedule.morning_time?.slice(0,5), label:'Morning', timeIcon:'morning' },
+              { which:'evening', session:todayPlan.evening, time:schedule.evening_time?.slice(0,5), label:'Evening', timeIcon:'evening' },
             ].map(({ which, session, time, label, timeIcon }) => {
               const done = isDone(todayPlan.day, which)
               const color = SKILL_COLORS_MAP[session.type] || 'var(--green)'
@@ -203,7 +212,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
                     {/* Info */}
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
-                        <span style={{ fontSize:10, fontWeight:900, color:'var(--textD)', textTransform:'uppercase', letterSpacing:'0.5px' }}>{timeIcon} {label} · {time}</span>
+                        <span style={{ fontSize:10, fontWeight:900, color:'var(--textD)', textTransform:'uppercase', letterSpacing:'0.5px' }}>{label} · {time}</span>
                         {done && <span style={{ fontSize:10, fontWeight:900, color:'var(--green)', textTransform:'uppercase', background:'var(--greenBg)', padding:'2px 7px', borderRadius:99 }}>Done</span>}
                       </div>
                       <div style={{ fontSize:15, fontWeight:900, color: done ? 'var(--textM)' : 'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
