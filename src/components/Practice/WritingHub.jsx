@@ -5,7 +5,17 @@ import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 import { Camera, Upload, X, Image, PenLine, ChevronLeft, Eye, EyeOff, FileText } from 'lucide-react'
 import DiagramRenderer from './DiagramRenderer'
 
-const ALL_WRITING = [...WRITING, ...WRITING_IELTS, ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[])]
+// Task 2 essays
+const ALL_TASK2 = [...WRITING, ...WRITING_IELTS]
+// Task 1 charts — all of them
+const ALL_TASK1 = [
+  ...(WRITING_TASK1||[]),
+  ...(WRITING_IELTS_2||[]),
+  ...(WRITING_OFFICIAL_2023||[]),
+  ...(WRITING_IELTS_3||[]),
+  ...(WRITING_IELTS_4||[]),
+]
+const ALL_WRITING = [...ALL_TASK2, ...ALL_TASK1]
 
 // Convert file to base64
 function fileToBase64(file) {
@@ -441,7 +451,7 @@ ${essay}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
-        {(tab === 'task2' ? ALL_WRITING : (WRITING_TASK1||[])).map(w => {
+        {(tab === 'task2' ? ALL_TASK2 : ALL_TASK1).map(w => {
           const prev = results.find(r => r.test_id === w.id)
           return (
             <div key={w.id} onClick={() => setSelected(w)} className="skill-card" style={{ cursor: 'pointer' }}>
