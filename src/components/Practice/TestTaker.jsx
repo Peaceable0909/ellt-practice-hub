@@ -230,7 +230,7 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
           <button onClick={onBack} style={{ padding:'10px 16px', borderRadius:12, border:'2px solid var(--border)', borderBottom:'4px solid var(--borderB)', background:'var(--bg2)', color:'var(--textM)', fontWeight:800, fontSize:13, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>Cancel</button>
           <button onClick={submit} disabled={saving} className="btn-ripple"
             style={{ padding:'12px 24px', borderRadius:12, border:'none', borderBottom:`4px solid ${saving?'var(--border)':'var(--greenD)'}`, background:saving?'var(--bg3)':'var(--green)', color:saving?'var(--textD)':'#fff', fontWeight:900, fontSize:14, cursor:saving?'not-allowed':'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.5px', transition:'all .15s', flexShrink:0 }}>
-            {saving ? 'Saving...' : answered < total ? `Submit (${total - answered} unanswered)` : 'Submit Answers'}
+            {saving ? 'Saving...' : answered < total ? `Submit (${total - answered} left)` : 'Submit Answers'}
           </button>
         </div>
       ) : (
