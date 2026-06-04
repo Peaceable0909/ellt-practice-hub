@@ -281,7 +281,7 @@ export default function SpeakingHub({ results, addResult, userId }) {
       const bandMatch = fb.match(/BAND:\s*([A-Z0-9+]+)/)
       const band = bandMatch?.[1] || 'B2'
       const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
-      const row = { skill:'speaking', test_id:selected.id, test_title:selected.title, band_score:bandScore }
+      const row = { skill:'speaking', test_id:selected.id, test_title:selected.title, band_score:bandScore, feedback:fb }
       await saveResult(row)
       addResult(row)
     } catch (e) {
