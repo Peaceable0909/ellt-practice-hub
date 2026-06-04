@@ -3,7 +3,7 @@ import { ChevronLeft, CheckCircle, BookOpen, Headphones, PenLine, Mic, Brain, St
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
-import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2, WRITING_OFFICIAL_2023 } from '../data/writing'
+import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2, WRITING_OFFICIAL_2023, WRITING_IELTS_3, WRITING_IELTS_4 } from '../data/writing'
 import { SPEAKING, SPEAKING_IELTS } from '../data/speaking'
 import TestTaker from './Practice/TestTaker'
 import WritingHub from './Practice/WritingHub'
@@ -220,6 +220,39 @@ function TaskRenderer({ task, taskIdx, results, addResult, trackResult, userId, 
 }
 
 
+// ─── All tests pool for grade review ─────────────────────────────────────────
+const ALL_L = [...LISTENING, ...(LISTENING_IELTS||[]), ...(LISTENING_CAM17_T1||[]),
+  ...(LISTENING_CAM17_T2||[]), ...(LISTENING_CAM17_T3||[]), ...(LISTENING_CAM17_T4||[]),
+  ...(LISTENING_CAM17_EXTRA||[])]
+const ALL_R = [...(READING||[]), ...(READING_IELTS||[])]
+const ALL_W = [...(WRITING||[]), ...(WRITING_TASK1||[]), ...(WRITING_IELTS||[]),
+  ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[]), ...(WRITING_IELTS_3||[]), ...(WRITING_IELTS_4||[])]
+const ALL_S = [...(SPEAKING||[]), ...(SPEAKING_IELTS||[])]
+const ALL_TESTS = [...ALL_L, ...ALL_R, ...ALL_W, ...ALL_S]
+
+function resolveTestForGrade(skill, testId) {
+  return ALL_TESTS.find(t => t.id === testId) || null
+}
+
+function getWrongAnswers(result) {
+  const test = resolveTestForGrade(result.skill, result.test_id)
+  if (!test || !test.qs || !result.answers) return []
+  let answers = {}
+  try { answers = typeof result.answers === 'string' ? JSON.parse(result.answers) : result.answers } catch { return [] }
+  const wrong = []
+  test.qs.forEach((q, i) => {
+    if (!q.opts) return // skip fill-in for now
+    const given = answers[i]
+    const correct = q.a
+    if (Array.isArray(correct)) {
+      if (!correct.includes(given)) wrong.push({ q: q.q, given, correct, opts: q.opts })
+    } else {
+      if (given !== correct) wrong.push({ q: q.q, given, correct, opts: q.opts })
+    }
+  })
+  return wrong
+}
+
 // ─── Session Grade Screen ─────────────────────────────────────────────────────
 function SessionGrade({ session, results, tasks, onContinue }) {
   const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
@@ -321,6 +354,55 @@ function SessionGrade({ session, results, tasks, onContinue }) {
             <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Avg Score</div>
           </div>
         </div>
+
+        {/* Questions to work on */}
+        {(() => {
+          const allWrong = results.flatMap(r => {
+            const wrong = getWrongAnswers(r)
+            const col = SKILL_COLOR[r.skill] || 'var(--textM)'
+            return wrong.map(w => ({ ...w, skill: r.skill, testTitle: r.test_title, col }))
+          })
+          if (!allWrong.length) return (
+            <div style={{ background:'var(--greenBg)', border:'1.5px solid var(--green)', borderRadius:14, padding:'14px 16px', marginBottom:20, textAlign:'center' }}>
+              <div style={{ fontSize:14, fontWeight:800, color:'var(--green)' }}>No mistakes — clean session!</div>
+              <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:3 }}>Every question answered correctly.</div>
+            </div>
+          )
+          return (
+            <div style={{ marginBottom:20 }}>
+              <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>Questions to Review ({allWrong.length})</div>
+              <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+                {allWrong.slice(0, 8).map((w, i) => (
+                  <div key={i} style={{ background:'var(--bg2)', border:'1.5px solid var(--coralBdr)', borderRadius:12, padding:'12px 14px', boxShadow:'var(--shadow)' }}>
+                    <div style={{ fontSize:11, fontWeight:700, color:w.col, textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:5 }}>{w.skill} — {w.testTitle}</div>
+                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:8, lineHeight:1.5 }}>{w.q.replace(/^Q\d+\.\s*/, '')}</div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                      {w.given !== undefined && w.given !== null && w.opts?.[w.given] !== undefined && (
+                        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'var(--coralBg)', borderRadius:8 }}>
+                          <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--coral)', flexShrink:0 }} />
+                          <span style={{ fontSize:12, color:'var(--coral)', fontWeight:700 }}>Your answer: </span>
+                          <span style={{ fontSize:12, color:'var(--text)', fontWeight:600 }}>{w.opts[w.given]}</span>
+                        </div>
+                      )}
+                      {w.opts?.[w.correct] !== undefined && (
+                        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'var(--greenBg)', borderRadius:8 }}>
+                          <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--green)', flexShrink:0 }} />
+                          <span style={{ fontSize:12, color:'var(--green)', fontWeight:700 }}>Correct: </span>
+                          <span style={{ fontSize:12, color:'var(--text)', fontWeight:600 }}>{Array.isArray(w.correct) ? w.correct.map(c => w.opts[c]).join(' or ') : w.opts[w.correct]}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {allWrong.length > 8 && (
+                  <div style={{ textAlign:'center', fontSize:12, color:'var(--textM)', fontWeight:700, padding:'8px' }}>
+                    +{allWrong.length - 8} more — check Progress for full history
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Continue button */}
         <button onClick={onContinue} style={{ width:'100%', padding:'15px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
