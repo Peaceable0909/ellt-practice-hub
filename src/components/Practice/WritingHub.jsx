@@ -115,7 +115,7 @@ EXAMINER NOTE: [One practical exam strategy tip — 2 sentences max]`
                       : bandRaw.includes('B2') ? 6
                       : bandRaw.includes('B1') ? 5
                       : 6 // safe fallback
-      const row = { skill:'writing', test_id:testId, test_title:taskTitle, band_score:bandScore }
+      const row = { skill:'writing', test_id:testId, test_title:taskTitle, band_score:bandScore, feedback:text }
       await saveResult(row)
       addResult(row)
       setSaved(true)
@@ -303,7 +303,7 @@ ${essay}
       const bandMatch = text.match(/BAND:\s*([A-Z0-9+]+)/)
       const band = bandMatch?.[1] || 'B2'
       const bandScore = band==='C2'?9:band==='C1'?7.5:band==='B2'?6:5
-      const row = { skill:'writing', test_id:selected.id, test_title:selected.title, band_score:bandScore, essay_text:essay }
+      const row = { skill:'writing', test_id:selected.id, test_title:selected.title, band_score:bandScore, essay_text:essay, feedback:text }
       await saveResult(row)
       addResult(row)
     } catch (e) { setFeedback('Error connecting to AI. Please try again.') }
