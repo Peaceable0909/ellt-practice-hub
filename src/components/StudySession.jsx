@@ -34,15 +34,10 @@ export default function StudySession({ session, results, addResult, userId, onCo
   const tasks = session.tasks || [{ skill: session.type, testId: session.testId, label: session.label }]
   const [taskIdx, setTaskIdx] = useState(0)
   const [tasksDone, setTasksDone] = useState([])
-  const [sessionDone, setSessionDone]     = useState(false)
-  const [sessionResults, setSessionResults] = useState([])
-  const [showGrade, setShowGrade]           = useState(false)
+  const [sessionDone, setSessionDone] = useState(false)
+  const [showGrade, setShowGrade]     = useState(false)
 
   const currentTask = tasks[taskIdx]
-  function trackResult(r) {
-    if (r) { setSessionResults(prev => [...prev, r]); addResult(r) }
-  }
-
   const allDone = tasksDone.length >= tasks.length
 
 
@@ -64,7 +59,7 @@ export default function StudySession({ session, results, addResult, userId, onCo
   }
 
   if (sessionDone && showGrade) {
-    return <SessionGrade session={session} results={sessionResults} tasks={tasks} onContinue={onComplete} />
+    return <SessionGrade session={session} allResults={results} tasks={tasks} onContinue={onComplete} />
   }
 
   return (
@@ -119,15 +114,14 @@ export default function StudySession({ session, results, addResult, userId, onCo
           userId={userId}
           onTaskComplete={completeTask}
           onBack={onBack}
-          trackResult={trackResult}
+
         />
       </div>
     </div>
   )
 }
 
-function TaskRenderer({ task, taskIdx, results, addResult, trackResult, userId, onTaskComplete, onBack }) {
-  trackResult = trackResult || addResult  // fallback
+function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplete, onBack }) {
   const { skill, testId, label, desc } = task
   const test = resolveTest(skill, testId)
   const [taskCompleted, setTaskCompleted] = useState(false)
@@ -254,12 +248,32 @@ function getWrongAnswers(result) {
 }
 
 // ─── Session Grade Screen ─────────────────────────────────────────────────────
-function SessionGrade({ session, results, tasks, onContinue }) {
+function SessionGrade({ session, allResults, tasks, onContinue }) {
+  // Find results from this session: match by task test IDs or today's results for matching skills
+  const taskTestIds = tasks.map(t => t.testId).filter(Boolean)
+  const taskSkills  = [...new Set(tasks.map(t => t.skill))]
+  const todayLocal  = new Date().toLocaleDateString('en-CA')
+
+  // Get today's results that match either the test IDs or the skills from this session
+  const results = (allResults || []).filter(r => {
+    const isToday = !r.completed_at || new Date(r.completed_at).toLocaleDateString('en-CA') === todayLocal
+    const matchesId = taskTestIds.includes(r.test_id)
+    const matchesSkill = taskSkills.includes(r.skill)
+    return isToday && (matchesId || matchesSkill)
+  })
+  // Dedupe by test_id — keep latest
+  const seen = new Set()
+  const dedupedResults = results.filter(r => {
+    if (seen.has(r.test_id)) return false
+    seen.add(r.test_id)
+    return true
+  })
+
   const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
   const SKILL_ICON  = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
 
   // Grade each result
-  const graded = results.map(r => {
+  const graded = dedupedResults.map(r => {
     let score, label, color
     if (r.band_score > 0) {
       score = r.band_score
@@ -357,15 +371,18 @@ function SessionGrade({ session, results, tasks, onContinue }) {
 
         {/* Questions to work on */}
         {(() => {
-          const allWrong = results.flatMap(r => {
+          const allWrong = dedupedResults.flatMap(r => {
             const wrong = getWrongAnswers(r)
             const col = SKILL_COLOR[r.skill] || 'var(--textM)'
             return wrong.map(w => ({ ...w, skill: r.skill, testTitle: r.test_title, col }))
           })
-          if (!allWrong.length) return (
+          // Also collect writing/speaking feedback
+          const feedbackResults = dedupedResults.filter(r => (r.skill === 'writing' || r.skill === 'speaking') && r.feedback)
+
+          if (!allWrong.length && !feedbackResults.length) return (
             <div style={{ background:'var(--greenBg)', border:'1.5px solid var(--green)', borderRadius:14, padding:'14px 16px', marginBottom:20, textAlign:'center' }}>
               <div style={{ fontSize:14, fontWeight:800, color:'var(--green)' }}>No mistakes — clean session!</div>
-              <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:3 }}>Every question answered correctly.</div>
+              <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:3 }}>All answers correct.</div>
             </div>
           )
           return (
@@ -399,6 +416,25 @@ function SessionGrade({ session, results, tasks, onContinue }) {
                     +{allWrong.length - 8} more — check Progress for full history
                   </div>
                 )}
+                {/* Writing/Speaking AI feedback */}
+                {feedbackResults.map((r, i) => {
+                  const col = SKILL_COLOR[r.skill] || 'var(--purple)'
+                  // Extract key points from feedback
+                  const fb = r.feedback || ''
+                  const lines = fb.split('\n').filter(l => l.trim().length > 10).slice(0, 5)
+                  return (
+                    <div key={`fb-${i}`} style={{ background:'var(--bg2)', border:`1.5px solid color-mix(in srgb, ${col} 40%, var(--border))`, borderRadius:12, padding:'14px', marginTop: allWrong.length ? 0 : 0, boxShadow:'var(--shadow)' }}>
+                      <div style={{ fontSize:11, fontWeight:700, color:col, textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:6 }}>{r.skill} Feedback — {r.test_title || r.test_id}</div>
+                      <div style={{ fontSize:12, color:'var(--text)', lineHeight:1.7, fontWeight:600 }}>
+                        {lines.length > 0 ? lines.map((l, li) => (
+                          <div key={li} style={{ marginBottom:4, paddingLeft:10, borderLeft:`2px solid color-mix(in srgb, ${col} 30%, var(--border))` }}>{l.trim()}</div>
+                        )) : (
+                          <div>{fb.slice(0, 300)}{fb.length > 300 ? '...' : ''}</div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           )
