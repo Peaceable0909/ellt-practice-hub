@@ -34,9 +34,15 @@ export default function StudySession({ session, results, addResult, userId, onCo
   const tasks = session.tasks || [{ skill: session.type, testId: session.testId, label: session.label }]
   const [taskIdx, setTaskIdx] = useState(0)
   const [tasksDone, setTasksDone] = useState([])
-  const [sessionDone, setSessionDone] = useState(false)
+  const [sessionDone, setSessionDone]     = useState(false)
+  const [sessionResults, setSessionResults] = useState([])
+  const [showGrade, setShowGrade]           = useState(false)
 
   const currentTask = tasks[taskIdx]
+  function trackResult(r) {
+    if (r) { setSessionResults(prev => [...prev, r]); addResult(r) }
+  }
+
   const allDone = tasksDone.length >= tasks.length
 
 
@@ -44,7 +50,7 @@ export default function StudySession({ session, results, addResult, userId, onCo
 
   function finishSession() {
     setSessionDone(true)
-    setTimeout(() => onComplete(), 1800)
+    setShowGrade(true)
   }
 
   function completeTask() {
@@ -57,16 +63,8 @@ export default function StudySession({ session, results, addResult, userId, onCo
     }
   }
 
-  if (sessionDone) {
-    return (
-      <div style={{ minHeight:'100vh', background:'var(--bg)', display:'flex', alignItems:'center', justifyContent:'center', flexDirection:'column', gap:16, padding:20 }}>
-        <div className="anim-bounceIn" style={{ width:80, height:80, borderRadius:'50%', background:'var(--greenBg)', border:'4px solid var(--green)', display:'flex', alignItems:'center', justifyContent:'center' }}>
-          <CheckCircle size={40} color="var(--green)" />
-        </div>
-        <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', textAlign:'center' }}>Session Complete</div>
-        <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginTop:4 }}>All tasks finished — great work</div>
-      </div>
-    )
+  if (sessionDone && showGrade) {
+    return <SessionGrade session={session} results={sessionResults} tasks={tasks} onContinue={onComplete} />
   }
 
   return (
@@ -121,13 +119,15 @@ export default function StudySession({ session, results, addResult, userId, onCo
           userId={userId}
           onTaskComplete={completeTask}
           onBack={onBack}
+          trackResult={trackResult}
         />
       </div>
     </div>
   )
 }
 
-function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplete, onBack }) {
+function TaskRenderer({ task, taskIdx, results, addResult, trackResult, userId, onTaskComplete, onBack }) {
+  trackResult = trackResult || addResult  // fallback
   const { skill, testId, label, desc } = task
   const test = resolveTest(skill, testId)
   const [taskCompleted, setTaskCompleted] = useState(false)
@@ -215,6 +215,118 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
       <button onClick={onTaskComplete} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:15, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
         Task Complete ✓
       </button>
+    </div>
+  )
+}
+
+
+// ─── Session Grade Screen ─────────────────────────────────────────────────────
+function SessionGrade({ session, results, tasks, onContinue }) {
+  const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
+  const SKILL_ICON  = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
+
+  // Grade each result
+  const graded = results.map(r => {
+    let score, label, color
+    if (r.band_score > 0) {
+      score = r.band_score
+      label = `Band ${r.band_score}`
+      color = r.band_score >= 7 ? 'var(--green)' : r.band_score >= 5.5 ? 'var(--amber)' : 'var(--coral)'
+    } else if (r.total > 0) {
+      const pct = Math.round((r.score / r.total) * 100)
+      score = pct
+      label = `${r.score}/${r.total} — ${pct}%`
+      color = pct >= 70 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--coral)'
+    } else {
+      label = 'Done'; color = 'var(--green)'; score = 100
+    }
+    return { ...r, label, color, score }
+  })
+
+  // Overall grade
+  const scores = graded.filter(r => r.score > 0)
+  const avgPct = scores.length
+    ? Math.round(scores.reduce((s, r) => s + (r.band_score > 0 ? (r.band_score / 9) * 100 : r.score), 0) / scores.length)
+    : 0
+
+  const grade = avgPct >= 85 ? { letter:'A', label:'Excellent', color:'var(--green)' }
+              : avgPct >= 70 ? { letter:'B', label:'Good work', color:'var(--blue)' }
+              : avgPct >= 55 ? { letter:'C', label:'Keep going', color:'var(--amber)' }
+              :                { letter:'D', label:'Needs practice', color:'var(--coral)' }
+
+  const messages = {
+    A: ["Outstanding session — you're right on track!", "Excellent work today. Keep this momentum going."],
+    B: ["Solid session — you're making real progress.", "Good consistent work. Every session builds your skills."],
+    C: ["You showed up and that's what counts. Review any weak areas tonight.", "Stay consistent — improvement takes time. You're doing it."],
+    D: ["Don't be discouraged — difficult questions mean you're pushing yourself.", "Review the answers carefully and try again tomorrow. You'll improve."],
+  }
+  const msg = messages[grade.letter][Math.floor(Math.random() * 2)]
+
+  return (
+    <div style={{ minHeight:'100vh', background:'var(--bg)', padding:'0 0 100px' }}>
+      {/* Header */}
+      <div style={{ background:'var(--bg2)', borderBottom:'1.5px solid var(--border)', padding:'0 16px', height:56, display:'flex', alignItems:'center' }}>
+        <div style={{ fontSize:15, fontWeight:900, color:'var(--text)' }}>Session Complete</div>
+      </div>
+
+      <div className="app-container anim-fadeUp">
+        {/* Grade hero */}
+        <div style={{ textAlign:'center', padding:'32px 0 24px' }}>
+          <div style={{ width:90, height:90, borderRadius:'50%', background:`color-mix(in srgb, ${grade.color} 15%, var(--bg2))`, border:`3px solid ${grade.color}`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', boxShadow:`0 0 0 8px color-mix(in srgb, ${grade.color} 8%, transparent)` }}>
+            <span style={{ fontSize:38, fontWeight:900, color:grade.color }}>{grade.letter}</span>
+          </div>
+          <div style={{ fontSize:24, fontWeight:900, color:'var(--text)', marginBottom:4 }}>{grade.label}</div>
+          <div style={{ fontSize:14, color:'var(--textM)', fontWeight:600, maxWidth:280, margin:'0 auto', lineHeight:1.6 }}>{msg}</div>
+        </div>
+
+        {/* Task results */}
+        {graded.length > 0 && (
+          <div style={{ marginBottom:20 }}>
+            <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>Your Results</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+              {graded.map((r, i) => {
+                const Icon = SKILL_ICON[r.skill] || BookOpen
+                const col  = SKILL_COLOR[r.skill] || 'var(--textM)'
+                return (
+                  <div key={i} style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:'14px 16px', display:'flex', alignItems:'center', gap:14, boxShadow:'var(--shadow)' }}>
+                    <div style={{ width:42, height:42, borderRadius:12, background:`color-mix(in srgb, ${col} 12%, var(--bg3))`, border:`1.5px solid color-mix(in srgb, ${col} 30%, var(--border))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                      <Icon size={18} color={col} />
+                    </div>
+                    <div style={{ flex:1, minWidth:0 }}>
+                      <div style={{ fontSize:13, fontWeight:800, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.test_title || r.test_id}</div>
+                      <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, marginTop:2, textTransform:'capitalize' }}>{r.skill}</div>
+                    </div>
+                    <div style={{ textAlign:'right', flexShrink:0 }}>
+                      <div style={{ fontSize:16, fontWeight:900, color:r.color }}>{r.label}</div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Day summary */}
+        <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:'14px 16px', marginBottom:24, display:'flex', justifyContent:'space-between', boxShadow:'var(--shadow)' }}>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:20, fontWeight:900, color:'var(--text)' }}>Day {session.dayNum}</div>
+            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Plan Day</div>
+          </div>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:20, fontWeight:900, color:'var(--green)' }}>{graded.length}</div>
+            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Tasks Done</div>
+          </div>
+          <div style={{ textAlign:'center' }}>
+            <div style={{ fontSize:20, fontWeight:900, color:grade.color }}>{avgPct > 0 ? `${avgPct}%` : '--'}</div>
+            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Avg Score</div>
+          </div>
+        </div>
+
+        {/* Continue button */}
+        <button onClick={onContinue} style={{ width:'100%', padding:'15px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
+          Back to My Plan
+        </button>
+      </div>
     </div>
   )
 }
