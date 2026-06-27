@@ -53,6 +53,17 @@ function pickQuestions(dateStr) {
 const today = new Date().toISOString().slice(0, 10)
 const STORAGE_KEY = `ellt-daily-${today}`
 
+function getDailyStreak() {
+  let streak = 0
+  for (let i = 0; i < 60; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    if (localStorage.getItem(`ellt-daily-${d.toISOString().slice(0, 10)}`)) streak++
+    else break
+  }
+  return streak
+}
+
 export default function DailyChallenge({ userId, addResult }) {
   const questions = useMemo(() => pickQuestions(today), [])
   const completed  = !!localStorage.getItem(STORAGE_KEY)
@@ -95,6 +106,7 @@ export default function DailyChallenge({ userId, addResult }) {
   // ── Compact card (not started / completed) ─────────────────
   if (!started || completed) {
     const saved = completed ? JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') : null
+    const streak = completed ? getDailyStreak() : 0
     return (
       <>
         <Confetti active={showConfetti} onDone={() => setShowConfetti(false)} />
@@ -107,15 +119,20 @@ export default function DailyChallenge({ userId, addResult }) {
                 Daily Challenge — {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short'})}
               </div>
               <div style={{ fontSize:18, fontWeight:900, color: completed ? 'var(--text)' : '#fff' }}>
-                {completed ? `${saved?.score}/${saved?.total} correct — well done!` : '5 questions · approx. 5 minutes'}
+                {completed ? `${saved?.score}/${saved?.total} correct — well done!` : '5 questions · under 2 minutes'}
               </div>
               {!completed && <div style={{ fontSize:13, color:'rgba(255,255,255,0.85)', fontWeight:600, marginTop:5 }}>Resets at midnight — same for all students today</div>}
               {completed && (
                 <div style={{ marginTop:8 }}>
-                  <div style={{ height:5, background:'var(--bg3)', borderRadius:99, overflow:'hidden' }}>
+                  <div style={{ height:5, background:'var(--bg3)', borderRadius:99, overflow:'hidden', marginBottom:6 }}>
                     <div style={{ height:'100%', width:`${(saved.score/saved.total)*100}%`, background:'var(--amber)', borderRadius:99 }} />
                   </div>
-                  <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700, marginTop:5 }}>New challenge available tomorrow</div>
+                  {streak > 1 && (
+                    <div style={{ fontSize:12, fontWeight:800, color:'var(--amber)', display:'flex', alignItems:'center', gap:4 }}>
+                      🔥 {streak} days in a row!
+                    </div>
+                  )}
+                  {streak <= 1 && <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700 }}>New challenge available tomorrow</div>}
                 </div>
               )}
             </div>
@@ -172,8 +189,11 @@ export default function DailyChallenge({ userId, addResult }) {
             })}
           </div>
 
-          <div style={{ marginTop:16, padding:'10px 14px', background:'var(--amberBg,#FFF0CD)', border:'2px solid var(--amber,#FF9600)', borderRadius:10, fontSize:12, color:'var(--text)', fontWeight:600 }}>
-            ⚡ Come back tomorrow for a new 5-question challenge!
+          <div style={{ marginTop:16, padding:'10px 14px', background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:10, fontSize:12, color:'var(--text)', fontWeight:600, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <span>⚡ Come back tomorrow for a new challenge!</span>
+            {getDailyStreak() > 1 && (
+              <span style={{ fontWeight:900, color:'var(--amber)', fontSize:13 }}>🔥 {getDailyStreak()} days!</span>
+            )}
           </div>
         </div>
       </>

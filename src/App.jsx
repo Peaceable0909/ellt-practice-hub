@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase, loadResults, onAuthChange, getProfile } from './lib/supabase'
 import Auth from './components/Auth'
 import Nav from './components/Nav'
+import Home from './components/Home'
 import Plan from './components/Plan'
 import Practice from './components/Practice'
 import MockTests from './components/MockTests'
@@ -15,7 +16,7 @@ export default function App() {
   const [page, setPage] = useState(() => {
     if (window.location.hash === '#admin') return 'Admin'
     const saved = localStorage.getItem('ellt-page')
-    return saved || 'Plan'
+    return saved || 'Home'
   })
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -110,6 +111,7 @@ export default function App() {
       )}
 
       <SessionReminder schedule={schedule} />
+      {page === 'Home'     && <Home {...sharedProps} setPage={setPage} profile={profile} streak={calcStreak(schedule)} />}
       {page === 'Plan'     && <Plan {...sharedProps} />}
       {page === 'Practice' && <Practice {...sharedProps} />}
       {page === 'MockTest' && <MockTests {...sharedProps} />}

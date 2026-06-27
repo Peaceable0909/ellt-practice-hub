@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from 'react'
 import { signOut } from '../lib/supabase'
 
 const NAV_ITEMS = [
-  { key: 'Plan',      icon: LayoutDashboard, label: 'My Plan'  },
+  { key: 'Home',      icon: LayoutDashboard, label: 'Home'     },
   { key: 'Practice',  icon: BookOpen,        label: 'Practice' },
   { key: 'MockTest',  icon: ClipboardList,   label: 'Mock Test'},
   { key: 'Progress',  icon: BarChart2,       label: 'Progress' },
@@ -35,7 +35,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: 62, gap: 8 }}>
 
           {/* Logo */}
-          <div onClick={() => setPage('Plan')} style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 16, cursor: 'pointer', flexShrink: 0 }}>
+          <div onClick={() => setPage('Home')} style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 16, cursor: 'pointer', flexShrink: 0 }}>
             <div style={{ width: 36, height: 36, borderRadius: 11, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#fff', border: '3px solid var(--greenD)' }}>E</div>
             <span style={{ fontWeight: 900, fontSize: 16, color: 'var(--text)', letterSpacing: '-0.3px' }} className="hide-mobile">ELLTPulse</span>
           </div>
@@ -123,7 +123,7 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
       {/* Mobile bottom nav */}
       <div className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {[
-          { key: 'Plan',     icon: LayoutDashboard, label: 'My Plan'  },
+          { key: 'Home',     icon: LayoutDashboard, label: 'Home'     },
           { key: 'Practice', icon: BookOpen,        label: 'Practice' },
           { key: 'MockTest', icon: ClipboardList,   label: 'Mock Test'},
           { key: 'Progress', icon: BarChart2,       label: 'Progress' },

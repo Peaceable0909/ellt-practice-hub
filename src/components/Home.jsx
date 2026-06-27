@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { Headphones, BookOpen, PenLine, Mic, Flame, Zap, ClipboardList,
-         Target, TrendingUp, ChevronRight, Trophy, Calendar } from 'lucide-react'
+         Target, ChevronRight, Trophy, Calendar, AlertTriangle } from 'lucide-react'
+import DailyChallenge from './DailyChallenge'
 
 const SKILLS = [
   { key:'listening', label:'Listening', Icon:Headphones, color:'var(--blue)',   borderColor:'var(--blueD)',  bg:'var(--blueBg)',   tests:6  },
@@ -8,14 +10,20 @@ const SKILLS = [
   { key:'speaking',  label:'Speaking',  Icon:Mic,        color:'var(--coral)',  borderColor:'#cc3333',       bg:'var(--coralBg)',  tests:7  },
 ]
 
-export default function Home({ setPage, results, profile }) {
+const SKILL_COLORS = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
+const SKILL_LABELS = { listening:'Listening', reading:'Reading', writing:'Writing', speaking:'Speaking' }
+
+export default function Home({ setPage, results, profile, userId, addResult, streak = 0 }) {
   const name = profile?.full_name?.split(' ')[0] || 'there'
   const totalTests = results.length
   const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
-  const streak = 1
 
-  const bySkill = {}
-  results.forEach(r => { if (!bySkill[r.skill]) bySkill[r.skill] = []; bySkill[r.skill].push(r) })
+  const bySkill = useMemo(() => {
+    const map = {}
+    results.forEach(r => { if (!map[r.skill]) map[r.skill] = []; map[r.skill].push(r) })
+    return map
+  }, [results])
+
   const skillBand = s => {
     const arr = bySkill[s] || []
     if (!arr.length) return null
@@ -30,30 +38,66 @@ export default function Home({ setPage, results, profile }) {
   const overall = totalTests
     ? (results.reduce((s, r) => s + (r.band_score || 0), 0) / totalTests).toFixed(1)
     : null
-  const accuracy = results.filter(r => r.score != null).length
-    ? Math.round(results.filter(r => r.score != null).reduce((s, r) => s + r.score / r.total, 0) / results.filter(r => r.score != null).length * 100)
-    : 0
+
+  // Weakest skill — only show when we have data in at least 2 skills
+  const weakestSkill = useMemo(() => {
+    const withData = ['listening','reading','writing','speaking'].map(skill => {
+      const arr = bySkill[skill] || []
+      const bandArr = arr.filter(r => r.band_score > 0)
+      const pctArr  = arr.filter(r => r.total > 0)
+      const score   = bandArr.length
+        ? (bandArr.reduce((t,r) => t+parseFloat(r.band_score),0)/bandArr.length/9)*100
+        : pctArr.length
+          ? (pctArr.reduce((t,r) => t+r.score/r.total,0)/pctArr.length)*100
+          : null
+      return { skill, score, count: arr.length }
+    }).filter(s => s.score != null)
+    if (withData.length < 2) return null
+    return withData.reduce((a, b) => a.score < b.score ? a : b)
+  }, [bySkill])
 
   return (
     <div className="app-container fade-up">
 
+      {/* Daily Challenge — first thing, every day */}
+      <DailyChallenge userId={userId} addResult={addResult} />
+
       {/* Welcome */}
-      <div style={{ marginBottom: 22 }}>
+      <div style={{ marginBottom: 16 }}>
         <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--text)', marginBottom: 4 }}>
           {totalTests === 0 ? `Let's start, ${name}!` : `Keep going, ${name}!`}
         </h1>
         <p style={{ fontSize: 14, color: 'var(--textM)', fontWeight: 600 }}>
-          {totalTests === 0 ? 'Choose a skill below to begin.' : `${totalTests} tests completed — ${streak} day streak!`}
+          {totalTests === 0 ? 'Choose a skill below to begin.' : `${totalTests} tests completed · ${streak} day streak`}
         </p>
       </div>
 
-      {/* Stats */}
+      {/* Weakest skill alert */}
+      {weakestSkill && (
+        <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:10 }}>
+          <AlertTriangle size={18} color="var(--amber)" style={{ flexShrink:0 }} />
+          <div style={{ flex:1, minWidth:0 }}>
+            <div style={{ fontSize:13, fontWeight:900, color:'var(--text)', marginBottom:2 }}>
+              Focus on {SKILL_LABELS[weakestSkill.skill]} this week
+            </div>
+            <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, lineHeight:1.5 }}>
+              Your {SKILL_LABELS[weakestSkill.skill].toLowerCase()} is your weakest area — extra practice here will lift your overall band fastest.
+            </div>
+          </div>
+          <button onClick={() => setPage('Practice')}
+            style={{ flexShrink:0, padding:'7px 13px', borderRadius:10, border:`2px solid var(--amber)`, borderBottom:`3px solid #cc7700`, background:'transparent', color:'var(--amber)', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif', whiteSpace:'nowrap' }}>
+            Practice →
+          </button>
+        </div>
+      )}
+
+      {/* Stats row */}
       <div className="grid-4" style={{ marginBottom: 22 }}>
         {[
-          { Icon: Flame,       val: streak,   label: 'Streak',    col: 'var(--streak)', bg: 'var(--amberBg)' },
-          { Icon: Zap,         val: xp,       label: 'XP',        col: 'var(--xp)',     bg: 'var(--purpleBg)' },
-          { Icon: ClipboardList,val: totalTests,label:'Tests',     col: 'var(--green)',  bg: 'var(--greenBg)' },
-          { Icon: Trophy,      val: overall || '—', label:'Band', col: 'var(--blue)',   bg: 'var(--blueBg)' },
+          { Icon: Flame,        val: streak,          label: 'Streak', col: 'var(--streak)', bg: 'var(--amberBg)' },
+          { Icon: Zap,          val: xp,              label: 'XP',     col: 'var(--xp)',     bg: 'var(--purpleBg)' },
+          { Icon: ClipboardList,val: totalTests,       label: 'Tests',  col: 'var(--green)',  bg: 'var(--greenBg)' },
+          { Icon: Trophy,       val: overall || '—',  label: 'Band',   col: 'var(--blue)',   bg: 'var(--blueBg)' },
         ].map(({ Icon, val, label, col, bg }) => (
           <div key={label} style={{ background: bg, border: `2px solid ${col}44`, borderBottom: `4px solid ${col}88`, borderRadius: 14, padding: '12px 10px', textAlign: 'center' }}>
             <Icon size={20} color={col} style={{ margin: '0 auto 4px' }} />
@@ -63,7 +107,7 @@ export default function Home({ setPage, results, profile }) {
         ))}
       </div>
 
-      {/* Skills */}
+      {/* Skills grid */}
       <div style={{ fontSize: 12, fontWeight: 900, color: 'var(--textM)', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 12 }}>
         Practice by Skill
       </div>
@@ -94,28 +138,28 @@ export default function Home({ setPage, results, profile }) {
         })}
       </div>
 
-      {/* CTAs */}
+      {/* Quick links */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 22 }}>
-        <div onClick={() => setPage('Mock Tests')} style={{ background: 'var(--greenBg)', border: '2px solid var(--green)', borderBottom: '4px solid var(--greenD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <ClipboardList size={18} color="var(--green)" />
-              <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>Full Mock Test</span>
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>All 4 skills · Voice recording · AI scored</div>
-          </div>
-          <ChevronRight size={20} color="var(--green)" />
-        </div>
-
-        <div onClick={() => setPage('My Plan')} style={{ background: 'var(--purpleBg)', border: '2px solid var(--purple)', borderBottom: '4px solid var(--purpleD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div onClick={() => setPage('Plan')} style={{ background: 'var(--purpleBg)', border: '2px solid var(--purple)', borderBottom: '4px solid var(--purpleD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Calendar size={18} color="var(--purple)" />
               <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>My Learning Plan</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>1 week to 1 month · Daily schedule · Email reminders</div>
+            <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>Today's sessions · daily schedule · progress tracking</div>
           </div>
           <ChevronRight size={20} color="var(--purple)" />
+        </div>
+
+        <div onClick={() => setPage('MockTest')} style={{ background: 'var(--greenBg)', border: '2px solid var(--green)', borderBottom: '4px solid var(--greenD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <ClipboardList size={18} color="var(--green)" />
+              <span style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>Full Mock Test</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>All 4 skills · voice recording · AI scored</div>
+          </div>
+          <ChevronRight size={20} color="var(--green)" />
         </div>
       </div>
 
@@ -128,7 +172,7 @@ export default function Home({ setPage, results, profile }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {results.slice(0, 5).map((r, i) => {
               const IconMap = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic }
-              const ColMap  = { listening: 'var(--blue)', reading: 'var(--amber)', writing: 'var(--purple)', speaking: 'var(--coral)' }
+              const ColMap  = SKILL_COLORS
               const ItemIcon = IconMap[r.skill] || BookOpen
               const col = ColMap[r.skill] || 'var(--blue)'
               return (
@@ -139,13 +183,15 @@ export default function Home({ setPage, results, profile }) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.test_title}</div>
                     <div style={{ fontSize: 11, color: 'var(--textM)', fontWeight: 600 }}>
-                      {new Date(r.completed_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' })}
+                      {r.completed_at ? new Date(r.completed_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' }) : 'Recent'}
                     </div>
                   </div>
-                  {r.score != null && <span style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 700, flexShrink: 0 }}>{r.score}/{r.total}</span>}
-                  <div style={{ background: r.band_score>=7?'var(--greenBg)':r.band_score>=5.5?'var(--amberBg)':'var(--coralBg)', border: `2px solid ${r.band_score>=7?'var(--green)':r.band_score>=5.5?'var(--amber)':'var(--coral)'}`, borderRadius: 8, padding: '4px 8px', fontSize: 13, fontWeight: 900, color: r.band_score>=7?'var(--green)':r.band_score>=5.5?'var(--amber)':'var(--coral)', flexShrink: 0 }}>
-                    {r.band_score}
-                  </div>
+                  {r.score != null && r.total > 0 && <span style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 700, flexShrink: 0 }}>{r.score}/{r.total}</span>}
+                  {r.band_score > 0 && (
+                    <div style={{ background: r.band_score>=7?'var(--greenBg)':r.band_score>=5.5?'var(--amberBg)':'var(--coralBg)', border: `2px solid ${r.band_score>=7?'var(--green)':r.band_score>=5.5?'var(--amber)':'var(--coral)'}`, borderRadius: 8, padding: '4px 8px', fontSize: 13, fontWeight: 900, color: r.band_score>=7?'var(--green)':r.band_score>=5.5?'var(--amber)':'var(--coral)', flexShrink: 0 }}>
+                      {r.band_score}
+                    </div>
+                  )}
                 </div>
               )
             })}
