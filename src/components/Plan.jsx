@@ -9,6 +9,11 @@ import StudySession from './StudySession'
 
 const PERIOD_DAYS = { '1_week':7, '2_weeks':14, '3_weeks':21, '1_month':30 }
 
+function parseLocalDate(str) {
+  const [y, m, d] = str.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 const SKILL_ICONS = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, mock: ClipboardList, review: CheckCircle, intro: Trophy }
 const SKILL_COLORS_MAP = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)', mock:'var(--green)', review:'var(--teal)', intro:'var(--green)' }
 
@@ -98,10 +103,9 @@ export default function Plan({ userId, userEmail, results, addResult }) {
 
   // ── PLAN VIEW ──────────────────────────────────────────────
   const plan = buildPlan(schedule.period, schedule.start_date)
-  const startD = new Date(schedule.start_date)
+  const startD = parseLocalDate(schedule.start_date)
   const todayD = new Date()
   todayD.setHours(0,0,0,0)
-  startD.setHours(0,0,0,0)
   const dayNum = Math.floor((todayD - startD) / 86400000) + 1
   const totalDays = PERIOD_DAYS[schedule.period] || 30
   const cfg = PERIOD_CONFIG[schedule.period]
@@ -270,7 +274,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
       {dayNum < 1 && (
         <div style={{ textAlign:'center', padding:'32px 20px', background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:20, marginBottom:24 }}>
           <Clock size={36} color="var(--amber)" style={{ margin:'0 auto 12px' }} />
-          <div style={{ fontSize:16, fontWeight:900, color:'var(--text)', marginBottom:4 }}>Plan starts on {new Date(schedule.start_date).toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</div>
+          <div style={{ fontSize:16, fontWeight:900, color:'var(--text)', marginBottom:4 }}>Plan starts on {parseLocalDate(schedule.start_date).toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</div>
           <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600 }}>Come back then — or change your start date below.</div>
         </div>
       )}
@@ -294,7 +298,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
               <div key={i} onClick={() => !isFuture && startSession(dp, mDone ? 'evening' : 'morning')}
                 style={{ borderRadius:10, border:`2px solid ${isToday?'var(--green)':'var(--border)'}`, borderBottom:`3px solid ${isToday?'var(--greenD)':'var(--borderB)'}`, background:isToday?'var(--greenBg)':'var(--bg2)', padding:'8px 4px', textAlign:'center', cursor:isFuture?'default':'pointer', opacity:isFuture?0.4:1, transition:'transform .15s' }}>
                 <div style={{ fontSize:9, fontWeight:900, color:isToday?'var(--green)':'var(--textD)', textTransform:'uppercase', marginBottom:4 }}>
-                  {['M','T','W','T','F','S','S'][new Date(new Date(schedule.start_date).getTime()+(d-1)*86400000).getDay()]}
+                  {['M','T','W','T','F','S','S'][new Date(parseLocalDate(schedule.start_date).getTime()+(d-1)*86400000).getDay()]}
                 </div>
                 <div style={{ fontSize:11, fontWeight:900, color:isToday?'var(--green)':'var(--textM)', marginBottom:4 }}>{d}</div>
                 <div style={{ display:'flex', gap:2, justifyContent:'center' }}>
@@ -319,7 +323,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
                 <div style={{ fontSize:13, fontWeight:800, color:'var(--textM)' }}>{d.morning.label} · {d.evening.label}</div>
               </div>
               <div style={{ fontSize:11, color:'var(--textD)', fontWeight:700 }}>
-                {new Date(new Date(schedule.start_date).getTime()+(d.day-1)*86400000).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
+                {new Date(parseLocalDate(schedule.start_date).getTime()+(d.day-1)*86400000).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
               </div>
             </div>
           ))}

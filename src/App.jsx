@@ -82,7 +82,8 @@ export default function App() {
   function calcStreak(sched) {
     if (!sched) return 0
     const completed = sched.completed_sessions || {}
-    const start = new Date(sched.start_date); start.setHours(0,0,0,0)
+    const [sy, sm, sd] = sched.start_date.split('-').map(Number)
+    const start = new Date(sy, sm - 1, sd)
     const today = new Date(); today.setHours(0,0,0,0)
     const dayNum = Math.floor((today - start) / 86400000) + 1
     let streak = 0
