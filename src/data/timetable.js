@@ -16,7 +16,7 @@ const L = [
   'lc17t2p1','lc17t4p1',                   // Cambridge 17 T2/T4
 ]
 // Reading — 8 passages
-const R = ['r1','r2','r3','r4','r5','ri1','ri2','ri3']
+const R = ['r1','r2','r3','r4','r5','r6','r7','r8','r9','r10','r11','r12','r13','ri1','ri2','ri3']
 
 // Writing — 23 tasks (Task 2 essays + Task 1 charts, interleaved evenly)
 const W = [

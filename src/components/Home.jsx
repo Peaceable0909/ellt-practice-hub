@@ -72,7 +72,15 @@ export default function Home({ setPage, results, profile, userId, addResult, str
         </p>
       </div>
 
-      {/* Weakest skill alert */}
+      {/* Weakest skill alert / new-student nudge */}
+      {!weakestSkill && totalTests === 0 && (
+        <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:10 }}>
+          <Target size={16} color="var(--textD)" style={{ flexShrink:0 }} />
+          <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600 }}>
+            Complete your first practice test to see personalised skill insights here.
+          </div>
+        </div>
+      )}
       {weakestSkill && (
         <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'12px 16px', marginBottom:16, display:'flex', alignItems:'center', gap:10 }}>
           <AlertTriangle size={18} color="var(--amber)" style={{ flexShrink:0 }} />
