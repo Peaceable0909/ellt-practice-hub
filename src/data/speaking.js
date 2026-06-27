@@ -139,8 +139,6 @@ The downside is when design becomes more about marketing than function. Very thi
 
 For me personally, when choosing a phone, the things that matter most are battery life, reliability, and how comfortable it feels to use for long periods. A phone that looks beautiful but dies by 3pm or breaks when dropped is not good design — it is just expensive packaging. The best products are those where design and function are completely inseparable.`,
   },
-]
-
   {
     id: 's8',
     title: 'Remote Work',
