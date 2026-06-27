@@ -479,12 +479,12 @@ function ReviewSession({ task, results, onTaskComplete }) {
 
 // ─── Session Grade Screen ─────────────────────────────────────────────────────
 function SessionGrade({ session, allResults, tasks, onContinue }) {
-  // Find results from this session: match by task test IDs or today's results for matching skills
+  const [tab, setTab] = useState('review') // 'review' | 'scoreboard'
+
   const taskTestIds = tasks.map(t => t.testId).filter(Boolean)
   const taskSkills  = [...new Set(tasks.map(t => t.skill))]
   const todayLocal  = new Date().toLocaleDateString('en-CA')
 
-  // Get today's results that match either the test IDs or the skills from this session
   const results = (allResults || []).filter(r => {
     const isToday = !r.completed_at || new Date(r.completed_at).toLocaleDateString('en-CA') === todayLocal
     const matchesId = taskTestIds.includes(r.test_id)
@@ -539,42 +539,102 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
   }
   const msg = messages[grade.letter][Math.floor(Math.random() * 2)]
 
+  // ── Plan scoreboard: all plan results grouped by skill ─────────────────────
+  const planSkills = ['listening','reading','writing','speaking']
+  const planResults = (allResults || []).filter(r => planSkills.includes(r.skill))
+  const scoreboardBySkill = planSkills.map(skill => {
+    const rs = planResults.filter(r => r.skill === skill)
+    if (!rs.length) return { skill, avg: null, count: 0, trend: null }
+    const bands = rs.filter(r => r.band_score > 0).map(r => r.band_score)
+    const avg = bands.length ? +(bands.reduce((a,b) => a+b,0)/bands.length).toFixed(1) : null
+    const recent = bands.slice(-3)
+    const older  = bands.slice(-6,-3)
+    const trend = recent.length && older.length
+      ? (recent.reduce((a,b)=>a+b,0)/recent.length) - (older.reduce((a,b)=>a+b,0)/older.length)
+      : null
+    return { skill, avg, count: rs.length, trend }
+  })
+  const worstSkill = scoreboardBySkill.filter(s => s.avg !== null).sort((a,b) => a.avg - b.avg)[0]
+
+  // ── Wrong answers ───────────────────────────────────────────────────────────
+  const allWrong = dedupedResults.flatMap(r => {
+    const wrong = getWrongAnswers(r)
+    const col = SKILL_COLOR[r.skill] || 'var(--textM)'
+    return wrong.map(w => ({ ...w, skill: r.skill, testTitle: r.test_title, col }))
+  })
+  const feedbackResults = dedupedResults.filter(r => (r.skill === 'writing' || r.skill === 'speaking') && r.feedback)
+
+  const ScoreBar = ({ pct, color }) => (
+    <div style={{ height:6, background:'var(--bg3)', borderRadius:99, overflow:'hidden', marginTop:4 }}>
+      <div style={{ width:`${Math.min(100,pct||0)}%`, height:'100%', background:color, borderRadius:99, transition:'width .6s ease' }}/>
+    </div>
+  )
+
   return (
     <div style={{ minHeight:'100vh', background:'var(--bg)', padding:'0 0 100px' }}>
       {/* Header */}
-      <div style={{ background:'var(--bg2)', borderBottom:'1.5px solid var(--border)', padding:'0 16px', height:56, display:'flex', alignItems:'center' }}>
-        <div style={{ fontSize:15, fontWeight:900, color:'var(--text)' }}>Session Complete</div>
+      <div style={{ background:'var(--bg2)', borderBottom:'1.5px solid var(--border)', padding:'0 16px', height:56, display:'flex', alignItems:'center', gap:12 }}>
+        <div style={{ flex:1, fontSize:15, fontWeight:900, color:'var(--text)' }}>Session Complete</div>
+        <div style={{ fontSize:11, fontWeight:700, color:'var(--textM)' }}>Day {session.dayNum}</div>
       </div>
 
       <div className="app-container anim-fadeUp">
-        {/* Grade hero */}
-        <div style={{ textAlign:'center', padding:'32px 0 24px' }}>
-          <div style={{ width:90, height:90, borderRadius:'50%', background:`color-mix(in srgb, ${grade.color} 15%, var(--bg2))`, border:`3px solid ${grade.color}`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', boxShadow:`0 0 0 8px color-mix(in srgb, ${grade.color} 8%, transparent)` }}>
-            <span style={{ fontSize:38, fontWeight:900, color:grade.color }}>{grade.letter}</span>
+
+        {/* ── HERO ── */}
+        <div style={{ textAlign:'center', padding:'28px 0 20px' }}>
+          <div style={{ width:96, height:96, borderRadius:'50%', background:`color-mix(in srgb, ${grade.color} 15%, var(--bg2))`, border:`3px solid ${grade.color}`, display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 14px', boxShadow:`0 0 0 10px color-mix(in srgb, ${grade.color} 8%, transparent)` }}>
+            <span style={{ fontSize:40, fontWeight:900, color:grade.color }}>{grade.letter}</span>
           </div>
-          <div style={{ fontSize:24, fontWeight:900, color:'var(--text)', marginBottom:4 }}>{grade.label}</div>
-          <div style={{ fontSize:14, color:'var(--textM)', fontWeight:600, maxWidth:280, margin:'0 auto', lineHeight:1.6 }}>{msg}</div>
+          <div style={{ fontSize:26, fontWeight:900, color:'var(--text)', marginBottom:4 }}>{grade.label}</div>
+          <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, maxWidth:300, margin:'0 auto', lineHeight:1.65 }}>{msg}</div>
         </div>
 
-        {/* Task results */}
+        {/* ── SESSION STATS ROW ── */}
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:20 }}>
+          {[
+            { label:'Session', value:`Day ${session.dayNum}`, color:'var(--blue)' },
+            { label:'Tasks Done', value:graded.length, color:'var(--green)' },
+            { label:'Avg Score', value:avgPct > 0 ? `${avgPct}%` : '—', color:grade.color },
+            { label:'Mistakes', value:allWrong.length, color: allWrong.length === 0 ? 'var(--green)' : 'var(--coral)' },
+          ].map(({ label, value, color }) => (
+            <div key={label} style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:12, padding:'12px 8px', textAlign:'center' }}>
+              <div style={{ fontSize:20, fontWeight:900, color }}>{value}</div>
+              <div style={{ fontSize:9, color:'var(--textM)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.4px', marginTop:2 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── PER-SKILL BREAKDOWN ── */}
         {graded.length > 0 && (
           <div style={{ marginBottom:20 }}>
-            <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>Your Results</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
+            <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>This Session — Skill Breakdown</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {graded.map((r, i) => {
                 const Icon = SKILL_ICON[r.skill] || BookOpen
                 const col  = SKILL_COLOR[r.skill] || 'var(--textM)'
+                const bandPct = r.band_score > 0 ? Math.round((r.band_score/9)*100) : r.score || 0
+                const wrongCount = allWrong.filter(w => w.testTitle === r.test_title).length
+                const status = bandPct >= 78 ? '✓ Strong' : bandPct >= 55 ? '~ Developing' : '✗ Needs work'
+                const statusCol = bandPct >= 78 ? 'var(--green)' : bandPct >= 55 ? 'var(--amber)' : 'var(--coral)'
                 return (
-                  <div key={i} style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:'14px 16px', display:'flex', alignItems:'center', gap:14, boxShadow:'var(--shadow)' }}>
-                    <div style={{ width:42, height:42, borderRadius:12, background:`color-mix(in srgb, ${col} 12%, var(--bg3))`, border:`1.5px solid color-mix(in srgb, ${col} 30%, var(--border))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      <Icon size={18} color={col} />
+                  <div key={i} style={{ background:'var(--bg2)', border:`1.5px solid var(--border)`, borderLeft:`4px solid ${col}`, borderRadius:14, padding:'14px 16px', boxShadow:'var(--shadow)' }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:10 }}>
+                      <div style={{ width:40, height:40, borderRadius:10, background:`color-mix(in srgb, ${col} 12%, var(--bg3))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                        <Icon size={18} color={col} />
+                      </div>
+                      <div style={{ flex:1, minWidth:0 }}>
+                        <div style={{ fontSize:13, fontWeight:800, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.test_title || r.test_id}</div>
+                        <div style={{ fontSize:10, color:'var(--textM)', fontWeight:600, marginTop:1, textTransform:'capitalize' }}>{r.skill}</div>
+                      </div>
+                      <div style={{ textAlign:'right', flexShrink:0 }}>
+                        <div style={{ fontSize:18, fontWeight:900, color:r.color }}>{r.label}</div>
+                        <div style={{ fontSize:10, fontWeight:800, color:statusCol, marginTop:1 }}>{status}</div>
+                      </div>
                     </div>
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ fontSize:13, fontWeight:800, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.test_title || r.test_id}</div>
-                      <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, marginTop:2, textTransform:'capitalize' }}>{r.skill}</div>
-                    </div>
-                    <div style={{ textAlign:'right', flexShrink:0 }}>
-                      <div style={{ fontSize:16, fontWeight:900, color:r.color }}>{r.label}</div>
+                    <ScoreBar pct={bandPct} color={col} />
+                    <div style={{ display:'flex', justifyContent:'space-between', marginTop:6 }}>
+                      <span style={{ fontSize:10, color:'var(--textM)', fontWeight:600 }}>{bandPct}% correct</span>
+                      {wrongCount > 0 && <span style={{ fontSize:10, color:'var(--coral)', fontWeight:700 }}>{wrongCount} mistake{wrongCount>1?'s':''} to review</span>}
                     </div>
                   </div>
                 )
@@ -583,94 +643,125 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
           </div>
         )}
 
-        {/* Day summary */}
-        <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:'14px 16px', marginBottom:24, display:'flex', justifyContent:'space-between', boxShadow:'var(--shadow)' }}>
-          <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:20, fontWeight:900, color:'var(--text)' }}>Day {session.dayNum}</div>
-            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Plan Day</div>
+        {/* ── PLAN SCOREBOARD ── */}
+        <div style={{ marginBottom:20 }}>
+          <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>My Plan — Running Scoreboard</div>
+          <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)' }}>
+            {scoreboardBySkill.map((s, i) => {
+              const Icon = SKILL_ICON[s.skill] || BookOpen
+              const col  = SKILL_COLOR[s.skill] || 'var(--textM)'
+              const bandPct = s.avg ? Math.round((s.avg/9)*100) : null
+              const trendIcon = s.trend === null ? '—' : s.trend > 0.3 ? '↑' : s.trend < -0.3 ? '↓' : '→'
+              const trendCol  = s.trend === null ? 'var(--textM)' : s.trend > 0.3 ? 'var(--green)' : s.trend < -0.3 ? 'var(--coral)' : 'var(--amber)'
+              return (
+                <div key={s.skill} style={{ padding:'13px 16px', borderBottom: i < 3 ? '1px solid var(--border)' : 'none' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom: s.avg ? 8 : 0 }}>
+                    <Icon size={15} color={col} />
+                    <span style={{ fontSize:12, fontWeight:800, color:'var(--text)', textTransform:'capitalize', flex:1 }}>{s.skill}</span>
+                    {s.avg !== null ? (
+                      <>
+                        <span style={{ fontSize:13, fontWeight:900, color: bandPct >= 70 ? 'var(--green)' : bandPct >= 50 ? 'var(--amber)' : 'var(--coral)' }}>Band {s.avg}</span>
+                        <span style={{ fontSize:13, fontWeight:900, color:trendCol, marginLeft:6 }}>{trendIcon}</span>
+                        <span style={{ fontSize:10, color:'var(--textM)', fontWeight:600, marginLeft:4 }}>{s.count} test{s.count>1?'s':''}</span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize:11, color:'var(--textM)', fontWeight:600 }}>No data yet</span>
+                    )}
+                  </div>
+                  {s.avg && <ScoreBar pct={bandPct} color={col} />}
+                </div>
+              )
+            })}
           </div>
-          <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:20, fontWeight:900, color:'var(--green)' }}>{graded.length}</div>
-            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Tasks Done</div>
-          </div>
-          <div style={{ textAlign:'center' }}>
-            <div style={{ fontSize:20, fontWeight:900, color:grade.color }}>{avgPct > 0 ? `${avgPct}%` : '--'}</div>
-            <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase' }}>Avg Score</div>
-          </div>
+          {worstSkill && (
+            <div style={{ marginTop:10, background:'var(--amberBg)', border:'1.5px solid var(--amber)', borderRadius:12, padding:'12px 14px', display:'flex', gap:10, alignItems:'flex-start' }}>
+              <span style={{ fontSize:16 }}>⚠️</span>
+              <div>
+                <div style={{ fontSize:12, fontWeight:900, color:'var(--amber)', marginBottom:2 }}>Focus area: {worstSkill.skill.charAt(0).toUpperCase()+worstSkill.skill.slice(1)}</div>
+                <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, lineHeight:1.5 }}>Your {worstSkill.skill} average is Band {worstSkill.avg} — your lowest skill. Prioritise this in tomorrow's session.</div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Questions to work on */}
-        {(() => {
-          const allWrong = dedupedResults.flatMap(r => {
-            const wrong = getWrongAnswers(r)
-            const col = SKILL_COLOR[r.skill] || 'var(--textM)'
-            return wrong.map(w => ({ ...w, skill: r.skill, testTitle: r.test_title, col }))
-          })
-          // Also collect writing/speaking feedback
-          const feedbackResults = dedupedResults.filter(r => (r.skill === 'writing' || r.skill === 'speaking') && r.feedback)
-
-          if (!allWrong.length && !feedbackResults.length) return (
-            <div style={{ background:'var(--greenBg)', border:'1.5px solid var(--green)', borderRadius:14, padding:'14px 16px', marginBottom:20, textAlign:'center' }}>
-              <div style={{ fontSize:14, fontWeight:800, color:'var(--green)' }}>No mistakes — clean session!</div>
-              <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:3 }}>All answers correct.</div>
+        {/* ── TABS: QUESTIONS TO REVIEW / AI FEEDBACK ── */}
+        {(allWrong.length > 0 || feedbackResults.length > 0) && (
+          <div style={{ marginBottom:20 }}>
+            <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+              {allWrong.length > 0 && (
+                <button onClick={() => setTab('review')} style={{ padding:'7px 14px', borderRadius:10, border:`2px solid ${tab==='review'?'var(--coral)':'var(--border)'}`, borderBottom:`3px solid ${tab==='review'?'var(--coralBdr)':'var(--borderB)'}`, background: tab==='review'?'var(--coralBg)':'var(--bg2)', color: tab==='review'?'var(--coral)':'var(--textM)', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>
+                  ✗ Mistakes ({allWrong.length})
+                </button>
+              )}
+              {feedbackResults.length > 0 && (
+                <button onClick={() => setTab('feedback')} style={{ padding:'7px 14px', borderRadius:10, border:`2px solid ${tab==='feedback'?'var(--purple)':'var(--border)'}`, borderBottom:`3px solid ${tab==='feedback'?'var(--purpleBdr)':'var(--borderB)'}`, background: tab==='feedback'?'var(--purpleBg)':'var(--bg2)', color: tab==='feedback'?'var(--purple)':'var(--textM)', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>
+                  AI Feedback ({feedbackResults.length})
+                </button>
+              )}
             </div>
-          )
-          return (
-            <div style={{ marginBottom:20 }}>
-              <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>Questions to Review ({allWrong.length})</div>
+
+            {tab === 'review' && allWrong.length > 0 && (
               <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-                {allWrong.slice(0, 8).map((w, i) => (
-                  <div key={i} style={{ background:'var(--bg2)', border:'1.5px solid var(--coralBdr)', borderRadius:12, padding:'12px 14px', boxShadow:'var(--shadow)' }}>
-                    <div style={{ fontSize:11, fontWeight:700, color:w.col, textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:5 }}>{w.skill} — {w.testTitle}</div>
-                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:8, lineHeight:1.5 }}>{w.q.replace(/^Q\d+\.\s*/, '')}</div>
-                    <div style={{ display:'flex', flexDirection:'column', gap:4 }}>
+                {allWrong.map((w, i) => (
+                  <div key={i} style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderLeft:'4px solid var(--coral)', borderRadius:12, padding:'14px', boxShadow:'var(--shadow)' }}>
+                    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                      <div style={{ fontSize:10, fontWeight:800, color:w.col, textTransform:'uppercase', letterSpacing:'0.4px' }}>{w.skill} — {w.testTitle}</div>
+                      <div style={{ fontSize:10, fontWeight:700, color:'var(--textM)' }}>Q{i+1} of {allWrong.length}</div>
+                    </div>
+                    <div style={{ fontSize:13, fontWeight:700, color:'var(--text)', marginBottom:10, lineHeight:1.55 }}>{w.q.replace(/^Q\d+\.\s*/, '')}</div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
                       {w.given !== undefined && w.given !== null && w.opts?.[w.given] !== undefined && (
-                        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'var(--coralBg)', borderRadius:8 }}>
-                          <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--coral)', flexShrink:0 }} />
-                          <span style={{ fontSize:12, color:'var(--coral)', fontWeight:700 }}>Your answer: </span>
+                        <div style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'7px 10px', background:'var(--coralBg)', borderRadius:8, border:'1px solid var(--coralBdr)' }}>
+                          <span style={{ fontSize:11, color:'var(--coral)', fontWeight:800, flexShrink:0 }}>✗ You said:</span>
                           <span style={{ fontSize:12, color:'var(--text)', fontWeight:600 }}>{w.opts[w.given]}</span>
                         </div>
                       )}
                       {w.opts?.[w.correct] !== undefined && (
-                        <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 10px', background:'var(--greenBg)', borderRadius:8 }}>
-                          <div style={{ width:6, height:6, borderRadius:'50%', background:'var(--green)', flexShrink:0 }} />
-                          <span style={{ fontSize:12, color:'var(--green)', fontWeight:700 }}>Correct: </span>
+                        <div style={{ display:'flex', alignItems:'flex-start', gap:8, padding:'7px 10px', background:'var(--greenBg)', borderRadius:8, border:'1px solid var(--greenBdr)' }}>
+                          <span style={{ fontSize:11, color:'var(--green)', fontWeight:800, flexShrink:0 }}>✓ Correct:</span>
                           <span style={{ fontSize:12, color:'var(--text)', fontWeight:600 }}>{Array.isArray(w.correct) ? w.correct.map(c => w.opts[c]).join(' or ') : w.opts[w.correct]}</span>
+                        </div>
+                      )}
+                      {w.explain && (
+                        <div style={{ padding:'8px 10px', background:'var(--blueBg)', borderRadius:8, border:'1px solid var(--blueBdr)', marginTop:2 }}>
+                          <div style={{ fontSize:10, fontWeight:800, color:'var(--blue)', textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:3 }}>Why?</div>
+                          <div style={{ fontSize:12, color:'var(--text)', fontWeight:600, lineHeight:1.6 }}>{w.explain}</div>
                         </div>
                       )}
                     </div>
                   </div>
                 ))}
-                {allWrong.length > 8 && (
-                  <div style={{ textAlign:'center', fontSize:12, color:'var(--textM)', fontWeight:700, padding:'8px' }}>
-                    +{allWrong.length - 8} more — check Progress for full history
-                  </div>
-                )}
-                {/* Writing/Speaking AI feedback */}
-                {feedbackResults.map((r, i) => {
-                  const col = SKILL_COLOR[r.skill] || 'var(--purple)'
-                  // Extract key points from feedback
-                  const fb = r.feedback || ''
-                  const lines = fb.split('\n').filter(l => l.trim().length > 10).slice(0, 5)
-                  return (
-                    <div key={`fb-${i}`} style={{ background:'var(--bg2)', border:`1.5px solid color-mix(in srgb, ${col} 40%, var(--border))`, borderRadius:12, padding:'14px', marginTop: allWrong.length ? 0 : 0, boxShadow:'var(--shadow)' }}>
-                      <div style={{ fontSize:11, fontWeight:700, color:col, textTransform:'uppercase', letterSpacing:'0.3px', marginBottom:6 }}>{r.skill} Feedback — {r.test_title || r.test_id}</div>
-                      <div style={{ fontSize:12, color:'var(--text)', lineHeight:1.7, fontWeight:600 }}>
-                        {lines.length > 0 ? lines.map((l, li) => (
-                          <div key={li} style={{ marginBottom:4, paddingLeft:10, borderLeft:`2px solid color-mix(in srgb, ${col} 30%, var(--border))` }}>{l.trim()}</div>
-                        )) : (
-                          <div>{fb.slice(0, 300)}{fb.length > 300 ? '...' : ''}</div>
-                        )}
-                      </div>
-                    </div>
-                  )
-                })}
               </div>
-            </div>
-          )
-        })()}
+            )}
 
-        {/* Continue button */}
+            {tab === 'feedback' && feedbackResults.map((r, i) => {
+              const col = SKILL_COLOR[r.skill] || 'var(--purple)'
+              const fb  = r.feedback || ''
+              const sections = fb.split('\n').filter(l => l.trim().length > 5)
+              return (
+                <div key={i} style={{ background:'var(--bg2)', border:`1.5px solid color-mix(in srgb, ${col} 40%, var(--border))`, borderLeft:`4px solid ${col}`, borderRadius:12, padding:'16px', marginBottom:10, boxShadow:'var(--shadow)' }}>
+                  <div style={{ fontSize:11, fontWeight:800, color:col, textTransform:'uppercase', letterSpacing:'0.4px', marginBottom:10 }}>{r.skill} AI Feedback — {r.test_title || r.test_id}</div>
+                  {sections.map((line, li) => {
+                    const isHeader = /^[A-Z\s]+:/.test(line.trim())
+                    return isHeader
+                      ? <div key={li} style={{ fontSize:11, fontWeight:900, color:col, textTransform:'uppercase', letterSpacing:'0.3px', marginTop:10, marginBottom:3 }}>{line.trim()}</div>
+                      : <div key={li} style={{ fontSize:13, color:'var(--text)', fontWeight:600, lineHeight:1.7, paddingLeft:10, borderLeft:`2px solid color-mix(in srgb, ${col} 25%, var(--border))`, marginBottom:4 }}>{line.trim()}</div>
+                  })}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {allWrong.length === 0 && feedbackResults.length === 0 && (
+          <div style={{ background:'var(--greenBg)', border:'1.5px solid var(--green)', borderRadius:14, padding:'16px', marginBottom:20, textAlign:'center' }}>
+            <div style={{ fontSize:22, marginBottom:4 }}>🎉</div>
+            <div style={{ fontSize:15, fontWeight:900, color:'var(--green)' }}>Perfect session — no mistakes!</div>
+            <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:3 }}>All answers correct. Outstanding work.</div>
+          </div>
+        )}
+
+        {/* Continue */}
         <button onClick={onContinue} style={{ width:'100%', padding:'15px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
           Back to My Plan
         </button>
