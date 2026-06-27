@@ -117,7 +117,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
   const totalSessions = totalDays * (cfg?.sessionsPerDay || 2)
 
   const startSession = (dayData, which) => {
-    const s = which === 'morning' ? dayData.morning : dayData.evening
+    const s = which === 'morning' ? dayData.morning : which === 'noon' ? dayData.noon : dayData.evening
     const key = `day_${dayData.day}_${which}`
     setActiveSession({ ...s, key, dayNum: dayData.day, which })
   }
@@ -128,10 +128,10 @@ export default function Plan({ userId, userEmail, results, addResult }) {
   function calcStreak() {
     let streak = 0
     // Check from today backwards — if today has nothing done, start from yesterday
-    const todayDone = completed[`day_${dayNum}_morning`] || completed[`day_${dayNum}_evening`]
+    const todayDone = completed[`day_${dayNum}_morning`] || completed[`day_${dayNum}_evening`] || completed[`day_${dayNum}_noon`]
     const startDay = todayDone ? dayNum : dayNum - 1
     for (let d = startDay; d >= 1; d--) {
-      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`]
+      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`] || completed[`day_${d}_noon`]
       if (hasDone) streak++
       else break // any gap resets streak
     }
@@ -284,7 +284,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
       <div style={{ marginBottom:24 }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
           <div style={{ fontSize:13, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px' }}>This Week</div>
-          <span style={{ fontSize:12, color:'var(--textM)', fontWeight:700 }}>{doneCount} / {Math.min(dayNum,totalDays)*2} sessions done</span>
+          <span style={{ fontSize:12, color:'var(--textM)', fontWeight:700 }}>{doneCount} / {Math.min(dayNum,totalDays) * (cfg?.sessionsPerDay || 2)} sessions done</span>
         </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:6 }}>
           {Array.from({length:7},(_,i) => {
@@ -296,7 +296,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
             const isToday = d === dayNum
             const isFuture = d > dayNum
             return (
-              <div key={i} onClick={() => !isFuture && startSession(dp, mDone ? 'evening' : 'morning')}
+              <div key={i} onClick={() => !isFuture && startSession(dp, !mDone ? 'morning' : dp.noon && !isDone(d,'noon') ? 'noon' : 'evening')}
                 style={{ borderRadius:10, border:`2px solid ${isToday?'var(--green)':'var(--border)'}`, borderBottom:`3px solid ${isToday?'var(--greenD)':'var(--borderB)'}`, background:isToday?'var(--greenBg)':'var(--bg2)', padding:'8px 4px', textAlign:'center', cursor:isFuture?'default':'pointer', opacity:isFuture?0.4:1, transition:'transform .15s' }}>
                 <div style={{ fontSize:9, fontWeight:900, color:isToday?'var(--green)':'var(--textD)', textTransform:'uppercase', marginBottom:4 }}>
                   {['M','T','W','T','F','S','S'][new Date(parseLocalDate(schedule.start_date).getTime()+(d-1)*86400000).getDay()]}
