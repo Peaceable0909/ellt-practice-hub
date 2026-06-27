@@ -21,7 +21,12 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
   // Compute score from answers at any time (not gated by submitted state)
   const calcScore = (ans) => test.qs.reduce((s, q, i) => {
     const a = ans[i]
-    if (q.type === 'fill') return s + (typeof a === 'string' && a.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
+    if (q.type === 'fill') {
+      const up = typeof a === 'string' ? a.toUpperCase().trim() : null
+      if (!up) return s
+      const valid = Array.isArray(q.a) ? q.a.map(x => x.toUpperCase()) : [q.a.toUpperCase()]
+      return s + (valid.includes(up) ? 1 : 0)
+    }
     if (Array.isArray(q.a)) return s + (q.a.includes(a) ? 1 : 0)
     return s + (a === q.a ? 1 : 0)
   }, 0)
@@ -154,6 +159,13 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
         </div>
       )}
 
+      {!submitted && test.tip && (
+        <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'12px 16px', marginBottom:14 }}>
+          <div style={{ fontSize:11, fontWeight:900, color:'var(--amber)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:4 }}>Tip</div>
+          <div style={{ fontSize:13, color:'var(--text)', fontWeight:600, lineHeight:1.6 }}>{test.tip}</div>
+        </div>
+      )}
+
       {/* Questions — two-column on desktop for reading */}
       <div className={isReading && test.passage ? 'reading-two-col' : ''}>
         {isReading && test.passage && (
@@ -164,7 +176,13 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
         {test.qs.map((q, qi) => {
           const userAns = answers[qi]
           const isFill = q.type === 'fill'
-          const isCorrect = submitted && (isFill ? (typeof userAns==='string' && userAns.toUpperCase().trim()===q.a.toUpperCase()) : Array.isArray(q.a) ? q.a.includes(userAns) : userAns===q.a)
+          const fillCorrect = isFill && (() => {
+            const up = typeof userAns === 'string' ? userAns.toUpperCase().trim() : null
+            if (!up) return false
+            const valid = Array.isArray(q.a) ? q.a.map(x => x.toUpperCase()) : [q.a.toUpperCase()]
+            return valid.includes(up)
+          })()
+          const isCorrect = submitted && (isFill ? fillCorrect : Array.isArray(q.a) ? q.a.includes(userAns) : userAns===q.a)
           const isWrong = submitted && !isCorrect
 
           return (
@@ -186,11 +204,17 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
                         try { localStorage.setItem(draftKey, JSON.stringify(next)) } catch {}
                       }}
                         style={{ maxWidth:280, textTransform:'uppercase', fontWeight:800, letterSpacing:1, fontSize:15 }}/>
-                      {submitted && <div style={{ marginTop:8, fontSize:13, color:isCorrect?'var(--green)':'var(--coral)', fontWeight:800 }}>
-                        {isCorrect ? '✓ Correct!' : `Correct answer: ${q.a}`}
-                      </div>}
+                      {submitted && (
+                        <div style={{ marginTop:8 }}>
+                          <div style={{ fontSize:13, color:isCorrect?'var(--green)':'var(--coral)', fontWeight:800 }}>
+                            {isCorrect ? '✓ Correct!' : `Correct answer: ${Array.isArray(q.a) ? q.a[0] : q.a}`}
+                          </div>
+                          {!isCorrect && q.explain && <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:4, lineHeight:1.5 }}>{q.explain}</div>}
+                        </div>
+                      )}
                     </div>
                   ) : (
+                    <>
                     <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
                       {q.opts.map((opt, oi) => {
                         const isSel = userAns===oi
@@ -216,6 +240,12 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
                         )
                       })}
                     </div>
+                    {submitted && isWrong && q.explain && (
+                      <div style={{ marginTop:10, padding:'10px 12px', background:'var(--bg3)', border:'1px solid var(--border)', borderRadius:10, fontSize:13, color:'var(--textM)', fontWeight:600, lineHeight:1.6 }}>
+                        {q.explain}
+                      </div>
+                    )}
+                    </>
                   )}
                 </div>
               </div>
