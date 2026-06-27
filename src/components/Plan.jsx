@@ -59,8 +59,9 @@ export default function Plan({ userId, userEmail, results, addResult }) {
     // BUG-06 fix: only reset completed_sessions when starting a BRAND NEW plan
     const keepCompleted = !isNewPlan && schedule ? (schedule.completed_sessions || {}) : {}
     const row = { user_id: userId, user_email: userEmail, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: keepCompleted, updated_at: new Date().toISOString() }
-    const { data, error } = await supabase.from('student_schedules').upsert([row]).select().single()
+    const { data, error } = await supabase.from('student_schedules').upsert([row], { onConflict: 'user_id' }).select().single()
     if (error) {
+      console.error('[Plan] saveSchedule failed:', error.message, error.code, error.hint)
       setSaving(false)
       alert('Could not save your plan. Please check your connection and try again.')
       return
