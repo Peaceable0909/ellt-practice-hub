@@ -114,7 +114,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
 
   // Count done
   const doneCount = Object.keys(completed).length
-  const totalSessions = totalDays * 2
+  const totalSessions = totalDays * (cfg?.sessionsPerDay || 2)
 
   const startSession = (dayData, which) => {
     const s = which === 'morning' ? dayData.morning : dayData.evening
@@ -138,8 +138,8 @@ export default function Plan({ userId, userEmail, results, addResult }) {
     return streak
   }
   const streak = calcStreak()
-  const todayFullyDone = isDone(dayNum, 'morning') && isDone(dayNum, 'evening')
-  const todayPartDone  = isDone(dayNum, 'morning') || isDone(dayNum, 'evening')
+  const todayFullyDone = isDone(dayNum, 'morning') && isDone(dayNum, 'evening') && (!todayPlan?.noon || isDone(dayNum, 'noon'))
+  const todayPartDone  = isDone(dayNum, 'morning') || isDone(dayNum, 'evening') || isDone(dayNum, 'noon')
 
   return (
     <div className="app-container anim-fadeUp">
@@ -194,9 +194,10 @@ export default function Plan({ userId, userEmail, results, addResult }) {
 
           <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
             {[
-              { which:'morning', session:todayPlan.morning, time:schedule.morning_time?.slice(0,5), label:'Morning', timeIcon:'morning' },
-              { which:'evening', session:todayPlan.evening, time:schedule.evening_time?.slice(0,5), label:'Evening', timeIcon:'evening' },
-            ].map(({ which, session, time, label, timeIcon }) => {
+              { which:'morning', session:todayPlan.morning, time:schedule.morning_time?.slice(0,5), label:'Morning' },
+              ...(todayPlan.noon ? [{ which:'noon', session:todayPlan.noon, time:'13:00', label:'Afternoon' }] : []),
+              { which:'evening', session:todayPlan.evening, time:schedule.evening_time?.slice(0,5), label:'Evening' },
+            ].map(({ which, session, time, label }) => {
               const done = isDone(todayPlan.day, which)
               const color = SKILL_COLORS_MAP[session.type] || 'var(--green)'
               const Icon = SKILL_ICONS[session.type] || BookOpen
@@ -303,6 +304,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
                 <div style={{ fontSize:11, fontWeight:900, color:isToday?'var(--green)':'var(--textM)', marginBottom:4 }}>{d}</div>
                 <div style={{ display:'flex', gap:2, justifyContent:'center' }}>
                   <div style={{ width:8, height:8, borderRadius:'50%', background:mDone?'var(--green)':'var(--border)' }}/>
+                  {cfg?.sessionsPerDay >= 3 && <div style={{ width:8, height:8, borderRadius:'50%', background:isDone(d,'noon')?'var(--green)':'var(--border)' }}/>}
                   <div style={{ width:8, height:8, borderRadius:'50%', background:eDone?'var(--green)':'var(--border)' }}/>
                 </div>
               </div>
@@ -320,7 +322,7 @@ export default function Plan({ userId, userEmail, results, addResult }) {
               <Lock size={16} color="var(--textD)" style={{ flexShrink:0 }} />
               <div style={{ flex:1 }}>
                 <div style={{ fontSize:11, color:'var(--textD)', fontWeight:700, textTransform:'uppercase', marginBottom:2 }}>Day {d.day}</div>
-                <div style={{ fontSize:13, fontWeight:800, color:'var(--textM)' }}>{d.morning.label} · {d.evening.label}</div>
+                <div style={{ fontSize:13, fontWeight:800, color:'var(--textM)' }}>{d.morning.label}{d.noon ? ` · ${d.noon.label}` : ''} · {d.evening.label}</div>
               </div>
               <div style={{ fontSize:11, color:'var(--textD)', fontWeight:700 }}>
                 {new Date(parseLocalDate(schedule.start_date).getTime()+(d.day-1)*86400000).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
@@ -365,7 +367,7 @@ function SetupView({ period, setPeriod, startDate, setStartDate, morningTime, se
           {Object.entries(PERIOD_CONFIG).map(([key,c]) => (
             <div key={key} onClick={() => setPeriod(key)} style={{ padding:14, borderRadius:14, border:`2px solid ${period===key?'var(--green)':'var(--border)'}`, borderBottom:`4px solid ${period===key?'var(--greenD)':'var(--borderB)'}`, background:period===key?'var(--greenBg)':'var(--bg2)', cursor:'pointer', transition:'all .2s' }}>
               <div style={{ fontSize:16, fontWeight:900, color:period===key?'var(--green)':'var(--text)', marginBottom:3 }}>{c.label}</div>
-              <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700 }}>{c.morningHours}h morning + {c.eveningHours}h evening per day</div>
+              <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700 }}>{c.sessionsPerDay >= 3 ? `${c.morningHours}h + ${c.noonHours}h + ${c.eveningHours}h per day` : `${c.morningHours}h morning + ${c.eveningHours}h evening per day`}</div>
             </div>
           ))}
         </div>

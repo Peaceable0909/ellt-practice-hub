@@ -1,10 +1,10 @@
 // ─── ELLTPulse Study Plan Builder ────────────────────────────────────────────
 
 export const PERIOD_CONFIG = {
-  '1_week':  { label: '1 Week',   days: 7,  morningHours: 2, eveningHours: 2, desc: 'Intensive crash course — 4hrs daily', description: 'Best for last-minute preparation. 4 hours of focused study every day.' },
-  '2_weeks': { label: '2 Weeks',  days: 14, morningHours: 2, eveningHours: 2, desc: 'Focused preparation — 4hrs daily',  description: 'Good for students who need a solid final push. Covers all 4 skills.' },
-  '3_weeks': { label: '3 Weeks',  days: 21, morningHours: 2, eveningHours: 2, desc: 'Thorough preparation — 4hrs daily', description: 'Comprehensive preparation with time to improve weak areas significantly.' },
-  '1_month': { label: '1 Month',  days: 30, morningHours: 2, eveningHours: 2, desc: 'Complete preparation — 4hrs daily', description: 'Full preparation with review days, mock tests, and all 4 skills covered deeply.' },
+  '1_week':  { label: '1 Week',   days: 7,  morningHours: 2, noonHours: 1.5, eveningHours: 2, sessionsPerDay: 3, desc: 'Maximum intensity — 5.5hrs daily', description: '5.5 hours daily · 3 sessions · maximum intensity. Best for last-minute preparation.' },
+  '2_weeks': { label: '2 Weeks',  days: 14, morningHours: 2, noonHours: 1.5, eveningHours: 2, sessionsPerDay: 3, desc: 'Intensive preparation — 5.5hrs daily', description: '5.5 hours daily · 3 sessions · intensive. Good for students who need a solid final push.' },
+  '3_weeks': { label: '3 Weeks',  days: 21, morningHours: 2, eveningHours: 2, sessionsPerDay: 2, desc: 'Thorough preparation — 4hrs daily', description: '4 hours daily · 2 sessions · thorough. Comprehensive preparation with time to improve weak areas.' },
+  '1_month': { label: '1 Month',  days: 30, morningHours: 2, eveningHours: 2, sessionsPerDay: 2, desc: 'Complete preparation — 4hrs daily', description: '4 hours daily · 2 sessions · steady pace. Full preparation with review days, mock tests, and all 4 skills.' },
 }
 
 // Listening — 22 tests
@@ -71,6 +71,38 @@ function makeMorning(dayType, idx) {
   }
 }
 
+function makeAfternoon(dayType, idx) {
+  if (dayType === 'mock' || dayType === 'mock_prep') return {
+    type: 'reading', testId: pick(R, idx+1), duration: 90,
+    label: 'Reading + Exam Strategy',
+    tasks: [
+      { skill:'reading', testId: pick(R, idx+1), label:'Reading Passage' },
+      { skill:'review',  testId: null,            label:'Exam Strategy' },
+    ],
+  }
+  if (dayType === 'review') return {
+    type: 'review', testId: null, duration: 90,
+    label: 'Afternoon Review',
+    tasks: [{ skill:'review', testId:null, label:'Review & Consolidate' }],
+  }
+  if (dayType === 'vocab') return {
+    type: 'writing', testId: pick(W, idx+4), duration: 90,
+    label: 'Writing + Vocab',
+    tasks: [
+      { skill:'writing', testId: pick(W, idx+4), label:'Writing Task' },
+      { skill:'vocab',   testId: null,            label:'Vocabulary Drill' },
+    ],
+  }
+  return {
+    type: 'writing', testId: pick(W, idx+3), duration: 90,
+    label: 'Writing + Vocab',
+    tasks: [
+      { skill:'writing', testId: pick(W, idx+3), label:'Writing Task' },
+      { skill:'vocab',   testId: null,            label:'Vocabulary Building' },
+    ],
+  }
+}
+
 function makeEvening(dayType, idx) {
   if (dayType === 'mock') return {
     type: 'mock', testId: null, duration: 180,
@@ -116,18 +148,21 @@ export function buildPlan(period, startDate = new Date().toISOString().slice(0,1
   const config = PERIOD_CONFIG[period]
   if (!config) return []
   const schedule = SCHEDULES[period] || SCHEDULE_30
+  const hasNoon = (config.sessionsPerDay || 2) >= 3
 
   return Array.from({ length: config.days }, (_, i) => {
     const dayType = schedule[i] || 'normal'
     const date = new Date(startDate)
     date.setDate(date.getDate() + i)
-    return {
+    const day = {
       day:     i + 1,
       date:    date.toISOString().slice(0, 10),
       dayType,
       morning: makeMorning(dayType, i),
       evening: makeEvening(dayType, i),
     }
+    if (hasNoon) day.noon = makeAfternoon(dayType, i)
+    return day
   })
 }
 
