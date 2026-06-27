@@ -141,6 +141,128 @@ For me personally, when choosing a phone, the things that matter most are batter
   },
 ]
 
+  {
+    id: 's8',
+    title: 'Remote Work',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'A global survey found that 70% of workers would prefer to work from home at least part of the time, yet many companies are now requiring staff to return to the office full-time.',
+    task: 'What are the advantages and disadvantages of working from home? Do you think companies should allow employees to choose where they work? Give your opinion and explain why.',
+    structure: [
+      'INTRO: The remote work debate — pandemic legacy and employer pushback',
+      'FOR remote work: flexibility, productivity, work-life balance, reduced commute',
+      'AGAINST: isolation, collaboration difficulties, home distractions, career progression',
+      'PERSONAL: Your own experience or someone you know who has worked remotely',
+      'CLOSE: Hybrid as the solution — or does it depend on the role?',
+    ],
+    model: `The case for remote work is compelling. Without a commute, workers reclaim hours every week that can be spent on rest, family, or exercise. Many people report being more productive at home because they face fewer interruptions than in an open-plan office. The flexibility also allows people with caring responsibilities to manage their lives more effectively, which benefits both individuals and society.
+
+However, I understand why many employers are concerned. Collaboration suffers when teams are dispersed. The spontaneous conversation that happens when colleagues share a space — the kind that leads to creative ideas and faster problem-solving — is very difficult to replicate on a video call. There is also evidence that remote workers can feel isolated and overlooked when it comes to promotions, simply because they are less visible to management.
+
+I think the ideal model is a hybrid arrangement, where employees come into the office two or three days a week for collaborative work and have the freedom to work from home for focused tasks. This retains the benefits of both environments while avoiding the worst of each.`,
+  },
+  {
+    id: 's9',
+    title: 'Fast Fashion',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'The fashion industry produces around 10% of global carbon emissions. Some campaigners are calling for a tax on cheap, disposable clothing.',
+    task: 'What are the advantages and disadvantages of cheap, fast fashion? Do you think it should be taxed or limited? Give your opinion.',
+    structure: [
+      'INTRO: Fast fashion — affordable clothing or environmental disaster?',
+      'PROS: Accessibility, affordability for lower-income consumers, self-expression',
+      'CONS: Environmental damage, poor working conditions, throwaway culture',
+      'PERSONAL: Your own relationship with clothing — how often do you buy, and why?',
+      'CLOSE: Tax, regulation, or education — which works best?',
+    ],
+    model: `Fast fashion has made stylish clothing accessible to people who previously could not afford it. Being able to dress well regardless of income is not a trivial benefit — clothing affects how people feel about themselves and how others perceive them. For young people especially, being able to participate in fashion culture without spending large amounts of money has real social value.
+
+But the environmental cost is severe. The fashion industry is one of the world's largest polluters, and most cheap clothing ends up in landfill within a year of purchase. The workers who make these garments are often paid poverty wages in dangerous conditions. When I buy a t-shirt for a few pounds, someone somewhere in the supply chain has paid a much higher price.
+
+I believe a tax on the cheapest, lowest-quality fast fashion items is worth exploring, provided the revenue is used to support sustainable alternatives and not simply to penalise lower-income shoppers. Ultimately though, taxation alone will not change culture. Education about the true cost of cheap clothing — environmental and human — needs to accompany any policy change.`,
+  },
+  {
+    id: 's10',
+    title: 'Artificial Intelligence',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'A report by the World Economic Forum estimates that AI could displace 85 million jobs while also creating 97 million new ones.',
+    task: 'What are the main advantages and disadvantages of artificial intelligence in the workplace? Do you think AI is something to welcome or fear? Give your opinion.',
+    structure: [
+      'INTRO: AI is already changing work — but is this different from previous technology shifts?',
+      'PROS: Efficiency, removing dangerous or repetitive tasks, new industries, better decisions',
+      'CONS: Job displacement, bias in algorithms, loss of human judgment, concentration of power',
+      'PERSONAL: A job or task you know that has already been affected by AI',
+      'CLOSE: Regulation and retraining — can we manage the transition fairly?',
+    ],
+    model: `Artificial intelligence is already making certain tasks faster and more accurate than humans can manage. In medicine, AI can analyse thousands of scans in the time it takes a doctor to review ten, catching patterns that human eyes might miss. In logistics, it optimises routes in real time in ways that save fuel and reduce emissions. These are genuine benefits that improve lives.
+
+The concern I take most seriously is not that AI will eliminate all jobs — history shows that technology tends to create new roles even as it destroys old ones — but that the transition will be deeply unequal. The new jobs created by AI require skills that many displaced workers do not have, and retraining takes time and money that individuals and governments may not invest quickly enough.
+
+I think AI is ultimately something to welcome, but only if it is accompanied by serious investment in education, retraining, and the regulation of how it is deployed. Technology that benefits only shareholders while impoverishing workers is not progress — it is just a different kind of inequality.`,
+  },
+  {
+    id: 's11',
+    title: 'Urban Green Spaces',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'Research from the University of Exeter found that people who spend at least two hours per week in nature report significantly better health and wellbeing.',
+    task: 'How important are parks and green spaces in cities? Should governments invest more in them? Give your opinion with examples.',
+    structure: [
+      'INTRO: Cities are growing — but are they becoming less liveable?',
+      'FOR green spaces: mental health, physical activity, biodiversity, community gathering',
+      'AGAINST investment: cost, land scarcity, priorities like housing or transport',
+      'PERSONAL: A green space that has mattered to you or your community',
+      'CLOSE: The case that green space is infrastructure, not a luxury',
+    ],
+    model: `Parks and green spaces play a role in city life that is easy to overlook until they are threatened. Research consistently shows that access to nature reduces stress and anxiety, encourages physical activity, and improves mental health. During periods of lockdown, the value of local parks became suddenly visible — they were, for many people, their only contact with open space and fresh air.
+
+Beyond individual wellbeing, urban green spaces serve important environmental functions. Trees filter air pollution, absorb rainwater that would otherwise overwhelm drainage systems, and provide habitat for urban wildlife. As climate change makes cities hotter, green space is also a critical tool for managing urban heat — a well-treed street can be several degrees cooler than a concrete one.
+
+I think governments need to treat green space as infrastructure rather than a luxury. We would not accept a city without roads or schools because of the cost. Parks deserve the same status, particularly in dense urban areas where they may be the only outdoor space available to children and elderly residents. Investing in green space is investing in public health, and that should be a priority.`,
+  },
+  {
+    id: 's12',
+    title: 'University Education',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'In many countries, the cost of a university degree has risen sharply, while graduate salaries have not kept pace. Some argue that vocational training offers better value.',
+    task: 'Is a university degree still worth getting? Discuss the advantages and disadvantages of higher education compared to vocational training. Give your opinion.',
+    structure: [
+      'INTRO: The changing value of a degree in a changing economy',
+      'FOR university: critical thinking, networks, research skills, breadth of knowledge',
+      'FOR vocational: practical skills, faster earnings, direct employment path, lower debt',
+      'PERSONAL: Your own experience or the experience of people you know',
+      'CLOSE: Is the right choice about the field, the person, or the system?',
+    ],
+    model: `A university degree still offers genuine advantages that vocational training does not easily replicate. The experience of spending three or four years studying a subject in depth — engaging with ideas, learning to construct arguments, working with people from different backgrounds — develops capacities that serve graduates across many different careers. The professional networks formed at university also have long-term value.
+
+However, I think the honest answer is that a degree is not equally valuable in every field. In areas like technology, construction, and healthcare, vocational qualifications lead to employment faster, often pay better in the early years, and do not saddle young people with decades of debt. The cultural assumption that university is the only respectable path after school has led many students to take degrees that do not serve them well.
+
+I believe the question should always be: what kind of career do you want, and what is the most direct path to it? For some people, that is a degree. For others, an apprenticeship or vocational qualification is a better investment. What we should resist is a system that treats vocational paths as second-best, because they are not.`,
+  },
+  {
+    id: 's13',
+    title: 'Cultural Heritage',
+    stage: 'Stage 2',
+    duration: '3–5 min',
+    source: 'Several major museums, including the British Museum, are under pressure to return artefacts taken from other countries during the colonial era.',
+    task: 'Do you think museums should return historical artefacts to their countries of origin? Discuss both sides of the argument and give your opinion.',
+    structure: [
+      'INTRO: Who owns the past? The museum repatriation debate',
+      'FOR return: national identity, colonial justice, cultural connection, original context',
+      'AGAINST return: preservation, universal access, safety concerns, legal ownership',
+      'PERSONAL: A cultural site, object, or tradition that matters to your identity',
+      'CLOSE: Can both sides be satisfied — loans, replicas, shared stewardship?',
+    ],
+    model: `The argument for returning artefacts is rooted in justice. Many objects in European museums were taken during colonial occupation — not purchased or gifted, but removed by force or under coercion. Returning them is an acknowledgement that this was wrong and a meaningful step towards repairing relationships between nations. Beyond the political dimension, there is something deeply significant about a culture being able to see its own heritage at home rather than behind glass in a foreign capital.
+
+Those who argue against return often point to preservation and access. Some artefacts were rescued from conflict or neglect and are now better preserved in their current homes. Major museums also attract millions of visitors from around the world, giving objects a global audience they might not have in smaller institutions. These are not trivial points.
+
+I think the best path forward involves genuine dialogue and flexible arrangements. Some objects should be returned unconditionally. Others might be managed through long-term loans, shared exhibitions, or high-quality replicas that allow both countries to benefit. What matters most is that these decisions are made collaboratively and respectfully, not defensively by institutions reluctant to give anything back.`,
+  },
+]
+
 // ─── NEW: IELTS Speaking Topics ───────────────────────────────────────────────
 
 export const SPEAKING_IELTS = [

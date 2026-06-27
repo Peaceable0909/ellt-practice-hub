@@ -27,8 +27,8 @@ const W = [
   'wi4','wi5','wi6','wi7','wi8','wi9',
   'wi10','wi11','wi12','wi13','wi14',
 ]
-// Speaking — 9 topics
-const S = ['s1','s2','s3','s4','s5','s6','s7','si1','si2']
+// Speaking — 15 topics
+const S = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','si1','si2']
 
 function pick(arr, i) { return arr[i % arr.length] }
 
