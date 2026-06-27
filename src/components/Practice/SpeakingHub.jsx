@@ -387,6 +387,15 @@ export default function SpeakingHub({ results, addResult, userId }) {
               feedback={feedback.replace(/^BAND:.*\n/,'').replace(/FLUENCY:.*\n/,'').replace(/COHERENCE:.*\n/,'').replace(/VOCABULARY:.*\n/,'').replace(/GRAMMAR:.*\n/,'').replace(/CONTENT:.*\n/,'').replace(/TONE:.*\n/,'').trim()}
               accentColor="var(--coral)"
             />
+            {selected.model && (
+              <div style={{ marginTop:14, background:'var(--coralBg)', border:'2px solid var(--coralBdr)', borderRadius:14, overflow:'hidden' }}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--coralBdr)' }}>
+                  <div style={{ fontSize:11, fontWeight:900, color:'var(--coral)', textTransform:'uppercase', letterSpacing:'0.5px' }}>Example Response</div>
+                  <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:2 }}>How a strong B2/C1 speaker might approach this topic</div>
+                </div>
+                <div style={{ padding:'14px 16px', fontSize:13, color:'var(--textM)', lineHeight:1.8, fontWeight:600, whiteSpace:'pre-line' }}>{selected.model}</div>
+              </div>
+            )}
           </div>
         )}
       </div>

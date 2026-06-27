@@ -339,6 +339,14 @@ ${essay}
           )}
         </div>
 
+        {/* Tip */}
+        {selected.tip && (
+          <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'12px 16px', marginBottom:16 }}>
+            <div style={{ fontSize:11, fontWeight:900, color:'var(--amber)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:4 }}>Tip</div>
+            <div style={{ fontSize:13, color:'var(--text)', fontWeight:600, lineHeight:1.6 }}>{selected.tip}</div>
+          </div>
+        )}
+
         {/* Input mode selector */}
         <div style={{ display: 'flex', background: 'var(--bg3)', borderRadius: 14, padding: 4, marginBottom: 16, gap: 4 }}>
           {[
@@ -387,6 +395,12 @@ ${essay}
               <div style={{ background: 'var(--greenBg)', border: '2px solid var(--greenBdr)', borderRadius: 14, padding: 16, marginBottom: 14 }}>
                 <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 900, letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: 8 }}>Model Answer — Band {selected.band}</div>
                 <p style={{ fontSize: 13, color: 'var(--textM)', lineHeight: 1.8, whiteSpace: 'pre-line', fontWeight: 600 }}>{selected.model}</p>
+                {selected.feedback && (
+                  <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--greenBdr)' }}>
+                    <div style={{ fontSize:11, fontWeight:900, color:'var(--green)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:4 }}>What Makes This Work</div>
+                    <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, lineHeight:1.6 }}>{selected.feedback}</div>
+                  </div>
+                )}
               </div>
             )}
             {feedback && <FeedbackBlock feedback={feedback} accentColor="var(--purple)" />}
@@ -420,6 +434,12 @@ ${essay}
               <div style={{ marginTop: 10, background: 'var(--greenBg)', border: '2px solid var(--greenBdr)', borderRadius: 14, padding: 16 }}>
                 <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 900, letterSpacing: '0.6px', textTransform: 'uppercase', marginBottom: 8 }}>Model Answer — Band {selected.band}</div>
                 <p style={{ fontSize: 13, color: 'var(--textM)', lineHeight: 1.8, whiteSpace: 'pre-line', fontWeight: 600 }}>{selected.model}</p>
+                {selected.feedback && (
+                  <div style={{ marginTop:12, paddingTop:12, borderTop:'1px solid var(--greenBdr)' }}>
+                    <div style={{ fontSize:11, fontWeight:900, color:'var(--green)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:4 }}>What Makes This Work</div>
+                    <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, lineHeight:1.6 }}>{selected.feedback}</div>
+                  </div>
+                )}
               </div>
             )}
           </div>

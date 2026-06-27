@@ -419,6 +419,41 @@ function OverviewTab({ results, streak }) {
         })}
       </div>
 
+      {/* Weakest skill recommendation */}
+      {(() => {
+        const withData = skills
+          .map(skill => {
+            const sr   = results.filter(r => r.skill === skill)
+            const band = avgBand(sr)
+            const pc   = pct(sr)
+            const score = band ? (parseFloat(band)/9)*100 : pc
+            return { skill, score, count: sr.length, band, pc }
+          })
+          .filter(s => s.count >= 1 && s.score != null)
+        if (withData.length < 2) return null
+        const worst = withData.reduce((a, b) => a.score < b.score ? a : b)
+        const best  = withData.reduce((a, b) => a.score > b.score ? a : b)
+        const worstDisplay = worst.band ? `Band ${worst.band}` : `${worst.pc}%`
+        const bestDisplay  = best.band  ? `Band ${best.band}`  : `${best.pc}%`
+        return (
+          <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'14px 16px' }}>
+            <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
+              <AlertTriangle size={18} color="var(--amber)" style={{ flexShrink:0, marginTop:2 }} />
+              <div>
+                <div style={{ fontSize:13, fontWeight:900, color:'var(--text)', marginBottom:4 }}>
+                  Focus on {SKILL_LABEL[worst.skill]} this week
+                </div>
+                <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, lineHeight:1.6 }}>
+                  Your {SKILL_LABEL[worst.skill].toLowerCase()} average is {worstDisplay} — your lowest skill.
+                  {best.skill !== worst.skill && ` Your ${SKILL_LABEL[best.skill].toLowerCase()} is strongest at ${bestDisplay}.`}
+                  {' '}Spend extra time here before your exam.
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* 7-day activity */}
       <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:16, boxShadow:'var(--shadow)' }}>
         <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:12 }}>Activity — Last 7 Days</div>

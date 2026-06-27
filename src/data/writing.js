@@ -6,6 +6,8 @@ export const WRITING = [
     task: 'In your experience, what are the pros and cons of working in groups when studying?',
     minWords: 200,
     band: 8,
+    tip: 'Start with a clear position statement. For pros and cons essays, use one paragraph per side with a specific example in each.',
+    feedback: 'Notice how the model opens by stating a position, then gives one advantages paragraph and one disadvantages paragraph, each grounded in a concrete example. The conclusion refers back to the opening stance — this circularity signals a well-planned response.',
     model: `In my opinion, working in groups is an essential part of studying at university. Many teachers encourage this type of learning because they believe it improves students' cooperation and motivation. From my own experience, it brings a lot of benefits, though it can also cause certain difficulties.
 
 One advantage of group work is that it gives students the chance to exchange ideas and develop their critical thinking. When people study together, they usually become more creative, as they are pushed to explain their thoughts to others. It also helps them to manage time more efficiently and to stay motivated when they would have given up if studying alone.
@@ -21,6 +23,8 @@ To conclude, I think group work is generally positive, but it requires good orga
     task: 'In your experience, what are the advantages and disadvantages of taking a short break from digital technology?',
     minWords: 200,
     band: 8,
+    tip: "The prompt says 'in your experience' — use a real or imagined personal example to support each point. This makes your writing feel more genuine and natural.",
+    feedback: "The model uses first-person experience ('I tried doing a short digital detox last year') to anchor both sides. Notice the nuanced final point about the stress of returning online — this elevates it above a simple pros/cons list and shows sophisticated thinking.",
     model: `Nowadays, many people choose to stay away from digital tools for a few days. They feel that phones and social media take too much of their time and attention. I tried doing a short digital detox last year, and I realised that this experience can bring both advantages and disadvantages.
 
 To start with, switching off from technology allows you to feel calmer and more concentrated. Without all the notifications and messages, your brain can rest and you can focus on what is happening around you. During my break, I spent more time outdoors and I felt I could actually enjoy small things again. Another positive aspect is that it strengthens relationships, because you speak face to face instead of just texting.
@@ -36,6 +40,8 @@ All in all, taking a short break from digital tools can be very refreshing, but 
     task: 'In your experience, what are the advantages and disadvantages of sending and receiving mail through the post instead of electronic mail?',
     minWords: 250,
     band: 10,
+    tip: "This task asks for 'in your experience' — include a personal example. Structure: intro + advantage of post + disadvantage of post + conclusion. Aim for 250 words minimum.",
+    feedback: "The model distinguishes between emotional value (handwritten letters feel genuine) and practical drawbacks (slow, resource-heavy). The conclusion avoids simply repeating the intro by reflecting on the deeper meaning of communication — this is what earns Band 10.",
     model: `In recent years, traditional letter services have almost disappeared in many countries, replaced by electronic communication. Although digital messages are faster and cheaper, I still believe that sending and receiving physical mail has some unique values which are difficult to substitute entirely.
 
 One of the main advantages of postal mail is its personal and emotional character. A handwritten letter often feels more genuine and thoughtful than an email typed in a hurry. The effort of writing, sealing and posting something gives the message a sense of importance that online communication rarely achieves. In addition, physical letters are tangible objects that can be kept as memories; for instance, many people still treasure postcards or old notes from friends and relatives.
@@ -51,6 +57,8 @@ To conclude, while electronic communication clearly dominates modern life, tradi
     task: 'In your experience, what are the advantages and disadvantages of working from home? Discuss both sides and give your own opinion.',
     minWords: 220,
     band: 8,
+    tip: "The prompt asks you to 'discuss both sides AND give your opinion'. Don't skip the opinion — state it clearly in your conclusion, not just 'it depends'.",
+    feedback: "The model ends with a specific recommendation (hybrid model) rather than a vague conclusion. Committing to a reasoned position is what separates a Band 7–8 answer from a Band 5 — the examiner wants to see you reach a clear view.",
     model: `In recent years, working from home has become a common arrangement, particularly after the global pandemic forced many organisations to rethink traditional office life. This shift has produced both clear benefits and noticeable problems.
 
 The biggest advantage is flexibility. Without the daily commute, employees recover hours that can be spent with family, exercising, or simply sleeping more. This often translates into better mental health and higher productivity for tasks that require deep concentration. Working from home can also reduce expenses, since people spend less on transport, lunch and work clothes.
@@ -66,6 +74,8 @@ In conclusion, working from home suits some people and some jobs very well, but 
     task: 'What are the advantages and disadvantages of keeping a daily journal or diary? Discuss both sides and give your own opinion.',
     minWords: 200,
     band: 7,
+    tip: 'For 200-word tasks, aim for 2 supporting points per side. Use simple connectors — On the positive side, However, In conclusion — to keep your structure clear and easy to follow.',
+    feedback: "This Band 7 model shows that clear structure matters more than complex vocabulary. The personal voice ('For me, I prefer to write only sometimes') feels authentic — examiners reward genuine personal reflection even when the language is not especially advanced.",
     model: `Nowadays many people start writing a diary because they think it can help to reduce stress and understand their feelings better. I tried this activity a few times, and in my opinion it has some good effects but also a few disadvantages.
 
 On the positive side, keeping a journal can make your mind more calm. When you write what happens during the day, you can think more clearly and see things from different sides. It also helps to remember nice moments and see how you changed over time. Another advantage is that writing a diary in English or another language can practise your writing skills.
@@ -83,6 +93,8 @@ export const WRITING_TASK1 = [
     prompt: 'The chart below gives attendance figures for Grandville Stadium from 2017, which are projected through 2030 after a major improvement project.',
     task: 'Summarize the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
     minWords: 150, band: 8,
+    tip: 'Start with an overview sentence naming the most important overall trend. For bar charts, compare both the direction of change AND the size of change across categories.',
+    feedback: "The model leads with a clear overview before detailing each event type. Notice the precise comparative language: 'a fourfold increase from 2017', 'the largest proportional growth of around 300%'. These exact comparisons are what earn top marks in Task 1.",
     chartDescription: 'Bar chart showing projected annual attendance after 2019 stadium improvements. Three event types: Theater, Sporting Events, Concerts. Years: 2017 (blue), 2020 (orange), 2030 (yellow). Theater: ~12k → ~16k → ~50k. Sporting Events: ~150k → ~157k → ~163k. Concerts: ~30k → ~44k → ~120k.',
     model: `The bar chart illustrates the actual and projected annual attendance at Grandville Stadium for three event types — theatre, sporting events, and concerts — across three years: 2017, 2020, and 2030, following a major improvement project completed in 2019.
 
@@ -102,6 +114,8 @@ export const WRITING_IELTS = [
     prompt: 'An increasing number of schools provide tablets and laptop computers for students to use in school, replacing books and other printed materials like exams and assignments.',
     task: 'What are the advantages and disadvantages of this trend? Write at least 250 words.',
     minWords: 250, band: 8,
+    tip: "For 'advantages and disadvantages' essays at 250+ words, devote one clear paragraph to each side. Open each paragraph with a topic sentence that names the point before supporting it.",
+    feedback: "The model uses strong topic sentences ('One of the main advantages...', 'However, there are notable drawbacks') so the examiner can follow the argument instantly. The conclusion calls for clear guidelines rather than rejecting technology — this balanced stance is more sophisticated than a simple verdict.",
     model: `In recent years, digital devices such as tablets and laptops have become increasingly common in educational settings, gradually replacing traditional textbooks, printed assignments and paper-based examinations. While this shift brings a number of significant benefits, it also introduces challenges that cannot be ignored.
 
 One of the main advantages of using digital devices in schools is the ability to provide students with immediate access to a vast amount of information. Instead of relying on a single textbook, students can explore multiple sources, watch educational videos, and access updated content at any time. This not only enriches the learning experience but also helps develop independent research skills that are essential in the modern world. Furthermore, devices can be tailored to meet the needs of individual learners; teachers can assign different tasks to students based on their abilities, making lessons more inclusive and personalized. From an environmental standpoint, reducing the use of paper also contributes positively to sustainability.
@@ -123,6 +137,8 @@ export const WRITING_IELTS_2 = [
     task: 'Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
     minWords: 150,
     band: 7,
+    tip: 'When a chart shows multiple groups (e.g. men/women, full/part-time), identify the most interesting comparison and make it your overview. Select the most significant data points rather than describing every bar.',
+    feedback: "The model correctly identifies the biggest story (women's part-time participation grew dramatically) and uses it to frame the specific data. The final sentence — 'balancing education alongside other commitments' — adds interpretation that goes beyond pure description.",
     chartDescription: 'Bar chart showing men and women in further education in Britain across three time periods. Data split by full-time and part-time study. Key trends: women increasingly outnumber men in part-time study; full-time numbers rise for both genders over the periods; women show the most dramatic growth in participation.',
     model: `The bar chart illustrates the participation of men and women in further education in Britain across three time periods, comparing those studying full-time and part-time.
 
@@ -142,6 +158,8 @@ In conclusion, while male participation remained relatively stable, the most sig
     task: 'To what extent do you agree or disagree? Give reasons for your answer and include any relevant examples from your knowledge or experience. Write at least 250 words.',
     minWords: 250,
     band: 7,
+    tip: "'To what extent do you agree?' means you must stake a clear position. A nuanced answer — largely agree with X, but not Y — often scores higher than a simple yes/no, as long as you argue it consistently throughout.",
+    feedback: "The model takes a split position: agree on encouraging alternatives, but disagree on international laws. This is sophisticated — it shows the examiner you can distinguish between two related proposals rather than treating the whole question as a single yes/no.",
     model: `The rapid rise in car ownership over the past century has undeniably transformed society, bringing both convenience and serious consequences. While I largely agree that alternative transport should be encouraged and that some regulation of car use is necessary, I believe that introducing international laws to control car ownership may be an overly restrictive approach.
 
 The environmental case for reducing car dependency is compelling. Vehicles remain one of the leading contributors to carbon dioxide emissions and air pollution in urban areas. Cities such as Oslo and Amsterdam have demonstrated that investing in public transport, cycling infrastructure, and pedestrianised zones can significantly reduce traffic congestion while improving public health. Encouraging such alternatives through subsidies, improved public transport networks, and urban planning is a practical and broadly supported policy direction.
@@ -164,6 +182,8 @@ export const WRITING_OFFICIAL_2023 = [
     prompt: 'The graph below shows radio and television audiences throughout the day in 1992.',
     task: 'Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.',
     minWords: 150, band: 7,
+    tip: "For line graphs, describe the overall direction of each line in your overview. Use time markers ('in the morning', 'by the late evening') and comparison language ('overtook', 'fell steadily') throughout.",
+    feedback: "The model is logically sequenced: overview → radio → TV → summary. Notice how it explains why the patterns exist ('presumably during the breakfast and commuting period') — this kind of interpretation is worth including when the reason is obvious from the data.",
     chartDescription: 'Line graph showing the percentage of the UK population watching TV or listening to radio at different times of day in 1992. Radio peaks in the morning (around 7-8am). TV audience grows through the day, peaking in the evening (around 8-9pm). The two lines cross mid-morning and again in the early afternoon. Radio audience is higher than TV from early morning until around midday. TV overtakes radio from lunchtime onwards.',
     model: `The line graph illustrates the proportion of the UK population who listened to the radio or watched television at various points throughout the day in 1992.
 
@@ -182,6 +202,8 @@ In conclusion, radio was the dominant medium in the mornings while television cl
     prompt: 'Children who are brought up in families that do not have large amounts of money are better prepared to deal with the problems of adult life than children brought up by wealthy parents.',
     task: 'To what extent do you agree or disagree with this opinion? Give reasons for your answer and include any relevant examples from your own knowledge or experience. Write at least 250 words.',
     minWords: 250, band: 7,
+    tip: "'To what extent do you agree?' — state your position in the opening paragraph and maintain it consistently. Examiners want to see you argue a position, not just list both sides without committing.",
+    feedback: "The model acknowledges the truth in the statement while arguing against it as a universal rule. The final sentence gives a specific, memorable alternative explanation ('parenting style, values...matter far more') — this makes the conclusion much stronger than simply restating the two sides.",
     model: `The idea that children raised in less affluent households are better equipped for the challenges of adult life is a view held by many, and while there is some truth to it, I believe the relationship between wealth and life preparation is more nuanced than this statement suggests.
 
 On the one hand, children from lower-income families may indeed develop important qualities that help them navigate adult life. Growing up with limited resources can foster resilience, resourcefulness, and a strong work ethic. These children often learn from an early age to manage money carefully, to persevere through difficulty, and to appreciate what they have. Such qualities can be invaluable in adulthood, particularly when facing financial hardship or professional setbacks. Furthermore, having experienced real-world challenges as children, they may be less likely to feel overwhelmed by the demands of independent adult life.
@@ -197,6 +219,8 @@ In conclusion, while growing up without financial privilege can build certain ch
     prompt: 'International tourism has brought enormous benefit to many places. At the same time, there is concern about its impact on local inhabitants and the environment.',
     task: 'Do the disadvantages of international tourism outweigh the advantages? Give reasons for your answer and include any relevant examples. Write at least 250 words.',
     minWords: 250, band: 7,
+    tip: "'Do the disadvantages outweigh the advantages?' — you must give a clear verdict in your opening paragraph. Your body paragraphs then prove that verdict with supporting evidence.",
+    feedback: "The model introduces its verdict immediately ('advantages still outweigh'), devotes a paragraph to each side, then adds a third paragraph proposing sustainable tourism as a solution. This solution paragraph is what elevates it — it shows the examiner you can think beyond a simple two-sided debate.",
     model: `International tourism has become one of the world's largest industries, generating significant economic benefits while simultaneously raising serious concerns about its environmental and social impact. In my view, the advantages of international tourism still outweigh the disadvantages, provided that it is managed responsibly.
 
 The economic benefits of tourism are substantial and wide-ranging. It creates employment across numerous sectors including hospitality, transport, retail, and entertainment. In many developing nations, tourism revenue is a vital source of foreign exchange and government income. Countries such as Thailand, Greece, and Kenya rely heavily on tourism to sustain their economies and fund public services. Additionally, tourism can help preserve cultural heritage by providing funding for the restoration of historic sites and encouraging communities to maintain their traditions.
@@ -220,6 +244,8 @@ export const WRITING_IELTS_3 = [
     chartDescription: 'Bar chart comparing UK and France spending (in £) on cars, computers, books, perfume and cameras in 2010.',
     minWords: 150,
     band: 9,
+    tip: 'For bar charts comparing two groups, your overview should state (1) which group is generally higher, and (2) which category is most dominant. Support every claim with a specific figure.',
+    feedback: "The model's overview covers both the main pattern (UK spent more overall) and the notable exception (France spent more on some items). Notice how every claim is supported by a specific number — this is what transforms mere description into Band 9 analysis.",
     model: `The chart illustrates the amount of money spent on five consumer goods (cars, computers, books, perfume and cameras) in France and the UK in 2010. Units are measured in pounds sterling.
 
 Overall, the UK spent more money on consumer goods than France in the period given. Both the British and the French spent most of their money on cars, whereas the least amount was spent on perfume in the UK compared to cameras in France.
@@ -238,6 +264,8 @@ On the other hand, France spent more on the remaining goods. Above £350,000 was
     chartDescription: 'Line graph showing grams consumed per person per week of margarine, butter and low-fat spreads from 1981 to 2007.',
     minWords: 150,
     band: 9,
+    tip: "When multiple lines show contrasting trends, explicitly contrast them in your overview using 'while' or 'whereas'. Then give each line its own detailed treatment with specific data points.",
+    feedback: "The model's overview cleanly contrasts the falling trend (margarine/butter) with the rising trend (low-fat spreads) using 'while'. It then gives each line precise treatment, including exact peak year and value for butter — the kind of detail that earns Band 9.",
     model: `The line graph illustrates the amount of three kinds of spreads consumed from 1981 to 2007. Units are measured in grams per person per week.
 
 Overall, the consumption of margarine and butter decreased over the period, while low-fat and reduced spreads rose. At the start, butter was the most popular spread, but by the end low-fat spreads had become most widely consumed.
@@ -256,6 +284,8 @@ In contrast, low-fat and reduced spreads only appeared in 1996 at around 10 gram
     chartDescription: 'Table showing Indian full-time students in 6 UK universities in 2020/21 and 2021/22 with % change.',
     minWords: 150,
     band: 9,
+    tip: "For table tasks, don't describe every row — identify the extremes (highest growth, lowest growth, largest numbers) and build your answer around them. Always give an overview before the detail.",
+    feedback: "The model focuses on the two most striking statistics (Sheffield's 187.7% and Coventry's 121.3%) before addressing lower-growth institutions. This selective approach — choosing the most significant data — is exactly what examiners reward in Band 9 responses.",
     model: `The table gives information about full-time students from India studying at six British universities in two academic years (2020/21 and 2021/22), as well as the percentage increase.
 
 Overall, the greatest increase in Indian students was seen at Sheffield University, while BBP University showed the lowest percentage growth. Coventry University had the most Indian students in the second year.
@@ -275,6 +305,8 @@ export const WRITING_IELTS_4 = [
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Grouped bar chart showing weekly hours spent on 7 activities in 2002 vs 2007.',
     minWords: 150, band: 9,
+    tip: "For grouped bar charts comparing two years, group your discussion by direction of change — what increased vs. what decreased — rather than going activity by activity. This creates much cleaner paragraphs.",
+    feedback: "The model splits activities into two groups (increased: TV, shopping, pubs; decreased: homework, sport, reading, cinema) and handles each group together. This organisation is far more effective than listing all seven activities one by one, and it's exactly how Band 9 responses are structured.",
     model: `The bar chart compares the number of hours per week that teenagers in Chester spent on seven activities in 2002 and 2007.
 
 Overall, watching television was by far the most popular activity in both years. While time spent on TV, shopping and going to pubs or discos increased, the hours devoted to homework, sport, reading and cinema all fell over the period.
@@ -291,6 +323,8 @@ In contrast, the hours devoted to homework fell from around 20 to 14, while spor
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Bar chart showing digital game sales (billions USD) by type from 2000 to 2006.',
     minWords: 150, band: 9,
+    tip: 'When multiple categories are shown over time, identify which is dominant throughout AND which shows the fastest growth — these two observations often make the strongest overview.',
+    feedback: "The model's overview identifies both key patterns: handheld's consistent dominance and online/mobile's rapid late-period growth. Notice how it uses 'negligible' for the starting point and 'grew considerably' for the trend — varied vocabulary avoids repeating the same words.",
     model: `The bar chart illustrates global sales of four types of digital games — handheld, console, online and mobile — between 2000 and 2006, measured in billions of US dollars.
 
 Overall, handheld games consistently dominated sales throughout the period, while online and mobile games showed the most significant growth toward the end of the period.
@@ -307,6 +341,8 @@ Online and mobile games began with negligible sales but grew considerably. Onlin
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Line graph showing weekly grams consumed of beef, chicken, lamb and fish 1979–2004.',
     minWords: 150, band: 9,
+    tip: "When lines cross on a graph, mention the crossover point specifically — 'chicken surpassed beef in the early 1990s'. Examiners reward this kind of precise comparison across lines.",
+    feedback: "The model makes the crossover point the narrative centre of the answer, using it to contrast chicken's dramatic rise with beef's steady decline. The observation that fish 'hovered consistently' uses a vivid verb that demonstrates vocabulary range.",
     model: `The line graph illustrates the weekly consumption in grams of four types of meat — beef, chicken, lamb and fish — in a European country over a 25-year period from 1979 to 2004.
 
 Overall, the most striking trend is the dramatic rise in chicken consumption and the notable decline in beef and lamb. Fish consumption remained relatively stable throughout the period.
@@ -323,6 +359,8 @@ In contrast, chicken saw a dramatic increase. Beginning at approximately 150 gra
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Table: city, year opened, km of route, stations, passengers per year.',
     minWords: 150, band: 9,
+    tip: 'For tables with multiple columns, highlight what makes each entry stand out (oldest, longest, most passengers) rather than describing every cell. Always give an overview before the detail.',
+    feedback: "The model immediately highlights the two most remarkable facts (London oldest, Tokyo most passengers) and uses them as anchors. Notice how 'despite its size' acknowledges an apparent contradiction — this kind of analytical observation, not just description, is what earns Band 9.",
     model: `The table gives information about the underground railway systems in six cities worldwide, including when they opened, the total route length, number of stations and annual passenger figures.
 
 Overall, London has the oldest and most extensive underground system, while Tokyo carries by far the largest number of passengers each year. The newer systems in Washington DC and Kyoto are comparatively smaller in scale.
@@ -339,6 +377,8 @@ Paris, which opened in 1900, has 199 kilometres and 297 stations, with 1,191 mil
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Two pie charts comparing electricity sources in Germany and France in 2009.',
     minWords: 150, band: 9,
+    tip: 'For pie chart comparisons between two countries, identify the single biggest structural difference in your overview. Then devote a paragraph to each country, ending with what the contrast implies.',
+    feedback: "The model identifies France's nuclear dominance as the defining feature and contrasts it with Germany's mixed approach. The final sentence — France 'had a much lower carbon footprint' — adds real-world interpretation that goes beyond pure description.",
     model: `The pie charts compare the proportions of electricity generated from different energy sources in Germany and France in 2009.
 
 Overall, the most striking difference between the two countries is their reliance on nuclear power. France generated the vast majority of its electricity from nuclear sources, whereas Germany used a much more diverse mix of energy types.
@@ -355,6 +395,8 @@ Germany's electricity generation was more evenly distributed. Coal was the large
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Line graph showing billion tonne-km transported by road, water, rail, and pipeline 1974–2002.',
     minWords: 150, band: 9,
+    tip: "When one category clearly dominates, make that your overview anchor: 'Road transport was the most dominant throughout and saw the greatest growth.' Then address other modes in order of significance.",
+    feedback: "The model establishes road as dominant in the first sentence and never loses that thread. Notice how it handles pipeline transport in just one sentence — this proportionate treatment (less space for less significant data) shows strong analytical judgement.",
     model: `The line graph shows the quantity of goods transported in the UK from 1974 to 2002 by road, water, rail and pipeline, measured in billion tonne-kilometres.
 
 Overall, road transport was by far the most dominant mode throughout the period and saw the greatest growth. All other forms of transport showed more modest and stable patterns over the same period.
@@ -371,6 +413,8 @@ Rail transport began at approximately 40 billion tonne-kilometres in 1974 and fl
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Line graph showing turtle population trends in India from 1980 to 2012.',
     minWords: 150, band: 9,
+    tip: "When all lines move in the same direction (all declining), your overview should acknowledge this, then compare the degree of change between groups. Use specific start and end values for each species.",
+    feedback: "The model groups Olive Ridley and Leatherback (dramatic decline) together and gives Green turtles a separate sentence (most stable). The final conservation comment adds perspective without overstepping into speculation — this is exactly the right level of interpretation.",
     model: `The line graph illustrates changes in the populations of three turtle species — Olive Ridley, Leatherback and Green — in India between 1980 and 2012.
 
 Overall, all three species experienced population decline over the period, with Olive Ridley turtles showing the most dramatic fall. Green turtles remained the most stable of the three.
@@ -387,6 +431,8 @@ Green turtle numbers were the most stable of the three species, beginning at aro
     task: 'Write at least 150 words. You should spend about 20 minutes on this task.',
     chartDescription: 'Two pie charts comparing household spending categories in 1950 vs 2010.',
     minWords: 150, band: 9,
+    tip: "For pie charts comparing two time points, identify the category with the largest change as your overview anchor. Then describe increases and decreases in separate sections.",
+    feedback: "The model uses food (44% → 23%) as the anchor — the most dramatic change — and builds everything else around it. Notice how 'likely due to greater car ownership' and 'suggesting households were spending more on leisure' add interpretation rather than just stating numbers.",
     model: `The pie charts compare average household expenditure across five categories in 1950 and 2010.
 
 Overall, food spending decreased dramatically over the sixty-year period, while the proportions spent on housing and transport both rose considerably. The share devoted to clothing fell, while other expenditure increased.
