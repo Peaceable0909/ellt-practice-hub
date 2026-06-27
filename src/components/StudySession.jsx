@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { ChevronLeft, CheckCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, Sun, Moon } from 'lucide-react'
+import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, Sun, Moon } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
@@ -27,8 +27,64 @@ function resolveTest(skill, testId) {
   return pool.find(t => t.id === testId) || null
 }
 
-const SKILL_ICON = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, review: Star, vocab: Brain, mock: Star }
+const SKILL_ICON  = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, review: Star, vocab: Brain, mock: Star }
 const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--green)', speaking:'var(--purple)', review:'var(--coral)', vocab:'var(--teal)', mock:'var(--green)' }
+
+// ─── Vocabulary bank (32 B2/C1 academic words) ───────────────────────────────
+const VOCAB_BANK = [
+  { w:'ambiguous',   def:'open to more than one possible meaning',                          alts:['completely clear and easy to understand','impossible to change or reverse','relating only to one academic subject'] },
+  { w:'facilitate',  def:'make an action or process easier or smoother',                    alts:['prevent an unwanted outcome from occurring','examine something in great detail','require a specific condition to be met'] },
+  { w:'predominant', def:'present as the strongest or most noticeable element',             alts:['existing only in small or limited amounts','happening regularly at fixed intervals','connected to two or more different things'] },
+  { w:'subsequent',  def:'coming after or following something in time or order',            alts:['happening at exactly the same time as something else','existing before something else took place','unrelated to what came before'] },
+  { w:'accumulate',  def:'gather or build up gradually over time',                          alts:['distribute something equally among a group','reduce to a smaller or simpler form','present data in a structured way'] },
+  { w:'adequate',    def:'satisfactory or acceptable; good enough for a purpose',           alts:['extremely impressive or outstanding in quality','unable to meet the required standard','having two completely opposite qualities'] },
+  { w:'arbitrary',   def:'based on chance or personal whim rather than reason or system',   alts:['carefully planned according to a logical system','strongly influenced by the opinions of others','relating to official rules and regulations'] },
+  { w:'coherent',    def:'logical and consistent; easy to follow and understand',           alts:['made up of many unrelated parts','containing information that cannot be verified','showing a strong emotional response'] },
+  { w:'compensate',  def:'give something to reduce or balance the effect of something negative', alts:['increase the severity of a problem','describe something in careful detail','divide something into equal parts'] },
+  { w:'constitute',  def:'be a part of a whole; make up or form something',                 alts:['argue strongly against a particular view','reduce something to its most basic form','indicate a future possibility'] },
+  { w:'derive',      def:'obtain or develop something from a specified source',              alts:['refuse to accept the truth of something','combine two separate elements together','remove something permanently from a situation'] },
+  { w:'distinct',    def:'clearly different and separate from something else',               alts:['closely connected and difficult to separate','typical of a particular time or place','gradually changing from one form to another'] },
+  { w:'inevitable',  def:'certain to happen; impossible to avoid or prevent',                alts:['very unlikely to occur under normal conditions','dependent on a number of uncertain factors','able to be changed or reversed with effort'] },
+  { w:'inherent',    def:'existing permanently as a natural or essential part of something', alts:['added to something at a later stage','relating to external influences on a system','varying significantly depending on context'] },
+  { w:'marginalise', def:'treat someone or something as unimportant or peripheral',          alts:['give extra resources to a particular group','include something as a central feature','describe the positive qualities of something'] },
+  { w:'objective',   def:'not influenced by personal feelings; based on facts alone',        alts:['strongly guided by personal opinion and emotion','relating to a single specific goal','difficult to measure or define clearly'] },
+  { w:'paradox',     def:'a situation or statement that seems contradictory but may be true',alts:['a simple and straightforward explanation','a pattern that repeats at regular intervals','a system with a single clear answer'] },
+  { w:'reinforce',   def:'strengthen or support something to make it more effective',        alts:['gradually weaken something over time','divide something into smaller components','present an opposing viewpoint'] },
+  { w:'scrutiny',    def:'close and detailed examination or investigation',                  alts:['a brief or superficial overview','the process of making a decision quickly','formal approval from an authority'] },
+  { w:'undermine',   def:'gradually weaken or damage something, especially confidence',      alts:['provide strong support for a position','bring two opposing sides into agreement','make something widely available to others'] },
+  { w:'viable',      def:'capable of working successfully; practical and achievable',        alts:['too complicated to implement in practice','requiring significant financial investment','limited to a specific context only'] },
+  { w:'advocate',    def:'publicly support or recommend a cause or idea',                    alts:['express strong opposition to a proposal','remain neutral when asked for an opinion','study something without forming a view'] },
+  { w:'elaborate',   def:'develop or explain something in further detail',                   alts:['reduce a complex idea to its simplest form','contradict what has previously been stated','combine several arguments into one'] },
+  { w:'generate',    def:'cause or produce something; bring something into existence',       alts:['prevent something from developing further','measure the size or scale of something','transfer something from one place to another'] },
+  { w:'integrate',   def:'combine or incorporate something into a larger whole',             alts:['remove an element from a larger system','focus exclusively on one aspect of something','repeat an action at regular intervals'] },
+  { w:'persist',     def:'continue firmly in spite of difficulty or opposition',             alts:['give up an activity when it becomes difficult','change direction in response to new information','pause temporarily before continuing later'] },
+  { w:'sustain',     def:'keep or maintain something at a certain level over time',          alts:['bring something to a sudden stop','introduce a completely new approach','reduce the impact of a negative event'] },
+  { w:'simulate',    def:'imitate or reproduce the conditions or appearance of something',   alts:['analyse the original version of something','improve the quality of an existing system','predict future events with certainty'] },
+  { w:'radical',     def:'relating to a fundamental change; thorough and far-reaching',      alts:['small and gradual, having little overall effect','acceptable to most people in society','focused on one specific aspect only'] },
+  { w:'variable',    def:'not consistent; liable to change or vary over time',               alts:['fixed and unable to be altered or changed','clearly defined and easy to measure','used in the same way in all contexts'] },
+  { w:'preliminary', def:'coming before or preparing for the main action or event',          alts:['happening at the very end of a process','the most important stage of something','occurring unexpectedly and without preparation'] },
+  { w:'concede',     def:'admit that something is true, especially when reluctant to do so', alts:['reject a statement as completely false','present new evidence to support a claim','avoid giving a direct answer to a question'] },
+]
+
+function seededV(n) { const x = Math.sin(n + 42) * 10000; return x - Math.floor(x) }
+
+function pickVocabWords() {
+  const today = new Date().toISOString().slice(0, 10)
+  const seed = today.split('-').reduce((a, b) => a * 100 + parseInt(b), 0)
+  const pool = [...VOCAB_BANK]
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(seededV(seed + i) * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]]
+  }
+  return pool.slice(0, 10).map((item, qi) => {
+    const opts = [item.def, ...item.alts]
+    for (let i = opts.length - 1; i > 0; i--) {
+      const j = Math.floor(seededV(seed + qi * 10 + i) * (i + 1));
+      [opts[i], opts[j]] = [opts[j], opts[i]]
+    }
+    return { word: item.w, opts, answer: opts.indexOf(item.def) }
+  })
+}
 
 export default function StudySession({ session, results, addResult, userId, onComplete, onBack }) {
   const tasks = session.tasks || [{ skill: session.type, testId: session.testId, label: session.label }]
@@ -187,24 +243,15 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
     return <FullMockTest userId={userId} addResult={(r) => addResult(r)} onExit={() => handleComplete(null)} />
   }
 
-  // Review / Vocab / fallback
-  const tips = {
-    review: ['Go back over vocabulary from this week. Write each word in a sentence.','Re-read your written responses and compare with the model answers.','Listen again to one test you already did — focus on what you missed.','Review True/False/Not Given answers — understand WHY each is correct.'],
-    vocab:  ['Write down 20 words you encountered this week. Learn their synonyms.','Study word families: achieve → achievement → achievable → unachievable.','Read one academic article and underline words you don\'t know.','Make flashcards for 10 new academic collocations.'],
-  }
-  const taskTips = tips[skill] || tips.review
+  if (skill === 'vocab')  return <VocabExercise  task={task} addResult={addResult} userId={userId} onTaskComplete={onTaskComplete} />
+  if (skill === 'review') return <ReviewSession  task={task} results={results}    onTaskComplete={onTaskComplete} />
+
+  // Generic fallback for any unrecognised skill type
   return (
     <div className="anim-fadeUp">
       <div style={{ fontSize:18, fontWeight:900, color:'var(--text)', marginBottom:8 }}>{label}</div>
       <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, lineHeight:1.7, marginBottom:20 }}>
-        {desc || 'Complete the activities below, then mark this task as done.'}
-      </div>
-      <div style={{ display:'flex', flexDirection:'column', gap:10, marginBottom:24 }}>
-        {taskTips.map((tip, i) => (
-          <div key={i} style={{ padding:'14px 16px', background:'var(--bg2)', border:'2px solid var(--border)', borderLeft:'4px solid var(--green)', borderRadius:12, fontSize:13, color:'var(--text)', fontWeight:600, lineHeight:1.6 }}>
-            <span style={{ color:'var(--green)', fontWeight:900, marginRight:8 }}>{i+1}.</span>{tip}
-          </div>
-        ))}
+        {desc || 'Complete the activity, then mark this task as done.'}
       </div>
       <button onClick={onTaskComplete} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:15, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
         Task Complete ✓
@@ -241,10 +288,193 @@ function getWrongAnswers(result) {
     if (Array.isArray(correct)) {
       if (!correct.includes(given)) wrong.push({ q: q.q, given, correct, opts: q.opts })
     } else {
-      if (given !== correct) wrong.push({ q: q.q, given, correct, opts: q.opts })
+      if (given !== correct) wrong.push({ q: q.q, given, correct, opts: q.opts, explain: q.explain })
     }
   })
   return wrong
+}
+
+// ─── Vocabulary Exercise ──────────────────────────────────────────────────────
+function VocabExercise({ task, addResult, userId, onTaskComplete }) {
+  const questions = useMemo(() => pickVocabWords(), [])
+  const [qi,      setQi]      = useState(0)
+  const [chosen,  setChosen]  = useState(null)
+  const [answers, setAnswers] = useState([])
+  const [saved,   setSaved]   = useState(false)
+  const col = SKILL_COLOR['vocab'] || 'var(--blue)'
+
+  const current = questions[qi]
+  const isDone  = answers.length === questions.length
+
+  function choose(opt) { if (chosen !== null) return; setChosen(opt) }
+
+  function next() {
+    const newAnswers = [...answers, chosen]
+    setAnswers(newAnswers)
+    setChosen(null)
+    if (qi < questions.length - 1) setQi(qi + 1)
+  }
+
+  useEffect(() => {
+    if (isDone && !saved) {
+      const score = answers.filter((a, i) => a === questions[i].answer).length
+      if (addResult) addResult({ skill:'vocab', test_id:'vocab_daily', test_title:'Vocabulary Exercise', score, total:questions.length, band_score:parseFloat((score/questions.length*9).toFixed(1)) })
+      setSaved(true)
+    }
+  }, [isDone]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (isDone) {
+    const score = answers.filter((a, i) => a === questions[i].answer).length
+    const pct   = Math.round((score / questions.length) * 100)
+    return (
+      <div className="anim-fadeUp" style={{ paddingBottom:40 }}>
+        <div style={{ textAlign:'center', padding:'28px 0 20px' }}>
+          <div style={{ fontSize:46, marginBottom:8 }}>{score===10?'🏆':score>=7?'⭐':'📚'}</div>
+          <div style={{ fontSize:22, fontWeight:900, color:'var(--text)', marginBottom:4 }}>
+            {score===10?'Perfect!':score>=7?'Great work!':'Keep building!'}
+          </div>
+          <div style={{ fontSize:15, color:'var(--textM)', fontWeight:700 }}>{score}/{questions.length} words correct</div>
+        </div>
+        <div style={{ height:10, background:'var(--bg3)', borderRadius:99, overflow:'hidden', marginBottom:20 }}>
+          <div style={{ height:'100%', width:`${pct}%`, background:pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--coral)', borderRadius:99 }} />
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:24 }}>
+          {questions.map((q, i) => {
+            const correct = answers[i] === q.answer
+            return (
+              <div key={i} style={{ padding:'10px 14px', background:'var(--bg2)', border:`2px solid ${correct?'var(--green)':'var(--coral)'}`, borderRadius:12 }}>
+                <div style={{ fontSize:13, fontWeight:900, color:'var(--text)', marginBottom:3 }}>{q.word}</div>
+                {!correct && <div style={{ fontSize:11, color:'var(--coral)', fontWeight:700 }}>✗ {q.opts[answers[i]]}</div>}
+                <div style={{ fontSize:11, color:correct?'var(--green)':'var(--textM)', fontWeight:700 }}>✓ {q.opts[q.answer]}</div>
+              </div>
+            )
+          })}
+        </div>
+        <button onClick={onTaskComplete} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:15, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
+          Next Task →
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ paddingBottom:40 }}>
+      <div style={{ display:'flex', gap:5, marginBottom:16 }}>
+        {questions.map((_, i) => (
+          <div key={i} style={{ flex:1, height:6, borderRadius:99, background:i<qi?'var(--green)':i===qi?col:'var(--bg3)' }} />
+        ))}
+      </div>
+      <div style={{ fontSize:10, fontWeight:700, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', marginBottom:8 }}>
+        Word {qi+1} of {questions.length} · Vocabulary Exercise
+      </div>
+      <div style={{ fontSize:20, fontWeight:900, color:col, marginBottom:6 }}>
+        "{current.word}"
+      </div>
+      <div style={{ fontSize:14, fontWeight:700, color:'var(--text)', marginBottom:18 }}>
+        What does this word mean?
+      </div>
+      <div style={{ display:'flex', flexDirection:'column', gap:8, marginBottom:16 }}>
+        {current.opts.map((opt, oi) => {
+          const isChosen  = chosen === oi
+          const isCorrect = oi === current.answer
+          let bg = 'var(--bg3)', border = 'var(--border)', color = 'var(--text)'
+          if (chosen !== null) {
+            if (isCorrect)     { bg='var(--greenBg)'; border='var(--green)'; color='var(--green)' }
+            else if (isChosen) { bg='var(--coralBg)'; border='var(--coral)'; color='var(--coral)' }
+          }
+          return (
+            <button key={oi} onClick={() => choose(oi)} disabled={chosen !== null}
+              style={{ padding:'12px 16px', borderRadius:12, border:`2px solid ${border}`, borderBottom:`3px solid ${chosen!==null&&isCorrect?'var(--greenD)':border}`, background:bg, color, fontFamily:'Nunito, sans-serif', fontSize:13, fontWeight:700, cursor:chosen!==null?'default':'pointer', textAlign:'left', transition:'all .15s', display:'flex', alignItems:'flex-start', gap:10 }}>
+              <span style={{ width:22, height:22, borderRadius:'50%', background:`${border}22`, border:`1px solid ${border}`, display:'inline-flex', alignItems:'center', justifyContent:'center', fontSize:10, fontWeight:900, flexShrink:0, marginTop:1 }}>
+                {String.fromCharCode(65+oi)}
+              </span>
+              <span style={{ flex:1, lineHeight:1.5 }}>{opt}</span>
+              {chosen!==null && isCorrect  && <CheckCircle size={15} color="var(--green)" style={{ flexShrink:0, marginTop:2 }} />}
+              {chosen!==null && isChosen && !isCorrect && <XCircle size={15} color="var(--coral)" style={{ flexShrink:0, marginTop:2 }} />}
+            </button>
+          )
+        })}
+      </div>
+      {chosen !== null && (
+        <button onClick={next} style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:14, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.5px' }}>
+          {qi < questions.length-1 ? 'Next Word →' : 'See Results →'}
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Review Session ───────────────────────────────────────────────────────────
+function ReviewSession({ task, results, onTaskComplete }) {
+  const RCOL  = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
+  const RICON = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
+
+  const recent = (results || [])
+    .filter(r => r.test_id !== 'daily_challenge' && r.test_id !== 'vocab_daily' && ['listening','reading','writing','speaking'].includes(r.skill))
+    .slice(0, 3)
+
+  return (
+    <div style={{ paddingBottom:40 }}>
+      <div style={{ fontSize:18, fontWeight:900, color:'var(--text)', marginBottom:6 }}>{task.label || 'Review Session'}</div>
+      <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, lineHeight:1.7, marginBottom:20 }}>
+        Go through your recent results. For each wrong answer, think about why — then try to recall the correct answer before looking.
+      </div>
+
+      {recent.length === 0 ? (
+        <div style={{ padding:'20px 16px', background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:14, textAlign:'center', marginBottom:24 }}>
+          <div style={{ fontSize:14, fontWeight:800, color:'var(--text)', marginBottom:6 }}>No results yet</div>
+          <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600 }}>Complete some practice tests first, then review sessions will show your mistakes here.</div>
+        </div>
+      ) : (
+        <div style={{ display:'flex', flexDirection:'column', gap:14, marginBottom:24 }}>
+          {recent.map((r, ri) => {
+            const wrong = getWrongAnswers(r)
+            const Icon  = RICON[r.skill] || BookOpen
+            const col   = RCOL[r.skill] || 'var(--blue)'
+            return (
+              <div key={ri} style={{ background:'var(--bg2)', border:`2px solid ${col}33`, borderRadius:14, overflow:'hidden' }}>
+                <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:10 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:`${col}18`, border:`2px solid ${col}33`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                    <Icon size={16} color={col} />
+                  </div>
+                  <div style={{ flex:1, minWidth:0 }}>
+                    <div style={{ fontSize:13, fontWeight:800, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{r.test_title}</div>
+                    <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600 }}>
+                      {r.total>0 ? `${r.score}/${r.total}` : r.band_score>0 ? `Band ${r.band_score}` : 'Completed'} · {r.completed_at ? new Date(r.completed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : 'Recent'}
+                    </div>
+                  </div>
+                </div>
+                {wrong.length > 0 ? (
+                  <div style={{ padding:'10px 14px', display:'flex', flexDirection:'column', gap:8 }}>
+                    <div style={{ fontSize:10, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px' }}>{wrong.length} question{wrong.length>1?'s':''} to review</div>
+                    {wrong.slice(0, 4).map((w, wi) => (
+                      <div key={wi} style={{ padding:'10px 12px', background:'var(--bg3)', border:'1.5px solid var(--border)', borderRadius:10 }}>
+                        <div style={{ fontSize:12, fontWeight:700, color:'var(--text)', marginBottom:6, lineHeight:1.5 }}>{w.q.replace(/^Q\d+\.\s*/,'')}</div>
+                        {w.given !== undefined && w.opts?.[w.given] !== undefined && (
+                          <div style={{ fontSize:11, color:'var(--coral)', fontWeight:700, marginBottom:2 }}>✗ You answered: {w.opts[w.given]}</div>
+                        )}
+                        <div style={{ fontSize:11, color:'var(--green)', fontWeight:700, marginBottom: w.explain ? 4 : 0 }}>
+                          ✓ Correct: {Array.isArray(w.correct) ? w.correct.map(c => w.opts[c]).join(' / ') : w.opts[w.correct]}
+                        </div>
+                        {w.explain && <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, lineHeight:1.5 }}>{w.explain}</div>}
+                      </div>
+                    ))}
+                    {wrong.length > 4 && <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700, textAlign:'center' }}>+{wrong.length-4} more — check Progress for full history</div>}
+                  </div>
+                ) : (
+                  <div style={{ padding:'12px 16px', fontSize:13, color:'var(--green)', fontWeight:700 }}>✓ All answers correct in this test!</div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      <button onClick={onTaskComplete} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:15, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
+        Done Reviewing ✓
+      </button>
+    </div>
+  )
 }
 
 // ─── Session Grade Screen ─────────────────────────────────────────────────────
