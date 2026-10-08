@@ -3,13 +3,15 @@ import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-
 import { supabase, loadResults, onAuthChange, getProfile } from './lib/supabase'
 import Auth from './components/Auth'
 import Nav from './components/Nav'
-import Home from './components/Home'
-import Plan from './components/Plan'
+import Today from './components/Today'
+import TodaySession from './components/TodaySession'
+import Plan, { PlanEdit } from './components/Plan'
 import Practice from './components/Practice'
 import MockTests from './components/MockTests'
 import Progress from './components/Progress'
 import Admin from './components/Admin'
 import SessionReminder from './components/SessionReminder'
+import { useScheduleStore, ScheduleProvider } from './lib/useSchedule'
 
 // Redirect that keeps ?query and #hash so Supabase auth callbacks
 // (#access_token=..., ?code=...) survive the hop to the landing route.
@@ -35,8 +37,10 @@ export default function App() {
   const [loadingResults, setLoadingResults] = useState(false)
   const [authReady, setAuthReady] = useState(false)
   const [isPasswordRecovery, setIsPasswordRecovery] = useState(false)
-  const [schedule, setSchedule] = useState(null)
   const isAdmin = session?.user?.email === 'myinterviewhub@gmail.com'
+  // The study plan (student_schedules) is loaded once here and shared with
+  // Today, Plan and the session runner through <ScheduleProvider>.
+  const scheduleStore = useScheduleStore(session?.user?.id, session?.user?.email, !isPasswordRecovery)
 
   useEffect(() => {
     document.body.className = dark ? 'dark' : ''
@@ -66,7 +70,6 @@ export default function App() {
     if (!session?.user?.id || isPasswordRecovery) return
     setLoadingResults(true)
     loadResults().then(setResults).finally(() => setLoadingResults(false))
-    supabase.from('student_schedules').select('*').eq('user_id', session.user.id).single().then(({ data }) => { if (data) setSchedule(data) })
     getProfile(session.user.id).then(p => {
       setProfile(p?.full_name ? p : session.user.user_metadata?.full_name
         ? { full_name: session.user.user_metadata.full_name } : null)
@@ -95,28 +98,11 @@ export default function App() {
   if (isPasswordRecovery) return <Auth isPasswordRecovery={true} />
   if (!session) return <Auth />
 
-  // BUG-02: Compute real streak from schedule completed_sessions
-  function calcStreak(sched) {
-    if (!sched) return 0
-    const completed = sched.completed_sessions || {}
-    const [sy, sm, sd] = sched.start_date.split('-').map(Number)
-    const start = new Date(sy, sm - 1, sd)
-    const today = new Date(); today.setHours(0,0,0,0)
-    const dayNum = Math.floor((today - start) / 86400000) + 1
-    let streak = 0
-    for (let d = dayNum; d >= 1; d--) {
-      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`]
-      if (hasDone) streak++
-      else if (d < dayNum) break
-    }
-    return streak
-  }
-
   const sharedProps = { results, addResult, userId: session.user.id, userEmail: session.user.email }
 
   return (
     <div style={{ background:'var(--bg)', minHeight:'100vh', color:'var(--text)' }}>
-      <Nav dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} isAdmin={isAdmin} />
+      <Nav dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={scheduleStore.streak} isAdmin={isAdmin} />
 
       {loadingResults && (
         <div style={{ position:'fixed', top:70, right:16, zIndex:999, background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, padding:'8px 14px', fontSize:12, fontWeight:700, color:'var(--textM)', display:'flex', alignItems:'center', gap:8, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}>
@@ -126,20 +112,24 @@ export default function App() {
         </div>
       )}
 
-      <SessionReminder schedule={schedule} />
+      <SessionReminder schedule={scheduleStore.schedule} />
       <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<RedirectTo to="/today" />} />
-        {/* TEMP (step 3): Home stands in until the Today page exists */}
-        <Route path="/today/*" element={<Home {...sharedProps} profile={profile} streak={calcStreak(schedule)} />} />
-        <Route path="/practice/:skill?" element={<Practice {...sharedProps} />} />
-        <Route path="/mock" element={<MockTests {...sharedProps} />} />
-        <Route path="/progress" element={<Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />} />
-        {/* TEMP (step 3): Plan moves under /today as the "Full plan" view */}
-        <Route path="/plan" element={<Plan {...sharedProps} />} />
-        <Route path="/admin" element={isAdmin ? <Admin user={session.user} /> : <RedirectTo to="/today" />} />
-        <Route path="*" element={<RedirectTo to="/today" />} />
-      </Routes>
+      <ScheduleProvider value={scheduleStore}>
+        <Routes>
+          <Route path="/" element={<RedirectTo to="/today" />} />
+          <Route path="/today" element={<Today {...sharedProps} profile={profile} />} />
+          <Route path="/today/plan" element={<Plan results={results} />} />
+          <Route path="/today/plan/edit" element={<PlanEdit />} />
+          <Route path="/today/session/:dayNum/:slot" element={<TodaySession {...sharedProps} />} />
+          <Route path="/practice/:skill?" element={<Practice {...sharedProps} />} />
+          <Route path="/mock" element={<MockTests {...sharedProps} />} />
+          <Route path="/progress" element={<Progress {...sharedProps} loading={loadingResults} streak={scheduleStore.streak} />} />
+          {/* Plan used to be a top-level tab; keep old links and bookmarks working */}
+          <Route path="/plan" element={<RedirectTo to="/today/plan" />} />
+          <Route path="/admin" element={isAdmin ? <Admin user={session.user} /> : <RedirectTo to="/today" />} />
+          <Route path="*" element={<RedirectTo to="/today" />} />
+        </Routes>
+      </ScheduleProvider>
     </div>
   )
 }

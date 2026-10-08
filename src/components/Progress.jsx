@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
          Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Headphones, BookOpen, PenLine, Mic, TrendingUp,
@@ -448,6 +449,10 @@ function OverviewTab({ results, streak }) {
                   {best.skill !== worst.skill && ` Your ${SKILL_LABEL[best.skill].toLowerCase()} is strongest at ${bestDisplay}.`}
                   {' '}Spend extra time here before your exam.
                 </div>
+                <Link to={`/practice/${worst.skill}`}
+                  style={{ display:'inline-flex', alignItems:'center', marginTop:10, padding:'8px 14px', minHeight:36, borderRadius:10, border:'2px solid var(--amber)', borderBottom:'3px solid #cc7700', background:'transparent', color:'var(--amber)', fontWeight:800, fontSize:12, fontFamily:'Nunito, sans-serif', textDecoration:'none' }}>
+                  Practice {SKILL_LABEL[worst.skill]} →
+                </Link>
               </div>
             </div>
           </div>

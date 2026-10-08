@@ -1,4 +1,4 @@
-import { LayoutDashboard, BarChart2, BookOpen,
+import { CalendarCheck, BarChart2, BookOpen,
          Flame, Zap, Sun, Moon, LogOut, User, ChevronDown,
          Calendar, ClipboardList, ShieldCheck } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
@@ -6,7 +6,7 @@ import { Link, NavLink } from 'react-router-dom'
 import { signOut } from '../lib/supabase'
 
 const NAV_ITEMS = [
-  { to: '/today',    icon: LayoutDashboard, label: 'Home'     },
+  { to: '/today',    icon: CalendarCheck,   label: 'Today'    },
   { to: '/practice', icon: BookOpen,        label: 'Practice' },
   { to: '/mock',     icon: ClipboardList,   label: 'Mock Test'},
   { to: '/progress', icon: BarChart2,       label: 'Progress' },
@@ -93,7 +93,7 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
                   </div>
                   {[
                     { icon: User,          label: 'My Profile',  to: '/progress' },
-                    { icon: Calendar,      label: 'Edit My Plan',to: '/plan' },
+                    { icon: Calendar,      label: 'Edit My Plan',to: '/today/plan/edit' },
                   ].map(({ icon: Icon, label, to }) => (
                     <Link key={label} to={to} onClick={() => setDropdownOpen(false)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', textDecoration: 'none', transition: 'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
