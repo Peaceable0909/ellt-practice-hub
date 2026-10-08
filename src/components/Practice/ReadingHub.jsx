@@ -2,15 +2,16 @@ import { useState } from 'react'
 import { READING, READING_IELTS } from '../../data/reading'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
+import useTestSelection from './useTestSelection'
 
 const ALL_READING = [...READING, ...READING_IELTS]
 
-export default function ReadingHub({ results, addResult, userId }) {
-  const [test, setTest] = useState(null)
+export default function ReadingHub({ results, addResult, userId, selectedId, onSelect }) {
+  const [test, openTest, closeTest] = useTestSelection(ALL_READING, { selectedId, onSelect })
   const [filter, setFilter] = useState('all') // all | oxford | ielts
 
   if (test) {
-    return <TestTaker test={test} skill="reading" prev={results.find(r=>r.test_id===test.id)} addResult={addResult} onBack={() => setTest(null)} userId={userId}/>
+    return <TestTaker key={test.id} test={test} skill="reading" prev={results.find(r=>r.test_id===test.id)} addResult={addResult} onBack={closeTest} userId={userId}/>
   }
 
   const filtered = ALL_READING.filter(t =>
@@ -60,7 +61,7 @@ export default function ReadingHub({ results, addResult, userId }) {
               <div style={{ fontSize: 11, color: 'var(--textM)', lineHeight: 1.6, background: 'var(--bg3)', borderRadius: 8, padding: '7px 10px', marginBottom: 12 }}>
                 {t.passage.slice(0, 140)}…
               </div>
-              <Btn primary color="var(--amber)" onClick={() => setTest(t)}>
+              <Btn primary color="var(--amber)" onClick={() => openTest(t)}>
                 {prev ? 'Retry →' : 'Start →'}
               </Btn>
             </Card>

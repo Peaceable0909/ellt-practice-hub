@@ -1,21 +1,26 @@
-import { LayoutDashboard, BarChart2, BookOpen,
+import { CalendarCheck, Dumbbell, ClipboardList, TrendingUp,
          Flame, Zap, Sun, Moon, LogOut, User, ChevronDown,
-         Calendar, ClipboardList, ShieldCheck } from 'lucide-react'
+         Calendar, ShieldCheck } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
+import { Link, NavLink } from 'react-router-dom'
 import { signOut } from '../lib/supabase'
 
+// The four destinations, same order in the desktop top nav and the mobile bottom bar.
+// NavLink matches by path prefix, so Today stays highlighted on /today/plan,
+// /today/plan/edit and /today/session/... and Practice on /practice/:skill.
 const NAV_ITEMS = [
-  { key: 'Home',      icon: LayoutDashboard, label: 'Home'     },
-  { key: 'Practice',  icon: BookOpen,        label: 'Practice' },
-  { key: 'MockTest',  icon: ClipboardList,   label: 'Mock Test'},
-  { key: 'Progress',  icon: BarChart2,       label: 'Progress' },
+  { to: '/today',    icon: CalendarCheck, label: 'Today'    },
+  { to: '/practice', icon: Dumbbell,      label: 'Practice' },
+  { to: '/mock',     icon: ClipboardList, label: 'Mock'     },
+  { to: '/progress', icon: TrendingUp,    label: 'Progress' },
 ]
 
-export default function Nav({ page, setPage, dark, setDark, user, profile, results = [], streak = 0, isAdmin = false }) {
+export default function Nav({ dark, setDark, user, profile, results = [], streak = 0, isAdmin = false }) {
   // Compute directly from user prop as a safety net
   const adminAccess = isAdmin || user?.email === 'myinterviewhub@gmail.com'
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropRef = useRef(null)
+  const triggerRef = useRef(null)
 
   const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student'
@@ -29,32 +34,45 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
     return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
+  // Escape closes the menu and hands focus back to the button that opened it (closing unmounts
+  // the focused menu link, which would otherwise drop focus to the page body)
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const onKey = e => {
+      if (e.key !== 'Escape') return
+      setDropdownOpen(false)
+      triggerRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [dropdownOpen])
+
   return (
     <>
-      <nav style={{ background: 'var(--bg2)', borderBottom: '1.5px solid var(--border)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <nav aria-label="Header" style={{ background: 'var(--bg2)', borderBottom: '1.5px solid var(--border)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: 62, gap: 8 }}>
 
           {/* Logo */}
-          <div onClick={() => setPage('Home')} style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 16, cursor: 'pointer', flexShrink: 0 }}>
+          <Link to="/today" style={{ display: 'flex', alignItems: 'center', gap: 8, marginRight: 16, cursor: 'pointer', flexShrink: 0, textDecoration: 'none' }}>
             <div style={{ width: 36, height: 36, borderRadius: 11, background: 'var(--green)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: 16, color: '#fff', border: '3px solid var(--greenD)' }}>E</div>
             <span style={{ fontWeight: 900, fontSize: 16, color: 'var(--text)', letterSpacing: '-0.3px' }} className="hide-mobile">ELLTPulse</span>
-          </div>
+          </Link>
 
           {/* Desktop nav */}
           <div style={{ display: 'flex', gap: 2, flex: 1 }} className="hide-mobile">
-            {NAV_ITEMS.map(({ key, icon: Icon, label }) => (
-              <button key={key} onClick={() => setPage(key)} style={{
+            {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+              <NavLink key={to} to={to} style={({ isActive }) => ({
                 padding: '7px 12px', borderRadius: 10, border: 'none',
-                background: page === key ? 'var(--greenBg)' : 'transparent',
-                color: page === key ? 'var(--green)' : 'var(--textM)',
-                fontWeight: page === key ? 800 : 700, fontSize: 13,
+                background: isActive ? 'var(--greenBg)' : 'transparent',
+                color: isActive ? 'var(--greenT)' : 'var(--textM)',
+                fontWeight: isActive ? 800 : 700, fontSize: 13,
                 cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
-                borderBottom: '2px solid transparent',
+                borderBottom: '2px solid transparent', textDecoration: 'none',
                 display: 'flex', alignItems: 'center', gap: 6, transition: 'all .15s',
-              }}>
+              })}>
                 <Icon size={14} />
                 {label}
-              </button>
+              </NavLink>
             ))}
 
 
@@ -64,22 +82,23 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
 
           {/* Stats */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }} onClick={() => setPage('Progress')}>
+            <Link to="/progress" aria-label={`Streak: ${streak} ${streak === 1 ? 'day' : 'days'}`} style={{ display: 'flex', alignItems: 'center', gap: 4, minHeight: 36, padding: '0 2px', cursor: 'pointer', textDecoration: 'none' }}>
               <Flame size={18} color="var(--streak)" fill="var(--streak)" />
-              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--streak)' }}>{streak}</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }} onClick={() => setPage('Progress')}>
+              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--amberT)' }}>{streak}</span>
+            </Link>
+            <Link to="/progress" aria-label={`${xp} XP`} style={{ display: 'flex', alignItems: 'center', gap: 4, minHeight: 36, padding: '0 2px', cursor: 'pointer', textDecoration: 'none' }}>
               <Zap size={16} color="var(--xp)" fill="var(--xp)" />
-              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--xp)' }}>{xp}</span>
-            </div>
+              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--purpleT)' }}>{xp}</span>
+            </Link>
 
-            <button onClick={() => setDark(d => !d)} style={{ width: 36, height: 36, borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
+            <button onClick={() => setDark(d => !d)} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} style={{ width: 36, height: 36, borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             {/* Avatar dropdown */}
-            <div ref={dropRef} style={{ position: 'relative' }}>
-              <button onClick={() => setDropdownOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
+            <div ref={dropRef} style={{ position: 'relative' }}
+              onBlur={e => { if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) setDropdownOpen(false) }}>
+              <button ref={triggerRef} onClick={() => setDropdownOpen(o => !o)} aria-expanded={dropdownOpen} aria-label="Account menu" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--greenD)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{initials}</div>
                 <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="hide-mobile">{displayName.split(' ')[0]}</span>
                 <ChevronDown size={12} color="var(--textM)" style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .2s' }} />
@@ -91,22 +110,22 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
                     <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600, marginTop: 2 }}>{user?.email}</div>
                   </div>
                   {[
-                    { icon: User,          label: 'My Profile',  action: () => { setPage('Progress'); setDropdownOpen(false) } },
-                    { icon: Calendar,      label: 'Edit My Plan',action: () => { setPage('Plan'); setDropdownOpen(false) } },
-                  ].map(({ icon: Icon, label, action }) => (
-                    <button key={label} onClick={action} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', transition: 'background .15s' }}
+                    { icon: User,     label: 'My Profile',   to: '/progress' },
+                    { icon: Calendar, label: 'Edit My Plan', to: '/today/plan/edit' },
+                  ].map(({ icon: Icon, label, to }) => (
+                    <Link key={label} to={to} onClick={() => setDropdownOpen(false)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', textDecoration: 'none', transition: 'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                       <Icon size={15} color="var(--textM)" />{label}
-                    </button>
+                    </Link>
                   ))}
                   {adminAccess && (
-                    <button onClick={() => { setPage('Admin'); setDropdownOpen(false) }}
-                      style={{ width:'100%', padding:'12px 16px', border:'none', background:'transparent', display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontFamily:'Nunito, sans-serif', fontSize:14, fontWeight:700, color:'var(--purple)', borderBottom:'1px solid var(--border)', textAlign:'left', transition:'background .15s' }}
+                    <Link to="/admin" onClick={() => setDropdownOpen(false)}
+                      style={{ width:'100%', boxSizing:'border-box', padding:'12px 16px', border:'none', background:'transparent', display:'flex', alignItems:'center', gap:10, cursor:'pointer', fontFamily:'Nunito, sans-serif', fontSize:14, fontWeight:700, color:'var(--purple)', borderBottom:'1px solid var(--border)', textAlign:'left', textDecoration:'none', transition:'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background='var(--bg3)'}
                       onMouseLeave={e => e.currentTarget.style.background='transparent'}>
                       <ShieldCheck size={15} color="var(--purple)" style={{marginRight:6}}/> Admin Panel
-                    </button>
+                    </Link>
                   )}
                   <button onClick={() => { setDropdownOpen(false); signOut() }} style={{ width: '100%', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 800, color: 'var(--coral)', textAlign: 'left', transition: 'background .15s' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--coralBg)'}
@@ -121,33 +140,30 @@ export default function Nav({ page, setPage, dark, setDark, user, profile, resul
       </nav>
 
       {/* Mobile bottom nav */}
-      <div className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
-        {[
-          { key: 'Home',     icon: LayoutDashboard, label: 'Home'     },
-          { key: 'Practice', icon: BookOpen,        label: 'Practice' },
-          { key: 'MockTest', icon: ClipboardList,   label: 'Mock Test'},
-          { key: 'Progress', icon: BarChart2,       label: 'Progress' },
-        ].map(({ key, icon: Icon, label }) => {
-          const active = page === key
-          return (
-            <button key={key} onClick={() => setPage(key)} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', color: active ? 'var(--green)' : 'var(--textD)', borderTop: active ? '3px solid var(--green)' : '3px solid transparent', transition: 'all .15s' }}>
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span style={{ fontSize: 10, fontWeight: active ? 900 : 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>{label}</span>
-            </button>
-          )
-        })}
-      </div>
+      <nav aria-label="Main" className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+        {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+          <NavLink key={to} to={to} style={({ isActive }) => ({ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'none', color: isActive ? 'var(--greenT)' : 'var(--textD)', borderTop: isActive ? '3px solid var(--green)' : '3px solid transparent', transition: 'all .15s' })}>
+            {({ isActive }) => (
+              <>
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span style={{ fontSize: 10, fontWeight: isActive ? 900 : 600, letterSpacing: '0.3px', textTransform: 'uppercase' }}>{label}</span>
+              </>
+            )}
+          </NavLink>
+        ))}
+      </nav>
 
       <style>{`
         .hide-mobile { display: inline-flex; }
         .show-mobile-only { display: none; }
         .bottom-nav { display: flex; }
-        @media (min-width: 768px) {
+        /* The top nav needs about 790px, so the bottom bar stays until 820px (keep in step with index.css) */
+        @media (min-width: 820px) {
           .hide-mobile { display: inline-flex !important; }
           .show-mobile-only { display: none !important; }
           .bottom-nav { display: none !important; }
         }
-        @media (max-width: 767px) {
+        @media (max-width: 819px) {
           .hide-mobile { display: none !important; }
           .show-mobile-only { display: flex !important; }
         }

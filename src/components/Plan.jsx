@@ -1,420 +1,248 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import { buildPlan, PERIOD_CONFIG, SESSION_ICONS, SESSION_COLORS } from '../data/timetable'
-import { Headphones, BookOpen, PenLine, Mic, ClipboardList,
-         ChevronRight, CheckCircle, Lock, Flame, Zap,
-         Trophy, Calendar, PlayCircle, RotateCcw, Clock,
-         Sun, Moon, Star, Brain, RefreshCw, Target } from 'lucide-react'
-import StudySession from './StudySession'
+import { useRef } from 'react'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { ChevronLeft, ChevronRight, ClipboardList, PlayCircle, RotateCcw, Eye } from 'lucide-react'
+import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays } from '../lib/useSchedule'
+import { TaskChip, DoneBadge, metaFor, fmtDuration, fmtDate, DAY_TYPE_LABELS, quietCard, sectionLabel, backLink } from './PlanBits'
+import PlanSetup from './PlanSetup'
 
-const PERIOD_DAYS = { '1_week':7, '2_weeks':14, '3_weeks':21, '1_month':30 }
+const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']   // Monday first
+const PRACTICE_SKILLS = ['listening', 'reading', 'writing', 'speaking']   // tasks that have a test in Practice
 
-function parseLocalDate(str) {
-  const [y, m, d] = str.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
+// ── FULL PLAN (/today/plan) ────────────────────────────────────
+// Calendar of every day in the plan. Tap a day to see its sessions: past days
+// (and today) can be reviewed or redone, future days are preview only.
+export default function Plan({ results = [] }) {
+  const { schedule, loading, error, reload, status, plan, dayNum, totalDays, cfg, completed, doneSessions, totalSessions } = useSchedule()
+  const [params, setParams] = useSearchParams()
+  const detailRef = useRef(null)
 
-const SKILL_ICONS = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, mock: ClipboardList, review: CheckCircle, intro: Trophy }
-const SKILL_COLORS_MAP = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)', mock:'var(--green)', review:'var(--teal)', intro:'var(--green)' }
-
-export default function Plan({ userId, userEmail, results, addResult }) {
-  const [schedule, setSchedule] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [activeSession, setActiveSession] = useState(null)  // the session currently open
-  const [view, setView] = useState('plan')                   // plan | setup
-  const [completed, setCompleted] = useState({})             // { "day_1_morning": timestamp }
-
-  // Setup form
-  const [period, setPeriod]       = useState('1_month')
-  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0,10))
-  const [morningTime, setMorning] = useState('09:00')
-  const [eveningTime, setEvening] = useState('19:00')
-  const [timezone, setTimezone]   = useState('Europe/London')
-  const [emailReminders, setEmail]= useState(true)
-  const [saving, setSaving]       = useState(false)
-
-  useEffect(() => { loadSchedule() }, [userId])
-
-  async function loadSchedule() {
-    setLoading(true)
-    const { data } = await supabase
-      .from('student_schedules').select('*').eq('user_id', userId).single()
-    if (data) {
-      setSchedule(data)
-      setCompleted(data.completed_sessions || {})
-    }
-    setLoading(false)
-  }
-
-  async function markDone(key) {
-    const updated = { ...completed, [key]: new Date().toISOString() }
-    setCompleted(updated)
-    await supabase.from('student_schedules')
-      .update({ completed_sessions: updated })
-      .eq('user_id', userId)
-  }
-
-  async function saveSchedule(isNewPlan) {
-    setSaving(true)
-    // BUG-06 fix: only reset completed_sessions when starting a BRAND NEW plan
-    const keepCompleted = !isNewPlan && schedule ? (schedule.completed_sessions || {}) : {}
-    const row = { user_id: userId, user_email: userEmail, period, start_date: startDate, morning_time: morningTime, evening_time: eveningTime, timezone, email_reminders: emailReminders, completed_sessions: keepCompleted, updated_at: new Date().toISOString() }
-    const { data, error } = await supabase.from('student_schedules').upsert([row], { onConflict: 'user_id' }).select().single()
-    if (error) {
-      console.error('[Plan] saveSchedule failed:', error.message, error.code, error.hint)
-      setSaving(false)
-      alert('Could not save your plan. Please check your connection and try again.')
-      return
-    }
-    if (data) { setSchedule(data); setCompleted(keepCompleted) }
-    setSaving(false)
-    setView('plan')
-  }
-
-  // ── ACTIVE SESSION ─────────────────────────────────────────
-  if (activeSession) {
-    return (
-      <StudySession
-        session={activeSession}
-        results={results}
-        addResult={addResult}
-        userId={userId}
-        onComplete={() => {
-          markDone(activeSession.key)
-          setActiveSession(null)
-        }}
-        onBack={() => setActiveSession(null)}
-      />
-    )
-  }
-
-  if (loading) return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:'60px 20px', color:'var(--textM)', fontSize:14, fontWeight:700 }}>
-      Loading your plan...
-    </div>
+  if (loading) return <Page><Centered>Loading your plan...</Centered></Page>
+  if (error && !schedule) return (
+    <Page>
+      <Centered>
+        Could not load your plan.{' '}
+        <button onClick={reload} style={{ background: 'none', border: 'none', color: 'var(--blueT)', fontWeight: 900, fontSize: 14, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'underline' }}>Try again</button>
+      </Centered>
+    </Page>
   )
+  // No plan yet: creating the first one is the onboarding on Today
+  if (!schedule) return <Navigate to="/today" replace />
 
-  // ── NO PLAN → SETUP ────────────────────────────────────────
-  if (!schedule || view === 'setup') {
-    return <SetupView period={period} setPeriod={setPeriod} startDate={startDate} setStartDate={setStartDate}
-      morningTime={morningTime} setMorning={setMorning} eveningTime={eveningTime} setEvening={setEvening}
-      timezone={timezone} setTimezone={setTimezone} emailReminders={emailReminders} setEmail={setEmail}
-      saving={saving} onSave={(isNew) => saveSchedule(isNew)} existing={!!schedule} onCancel={() => setView('plan')} />
+  const start = parseLocalDate(schedule.start_date)
+  const lead = (start.getDay() + 6) % 7   // blank cells so day 1 sits under its real weekday
+  const defaultDay = status === 'active' ? dayNum : status === 'finished' ? totalDays : 1
+  const asked = parseInt(params.get('day'), 10)
+  const selected = asked >= 1 && asked <= totalDays ? asked : defaultDay
+  const selectedDay = plan.find(d => d.day === selected)
+  const pct = totalSessions ? Math.round((doneSessions / totalSessions) * 100) : 0
+
+  // On a phone the day's sessions sit below the calendar, off screen: bring them into view
+  const selectDay = n => {
+    setParams({ day: String(n) }, { replace: true })
+    requestAnimationFrame(() => {
+      const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      detailRef.current?.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' })
+    })
   }
 
-  // ── PLAN VIEW ──────────────────────────────────────────────
-  const plan = buildPlan(schedule.period, schedule.start_date)
-  const startD = parseLocalDate(schedule.start_date)
-  const todayD = new Date()
-  todayD.setHours(0,0,0,0)
-  const dayNum = Math.floor((todayD - startD) / 86400000) + 1
-  const totalDays = PERIOD_DAYS[schedule.period] || 30
-  const cfg = PERIOD_CONFIG[schedule.period]
-  const todayPlan = plan.find(d => d.day === dayNum)
-  const pct = Math.min(100, Math.round((dayNum / totalDays) * 100))
-
-  // Count done
-  const doneCount = Object.keys(completed).length
-  const totalSessions = totalDays * (cfg?.sessionsPerDay || 2)
-
-  const startSession = (dayData, which) => {
-    const s = which === 'morning' ? dayData.morning : which === 'noon' ? dayData.noon : dayData.evening
-    const key = `day_${dayData.day}_${which}`
-    setActiveSession({ ...s, key, dayNum: dayData.day, which })
-  }
-
-  const isDone = (day, which) => !!completed[`day_${day}_${which}`]
-
-  // Streak = consecutive days with at least one session done (ending today or yesterday)
-  function calcStreak() {
-    let streak = 0
-    // Check from today backwards — if today has nothing done, start from yesterday
-    const todayDone = completed[`day_${dayNum}_morning`] || completed[`day_${dayNum}_evening`] || completed[`day_${dayNum}_noon`]
-    const startDay = todayDone ? dayNum : dayNum - 1
-    for (let d = startDay; d >= 1; d--) {
-      const hasDone = completed[`day_${d}_morning`] || completed[`day_${d}_evening`] || completed[`day_${d}_noon`]
-      if (hasDone) streak++
-      else break // any gap resets streak
-    }
-    return streak
-  }
-  const streak = calcStreak()
-  const todayFullyDone = isDone(dayNum, 'morning') && isDone(dayNum, 'evening') && (!todayPlan?.noon || isDone(dayNum, 'noon'))
-  const todayPartDone  = isDone(dayNum, 'morning') || isDone(dayNum, 'evening') || isDone(dayNum, 'noon')
+  const statusText = status === 'upcoming'
+    ? `Starts ${fmtDate(start, { weekday: 'short', day: 'numeric', month: 'short' })}`
+    : status === 'finished' ? 'Plan complete' : `Day ${dayNum} of ${totalDays}`
 
   return (
-    <div className="app-container anim-fadeUp">
-
-      {/* ── HERO: Today ──────────────────────────────────── */}
-      <div style={{ background:'linear-gradient(135deg, var(--green) 0%, #46A302 100%)', borderRadius:20, padding:'22px 20px', marginBottom:20, border:'3px solid var(--greenD)', position:'relative', overflow:'hidden' }}>
-        {/* Background decoration */}
-        <div style={{ position:'absolute', right:-20, top:-20, width:120, height:120, borderRadius:'50%', background:'rgba(255,255,255,0.08)' }}/>
-        <div style={{ position:'absolute', right:20, top:20, width:60, height:60, borderRadius:'50%', background:'rgba(255,255,255,0.06)' }}/>
-
-        <div style={{ position:'relative' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:12 }}>
-            <div>
-              <div style={{ fontSize:11, fontWeight:900, color:'rgba(255,255,255,0.7)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:3 }}>
-                {new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})}
-              </div>
-              <div style={{ fontSize:22, fontWeight:900, color:'#fff' }}>
-                {dayNum < 1 ? 'Plan starts soon!' : dayNum > totalDays ? 'Plan complete!' : `Day ${dayNum} of ${totalDays}`}
-              </div>
-            </div>
-            <div style={{ background:'rgba(255,255,255,0.2)', borderRadius:12, padding:'8px 14px', textAlign:'center' }}>
-              <div style={{ fontSize:22, fontWeight:900, color:'#fff' }}>{pct}%</div>
-              <div style={{ fontSize:9, color:'rgba(255,255,255,0.7)', fontWeight:700, textTransform:'uppercase' }}>done</div>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div style={{ height:8, background:'rgba(255,255,255,0.25)', borderRadius:99, marginBottom:12, overflow:'hidden' }}>
-            <div style={{ height:'100%', width:`${pct}%`, background:'#fff', borderRadius:99, transition:'width .4s' }}/>
-          </div>
-
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', flexWrap:'wrap', gap:8 }}>
-            <div style={{ fontSize:12, color:'rgba(255,255,255,0.8)', fontWeight:700 }}>
-              {cfg?.label} Plan · {schedule.morning_time?.slice(0,5)} & {schedule.evening_time?.slice(0,5)}
-            </div>
-            {streak > 0 && (
-              <div style={{ display:'flex', alignItems:'center', gap:5, background:'rgba(255,255,255,0.2)', borderRadius:99, padding:'4px 10px' }}>
-                <Flame size={13} color="#FFD700" fill="#FFD700" />
-                <span style={{ fontSize:12, fontWeight:900, color:'#fff' }}>{streak} day streak</span>
-              </div>
-            )}
-          </div>
-        </div>
+    <Page>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+        <Link to="/today" style={backLink}><ChevronLeft size={16} /> Today</Link>
+        <h1 style={{ fontSize: 20, fontWeight: 900, color: 'var(--text)' }}>Full plan</h1>
       </div>
 
-      {/* ── TODAY'S SESSIONS ──────────────────────────────── */}
-      {todayPlan && dayNum >= 1 && dayNum <= totalDays && (
-        <div style={{ marginBottom:24 }}>
-          <div style={{ fontSize:13, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:12 }}>
-            Today's Sessions
-          </div>
+      {/* Summary */}
+      <div style={{ ...quietCard, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)' }}>{cfg?.label} plan · {statusText}</div>
+          <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 700 }}>{schedule.morning_time?.slice(0, 5)} and {schedule.evening_time?.slice(0, 5)}</div>
+        </div>
+        <div className="xp-bar" style={{ height: 12 }} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct} aria-label="Sessions completed">
+          <div className="xp-bar-fill" style={{ width: `${pct}%`, background: 'var(--green)' }} />
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--textM)', fontWeight: 700, marginTop: 7 }}>{doneSessions} of {totalSessions} sessions done</div>
+      </div>
 
-          <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
-            {[
-              { which:'morning', session:todayPlan.morning, time:schedule.morning_time?.slice(0,5), label:'Morning' },
-              ...(todayPlan.noon ? [{ which:'noon', session:todayPlan.noon, time:'13:00', label:'Afternoon' }] : []),
-              { which:'evening', session:todayPlan.evening, time:schedule.evening_time?.slice(0,5), label:'Evening' },
-            ].map(({ which, session, time, label }) => {
-              const done = isDone(todayPlan.day, which)
-              const color = SKILL_COLORS_MAP[session.type] || 'var(--green)'
-              const Icon = SKILL_ICONS[session.type] || BookOpen
-              return (
-                <div key={which} style={{
-                  background: done ? 'var(--bg3)' : 'var(--bg2)',
-                  border: `2px solid ${done ? 'var(--green)' : color + '66'}`,
-                  borderBottom: `4px solid ${done ? 'var(--greenD)' : color + 'aa'}`,
-                  borderRadius: 18, padding: 18, opacity: done ? 0.75 : 1,
-                }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:14 }}>
-                    {/* Icon */}
-                    <div style={{ width:52, height:52, borderRadius:14, background:`${color}18`, border:`2px solid ${color}44`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
-                      {done ? <CheckCircle size={24} color="var(--green)" /> : <Icon size={24} color={color} />}
-                    </div>
+      {/* Calendar */}
+      <div style={{ ...sectionLabel, marginBottom: 10 }}>Calendar</div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: 6, marginBottom: 6 }}>
+        {WEEKDAYS.map((w, i) => (
+          <div key={i} style={{ textAlign: 'center', fontSize: 10, fontWeight: 900, color: 'var(--textD)', textTransform: 'uppercase' }}>{w}</div>
+        ))}
+        {Array.from({ length: lead }, (_, i) => <div key={`blank-${i}`} />)}
+        {plan.map(d => {
+          const slots = getDaySlots(d, schedule)
+          const done = slots.map(s => !!completed[sessionKey(d.day, s.which)])
+          return (
+            <DayTile key={d.day} d={d} date={addDays(start, d.day - 1)} dayNum={dayNum} done={done}
+              selected={d.day === selected} onSelect={() => selectDay(d.day)} />
+          )
+        })}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--textM)', fontWeight: 600, marginBottom: 18 }}>
+        Numbers are plan days, dots are sessions. Tap a day to see it.
+      </div>
 
-                    {/* Info */}
-                    <div style={{ flex:1, minWidth:0 }}>
-                      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:3 }}>
-                        <span style={{ fontSize:10, fontWeight:900, color:'var(--textD)', textTransform:'uppercase', letterSpacing:'0.5px' }}>{label} · {time}</span>
-                        {done && <span style={{ fontSize:10, fontWeight:900, color:'var(--green)', textTransform:'uppercase', background:'var(--greenBg)', padding:'2px 7px', borderRadius:99 }}>Done</span>}
-                      </div>
-                      <div style={{ fontSize:15, fontWeight:900, color: done ? 'var(--textM)' : 'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
-                      {/* Task chips */}
-                      {session.tasks && (
-                        <div style={{ display:'flex', gap:4, marginTop:7, flexWrap:'wrap' }}>
-                          {session.tasks.map((task, ti) => {
-                            const skillColor = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)', review:'var(--teal)', vocab:'var(--green)', mock:'var(--green)' }
-                            const SkillIcon = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic, review:Star, vocab:Brain, mock:ClipboardList }
-                            const TI = SkillIcon[task.skill] || BookOpen
-                            const col = skillColor[task.skill] || 'var(--textM)'
-                            return (
-                              <span key={ti} style={{ fontSize:11, fontWeight:700, color:col, background:`color-mix(in srgb, ${col} 10%, var(--bg3))`, border:`1px solid color-mix(in srgb, ${col} 30%, var(--border))`, borderRadius:8, padding:'3px 8px', display:'inline-flex', alignItems:'center', gap:4 }}>
-                                <TI size={10} /> {task.label}
-                              </span>
-                            )
-                          })}
-                        </div>
-                      )}
-                    </div>
+      {selectedDay && (
+        // scroll margins keep it clear of the sticky top nav and the mobile bottom bar
+        <div ref={detailRef} style={{ scrollMarginTop: 'calc(var(--nav-h) + 8px)', scrollMarginBottom: 'calc(var(--bottom-nav-h) + 12px)' }}>
+          <DayDetail d={selectedDay} schedule={schedule} start={start} dayNum={dayNum} completed={completed} results={results} />
+        </div>
+      )}
+    </Page>
+  )
+}
 
-                    {/* Action button */}
-                    {!done ? (
-                      <button onClick={() => startSession(todayPlan, which)}
-                        style={{ flexShrink:0, padding:'10px 18px', borderRadius:12, border:'none', borderBottom:`4px solid ${color}cc`, background:color, color:'#fff', fontWeight:900, fontSize:13, cursor:'pointer', fontFamily:'Nunito, sans-serif', display:'flex', alignItems:'center', gap:6, textTransform:'uppercase', letterSpacing:'0.4px' }}>
-                        <PlayCircle size={16} /> Start
-                      </button>
-                    ) : (
-                      <button onClick={() => startSession(todayPlan, which)}
-                        style={{ flexShrink:0, padding:'10px 14px', borderRadius:12, border:'2px solid var(--border)', borderBottom:'3px solid var(--borderB)', background:'var(--bg2)', color:'var(--textM)', fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif', display:'flex', alignItems:'center', gap:6 }}>
-                        <RotateCcw size={13} /> Redo
-                      </button>
+function DayTile({ d, date, dayNum, done, selected, onSelect }) {
+  const isToday = d.day === dayNum
+  const isFuture = d.day > dayNum
+  const allDone = done.every(Boolean)
+  const accent = selected ? 'var(--blue)' : isToday ? 'var(--green)' : 'var(--border)'
+  const accentB = selected ? 'var(--blueD)' : isToday ? 'var(--greenD)' : 'var(--borderB)'
+  return (
+    <button onClick={onSelect} aria-pressed={selected}
+      aria-label={`Day ${d.day}, ${fmtDate(date)}, ${done.filter(Boolean).length} of ${done.length} sessions done${isToday ? ', today' : ''}`}
+      style={{
+        position: 'relative', minWidth: 0, minHeight: 52, padding: '8px 2px 7px', cursor: 'pointer',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+        borderRadius: 10, border: `2px solid ${accent}`, borderBottom: `3px solid ${accentB}`,
+        background: selected ? 'var(--blueBg)' : isToday ? 'var(--greenBg)' : 'var(--bg2)',
+        opacity: isFuture && !selected ? 0.6 : 1, fontFamily: 'Nunito, sans-serif',
+      }}>
+      <span style={{ fontSize: 13, fontWeight: 900, lineHeight: 1, color: allDone || isToday ? 'var(--greenT)' : 'var(--text)' }}>{d.day}</span>
+      <span style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
+        {done.map((v, i) => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: v ? 'var(--green)' : 'var(--border)' }} />)}
+      </span>
+      {d.dayType === 'mock' && <ClipboardList size={10} color="var(--green)" style={{ position: 'absolute', top: 3, right: 3 }} aria-hidden="true" />}
+    </button>
+  )
+}
+
+function ResultBadge({ r }) {
+  const band = Number(r.band_score)
+  const pctScore = r.total > 0 ? Math.round((r.score / r.total) * 100) : null
+  if (!(band > 0) && pctScore == null) return null
+  const tone = band > 0
+    ? (band >= 7 ? 'green' : band >= 5.5 ? 'amber' : 'coral')
+    : (pctScore >= 70 ? 'green' : pctScore >= 50 ? 'amber' : 'coral')
+  return (
+    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 900, color: `var(--${tone}T)`, border: `1.5px solid var(--${tone})`, borderRadius: 8, padding: '2px 7px' }}>
+      {band > 0 ? `Band ${band}` : `${r.score}/${r.total}`}
+    </span>
+  )
+}
+
+function DayDetail({ d, schedule, start, dayNum, completed, results }) {
+  const isToday = d.day === dayNum
+  const isFuture = d.day > dayNum
+  const slots = getDaySlots(d, schedule)
+  const date = addDays(start, d.day - 1)
+  const typeLabel = DAY_TYPE_LABELS[d.dayType]
+  const chip = (text, col, textCol = col) => (
+    <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4px', color: textCol, border: `1.5px solid ${col}`, borderRadius: 99, padding: '2px 8px' }}>{text}</span>
+  )
+
+  return (
+    <div style={{ ...quietCard, padding: '16px 16px 6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text)' }}>Day {d.day}</div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {typeLabel && (d.dayType === 'mock' ? chip(typeLabel, 'var(--green)', 'var(--greenT)') : chip(typeLabel, 'var(--blue)', 'var(--blueT)'))}
+          {isToday ? chip('Today', 'var(--green)', 'var(--greenT)') : isFuture ? chip('Preview only', 'var(--textM)') : chip('Review', 'var(--textM)')}
+        </div>
+      </div>
+      <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 700, marginBottom: 6 }}>{fmtDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+
+      {slots.map(slot => {
+        const s = slot.session
+        const tasks = s.tasks || []
+        const isDone = !!completed[sessionKey(d.day, slot.which)]
+        const { Icon, color } = metaFor(s.type)
+        return (
+          <div key={slot.which} style={{ padding: '14px 0', borderTop: '2px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+              <Icon size={14} color={color} />
+              <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--textD)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{slot.label} · {slot.time}</span>
+              {isDone && <DoneBadge />}
+              {!isDone && !isFuture && !isToday && (
+                <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--amberT)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Not done</span>
+              )}
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', lineHeight: 1.3 }}>{s.label}</div>
+            <div style={{ fontSize: 11, color: 'var(--textM)', fontWeight: 700, margin: '2px 0 8px' }}>
+              {tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} · ~{fmtDuration(s.duration)}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {tasks.map((t, i) => {
+                const r = !isFuture && t.testId ? results.find(x => x.test_id === t.testId) : null
+                // The exact test as free practice (opens in Practice with a Back to Today bar);
+                // the Start / Redo button below runs it as part of the session instead.
+                const practiceTo = !isFuture && t.testId && PRACTICE_SKILLS.includes(t.skill) ? `/practice/${t.skill}/${encodeURIComponent(t.testId)}` : null
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <TaskChip task={t} />
+                    {(r || practiceTo) && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                        {r && <ResultBadge r={r} />}
+                        {practiceTo && (
+                          <Link to={practiceTo} state={{ from: 'today' }} aria-label={`Practise ${t.label} on its own`}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 2, minHeight: 32, fontSize: 11, fontWeight: 900, color: 'var(--blueT)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            Practise <ChevronRight size={13} />
+                          </Link>
+                        )}
+                      </span>
                     )}
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Plan complete */}
-      {dayNum > totalDays && (
-        <div style={{ textAlign:'center', padding:'32px 20px', background:'var(--greenBg)', border:'2px solid var(--green)', borderRadius:20, marginBottom:24 }}>
-          <Trophy size={40} color="var(--green)" style={{ margin:'0 auto 12px' }} />
-          <div style={{ fontSize:20, fontWeight:900, color:'var(--green)', marginBottom:4 }}>Plan Complete!</div>
-          <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginBottom:16 }}>You finished your {cfg?.label} plan. Start a new one to keep improving.</div>
-          <button onClick={() => setView('setup')} style={{ padding:'12px 24px', borderRadius:12, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:14, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>
-            Start New Plan
-          </button>
-        </div>
-      )}
-
-      {/* Plan not started yet */}
-      {dayNum < 1 && (
-        <div style={{ textAlign:'center', padding:'32px 20px', background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:20, marginBottom:24 }}>
-          <Clock size={36} color="var(--amber)" style={{ margin:'0 auto 12px' }} />
-          <div style={{ fontSize:16, fontWeight:900, color:'var(--text)', marginBottom:4 }}>Plan starts on {parseLocalDate(schedule.start_date).toLocaleDateString('en-GB',{day:'numeric',month:'long'})}</div>
-          <div style={{ fontSize:13, color:'var(--textM)', fontWeight:600 }}>Come back then — or change your start date below.</div>
-        </div>
-      )}
-
-      {/* ── WEEKLY VIEW ───────────────────────────────────── */}
-      <div style={{ marginBottom:24 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-          <div style={{ fontSize:13, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px' }}>This Week</div>
-          <span style={{ fontSize:12, color:'var(--textM)', fontWeight:700 }}>{doneCount} / {Math.min(dayNum,totalDays) * (cfg?.sessionsPerDay || 2)} sessions done</span>
-        </div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(7,1fr)', gap:6 }}>
-          {Array.from({length:7},(_,i) => {
-            const d = i + Math.max(1, dayNum - 3)
-            const dp = plan.find(x => x.day === d)
-            if (!dp || d > totalDays) return <div key={i} style={{ height:56, borderRadius:10, background:'var(--bg3)', border:'2px solid var(--border)' }} />
-            const mDone = isDone(d, 'morning')
-            const eDone = isDone(d, 'evening')
-            const isToday = d === dayNum
-            const isFuture = d > dayNum
-            return (
-              <div key={i} onClick={() => !isFuture && startSession(dp, !mDone ? 'morning' : dp.noon && !isDone(d,'noon') ? 'noon' : 'evening')}
-                style={{ borderRadius:10, border:`2px solid ${isToday?'var(--green)':'var(--border)'}`, borderBottom:`3px solid ${isToday?'var(--greenD)':'var(--borderB)'}`, background:isToday?'var(--greenBg)':'var(--bg2)', padding:'8px 4px', textAlign:'center', cursor:isFuture?'default':'pointer', opacity:isFuture?0.4:1, transition:'transform .15s' }}>
-                <div style={{ fontSize:9, fontWeight:900, color:isToday?'var(--green)':'var(--textD)', textTransform:'uppercase', marginBottom:4 }}>
-                  {['M','T','W','T','F','S','S'][new Date(parseLocalDate(schedule.start_date).getTime()+(d-1)*86400000).getDay()]}
-                </div>
-                <div style={{ fontSize:11, fontWeight:900, color:isToday?'var(--green)':'var(--textM)', marginBottom:4 }}>{d}</div>
-                <div style={{ display:'flex', gap:2, justifyContent:'center' }}>
-                  <div style={{ width:8, height:8, borderRadius:'50%', background:mDone?'var(--green)':'var(--border)' }}/>
-                  {cfg?.sessionsPerDay >= 3 && <div style={{ width:8, height:8, borderRadius:'50%', background:isDone(d,'noon')?'var(--green)':'var(--border)' }}/>}
-                  <div style={{ width:8, height:8, borderRadius:'50%', background:eDone?'var(--green)':'var(--border)' }}/>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* ── UPCOMING ─────────────────────────────────────── */}
-      <div style={{ marginBottom:20 }}>
-        <div style={{ fontSize:13, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:12 }}>Coming Up</div>
-        <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-          {plan.filter(d => d.day > dayNum && d.day <= dayNum + 3).map(d => (
-            <div key={d.day} style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 16px', background:'var(--bg2)', border:'2px solid var(--border)', borderBottom:'3px solid var(--borderB)', borderRadius:14, opacity:0.7 }}>
-              <Lock size={16} color="var(--textD)" style={{ flexShrink:0 }} />
-              <div style={{ flex:1 }}>
-                <div style={{ fontSize:11, color:'var(--textD)', fontWeight:700, textTransform:'uppercase', marginBottom:2 }}>Day {d.day}</div>
-                <div style={{ fontSize:13, fontWeight:800, color:'var(--textM)' }}>{d.morning.label}{d.noon ? ` · ${d.noon.label}` : ''} · {d.evening.label}</div>
-              </div>
-              <div style={{ fontSize:11, color:'var(--textD)', fontWeight:700 }}>
-                {new Date(parseLocalDate(schedule.start_date).getTime()+(d.day-1)*86400000).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}
-              </div>
+                )
+              })}
             </div>
-          ))}
-        </div>
-      </div>
+            {!isFuture && (
+              <Link to={`/today/session/${d.day}/${slot.which}`} state={{ from: 'plan' }}
+                style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, padding: '9px 16px', borderRadius: 12, textDecoration: 'none', fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.4px',
+                  ...(isDone
+                    ? { border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg2)', color: 'var(--textM)' }
+                    : { border: 'none', borderBottom: '4px solid var(--greenD)', background: 'var(--green)', color: '#fff' }) }}>
+                {isDone ? <><RotateCcw size={13} /> Redo</> : <><PlayCircle size={15} /> {isToday ? 'Start' : 'Catch up'}</>}
+              </Link>
+            )}
+          </div>
+        )
+      })}
 
-      {/* ── FOOTER LINKS ─────────────────────────────────── */}
-      <div style={{ display:'flex', gap:10, flexWrap:'wrap', paddingTop:8, borderTop:'2px solid var(--border)' }}>
-        <button onClick={() => setView('setup')} style={{ padding:'8px 14px', borderRadius:10, border:'2px solid var(--border)', borderBottom:'3px solid var(--borderB)', background:'var(--bg2)', color:'var(--textM)', fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>
-          Edit Plan
-        </button>
-        <span style={{ fontSize:12, color:'var(--textD)', fontWeight:600, display:'flex', alignItems:'center' }}>
-          Want extra practice? Use the <strong style={{ color:'var(--blue)', marginLeft:4 }}>Practice</strong> tab.
-        </span>
-      </div>
+      {isFuture && (
+        <div style={{ borderTop: '2px solid var(--border)', padding: '12px 0', display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--textM)', fontWeight: 700 }}>
+          <Eye size={14} style={{ flexShrink: 0 }} /> This day opens on {fmtDate(date, { weekday: 'long', day: 'numeric', month: 'short' })}.
+        </div>
+      )}
     </div>
   )
 }
 
-// ── SETUP VIEW ─────────────────────────────────────────────────
-const TIMEZONES = ['Europe/London','Europe/Paris','Africa/Lagos','Africa/Accra','Africa/Nairobi','America/New_York','America/Los_Angeles','Asia/Dubai','Asia/Karachi','Asia/Dhaka','Australia/Sydney']
+function Page({ children }) {
+  return <div className="app-container anim-fadeUp" style={{ maxWidth: 640 }}>{children}</div>
+}
 
-function SetupView({ period, setPeriod, startDate, setStartDate, morningTime, setMorning, eveningTime, setEvening, timezone, setTimezone, emailReminders, setEmail, saving, onSave, existing, onCancel }) {
-  const cfg = PERIOD_CONFIG[period]
-  return (
-    <div className="app-container anim-fadeUp" style={{ maxWidth:520 }}>
-      <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:24 }}>
-        {existing && <button onClick={onCancel} style={{ padding:'8px 14px', borderRadius:10, border:'2px solid var(--border)', borderBottom:'3px solid var(--borderB)', background:'var(--bg2)', color:'var(--textM)', fontWeight:700, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif' }}>← Cancel</button>}
-        <div>
-          <h2 style={{ fontSize:20, fontWeight:900, color:'var(--text)' }}>{existing?'Edit':'Start'} Your Learning Plan</h2>
-          <p style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginTop:2 }}>Your plan will guide every session — let's set it up.</p>
-        </div>
-      </div>
+function Centered({ children }) {
+  return <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--textM)', fontSize: 14, fontWeight: 700 }}>{children}</div>
+}
 
-      {/* Period */}
-      <div style={{ marginBottom:20 }}>
-        <div style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>How long do you have?</div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8 }}>
-          {Object.entries(PERIOD_CONFIG).map(([key,c]) => (
-            <div key={key} onClick={() => setPeriod(key)} style={{ padding:14, borderRadius:14, border:`2px solid ${period===key?'var(--green)':'var(--border)'}`, borderBottom:`4px solid ${period===key?'var(--greenD)':'var(--borderB)'}`, background:period===key?'var(--greenBg)':'var(--bg2)', cursor:'pointer', transition:'all .2s' }}>
-              <div style={{ fontSize:16, fontWeight:900, color:period===key?'var(--green)':'var(--text)', marginBottom:3 }}>{c.label}</div>
-              <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700 }}>{c.sessionsPerDay >= 3 ? `${c.morningHours}h + ${c.noonHours}h + ${c.eveningHours}h per day` : `${c.morningHours}h morning + ${c.eveningHours}h evening per day`}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop:8, padding:'10px 14px', background:'var(--bg3)', borderRadius:10, fontSize:12, color:'var(--textM)', fontWeight:600, lineHeight:1.5 }}>
-          {cfg.description}
-        </div>
-      </div>
+// ── EDIT PLAN (/today/plan/edit) ───────────────────────────────
+// /today/plan/edit        edit the current plan (completed sessions are kept)
+// /today/plan/edit?new=1  start a brand new plan (completed sessions reset)
+// The form itself, and the save, live in PlanSetup (shared with first-run onboarding).
+export function PlanEdit() {
+  const { schedule, loading } = useSchedule()
+  const [params] = useSearchParams()
 
-      {/* Date */}
-      <div style={{ marginBottom:14 }}>
-        <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>Start Date</label>
-        <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} min={new Date().toISOString().slice(0,10)} />
-      </div>
+  if (loading) return <Page><Centered>Loading your plan...</Centered></Page>
+  // Nothing to edit yet (or the plan failed to load): Today shows the onboarding or the retry
+  if (!schedule) return <Navigate to="/today" replace />
 
-      {/* Times */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
-        {[['☀️ Morning Time', morningTime, setMorning],['🌙 Evening Time', eveningTime, setEvening]].map(([label,val,set]) => (
-          <div key={label}>
-            <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>{label}</label>
-            <input type="time" value={val} onChange={e=>set(e.target.value)} />
-          </div>
-        ))}
-      </div>
-
-      {/* Timezone */}
-      <div style={{ marginBottom:14 }}>
-        <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>Timezone</label>
-        <select value={timezone} onChange={e=>setTimezone(e.target.value)}>
-          {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
-        </select>
-      </div>
-
-      {/* Email reminders */}
-      <div onClick={() => setEmail(e=>!e)} style={{ marginBottom:22, padding:14, background:emailReminders?'var(--greenBg)':'var(--bg3)', border:`2px solid ${emailReminders?'var(--green)':'var(--border)'}`, borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', gap:12 }}>
-        <div style={{ width:22, height:22, borderRadius:6, border:`2px solid ${emailReminders?'var(--green)':'var(--border)'}`, background:emailReminders?'var(--green)':'transparent', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:12, color:'#fff', fontWeight:900 }}>
-          {emailReminders ? '✓' : ''}
-        </div>
-        <div>
-          <div style={{ fontSize:13, fontWeight:900, color:'var(--text)' }}>Email Reminders</div>
-          <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, marginTop:1 }}>Get a daily email at {morningTime} with your sessions and a study tip</div>
-        </div>
-      </div>
-
-      <button onClick={() => onSave(!existing)} disabled={saving} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:`4px solid ${saving?'var(--border)':'var(--greenD)'}`, background:saving?'var(--bg3)':'var(--green)', color:saving?'var(--textM)':'#fff', fontWeight:900, fontSize:15, cursor:saving?'not-allowed':'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
-        {saving ? 'Saving...' : existing ? `Save Changes →` : `Start My ${PERIOD_CONFIG[period].label} Plan →`}
-      </button>
-    </div>
-  )
+  const existing = params.get('new') !== '1'
+  return <PlanSetup key={existing ? 'edit' : 'new'} variant="edit" existing={existing} />
 }

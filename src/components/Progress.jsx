@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
          Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Headphones, BookOpen, PenLine, Mic, TrendingUp,
@@ -6,6 +7,7 @@ import { Headphones, BookOpen, PenLine, Mic, TrendingUp,
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
+import { skillScores, lowestSkill, highestSkill, formatSkillScore, averageBand, averagePct, isTestResult } from '../lib/skillStats'
 
 const ALL_L = [...LISTENING, ...(LISTENING_IELTS||[]), ...(LISTENING_CAM17_T1||[]),
   ...(LISTENING_CAM17_T2||[]), ...(LISTENING_CAM17_T3||[]), ...(LISTENING_CAM17_T4||[]),
@@ -17,15 +19,9 @@ const SKILL_COLOR  = { listening:'var(--blue)', reading:'var(--amber)', writing:
 const SKILL_ICON   = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
 const SKILL_LABEL  = { listening:'Listening', reading:'Reading', writing:'Writing', speaking:'Speaking' }
 
-function avgBand(arr) {
-  const r = arr.filter(x => x.band_score > 0)
-  return r.length ? (r.reduce((s,x) => s + parseFloat(x.band_score), 0) / r.length).toFixed(1) : null
-}
-
-function pct(arr) {
-  const r = arr.filter(x => x.total > 0)
-  return r.length ? Math.round(r.reduce((s,x) => s + x.score/x.total, 0) / r.length * 100) : null
-}
+// Same rounding as the Focus card and Practice (see lib/skillStats): the numbers always agree
+const avgBand = arr => { const b = averageBand(arr); return b == null ? null : b.toFixed(1) }
+const pct = averagePct
 
 // Cross-reference answers against test data to get question-level pass/fail
 function analyseAnswers(results) {
@@ -76,9 +72,10 @@ function analyseAnswers(results) {
   return { wrongByType, totalByType, wrongQuestions, mcqAcc, fillAcc }
 }
 
-// Build trend data from results (last 10)
+// Build trend data from results (last 10). Results arrive newest first: take the newest 10 and
+// put them oldest to newest for the chart.
 function trendData(arr) {
-  return [...arr].reverse().slice(0, 10).map((r, i) => ({
+  return arr.slice(0, 10).reverse().map((r, i) => ({
     n: i + 1,
     band: r.band_score > 0 ? parseFloat(r.band_score) : null,
     pct:  r.total > 0 ? Math.round(r.score / r.total * 100) : null,
@@ -377,9 +374,9 @@ function OverviewTab({ results, streak }) {
     return { day: d.toLocaleDateString('en-GB',{weekday:'short'}), tests:count }
   }), [results])
 
-  const overall = results.filter(r=>r.band_score>0).length
-    ? (results.filter(r=>r.band_score>0).reduce((s,r)=>s+parseFloat(r.band_score),0)/results.filter(r=>r.band_score>0).length).toFixed(1)
-    : null
+  const scoreBySkill = useMemo(() => Object.fromEntries(skillScores(results).map(s => [s.skill, s])), [results])
+  const overallBand = averageBand(results)
+  const overall = overallBand != null ? overallBand.toFixed(1) : null
 
   return (
     <div style={{ display:'flex', flexDirection:'column', gap:16 }}>
@@ -394,20 +391,19 @@ function OverviewTab({ results, streak }) {
       <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, padding:16, boxShadow:'var(--shadow)' }}>
         <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:12 }}>Performance by Skill</div>
         {skills.map(skill => {
-          const sr   = results.filter(r=>r.skill===skill)
+          const count = results.filter(r=>r.skill===skill).length
           const col  = SKILL_COLOR[skill]
           const Icon = SKILL_ICON[skill]
-          const band = avgBand(sr)
-          const pc   = pct(sr)
-          const display = band ? `Band ${band}` : pc!=null ? `${pc}%` : null
-          const pctNum = band ? (parseFloat(band)/9)*100 : pc
+          const score = scoreBySkill[skill]
+          const display = score ? formatSkillScore(score) : null
+          const pctNum = score ? score.score : null
           return (
             <div key={skill} style={{ marginBottom:12 }}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
                 <div style={{ display:'flex', alignItems:'center', gap:7 }}>
                   <Icon size={14} color={col} />
                   <span style={{ fontSize:13, fontWeight:800, color:'var(--text)' }}>{SKILL_LABEL[skill]}</span>
-                  <span style={{ fontSize:11, color:'var(--textM)', fontWeight:600 }}>({sr.length} tests)</span>
+                  <span style={{ fontSize:11, color:'var(--textM)', fontWeight:600 }}>({count} tests)</span>
                 </div>
                 <span style={{ fontSize:14, fontWeight:900, color:pctNum>=78?'var(--green)':pctNum>=55?'var(--amber)':'var(--coral)' }}>{display || '—'}</span>
               </div>
@@ -421,20 +417,12 @@ function OverviewTab({ results, streak }) {
 
       {/* Weakest skill recommendation */}
       {(() => {
-        const withData = skills
-          .map(skill => {
-            const sr   = results.filter(r => r.skill === skill)
-            const band = avgBand(sr)
-            const pc   = pct(sr)
-            const score = band ? (parseFloat(band)/9)*100 : pc
-            return { skill, score, count: sr.length, band, pc }
-          })
-          .filter(s => s.count >= 1 && s.score != null)
+        const withData = skillScores(results)
         if (withData.length < 2) return null
-        const worst = withData.reduce((a, b) => a.score < b.score ? a : b)
-        const best  = withData.reduce((a, b) => a.score > b.score ? a : b)
-        const worstDisplay = worst.band ? `Band ${worst.band}` : `${worst.pc}%`
-        const bestDisplay  = best.band  ? `Band ${best.band}`  : `${best.pc}%`
+        const worst = lowestSkill(withData)
+        const best  = highestSkill(withData)
+        const worstDisplay = formatSkillScore(worst)
+        const bestDisplay  = formatSkillScore(best)
         return (
           <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'14px 16px' }}>
             <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>
@@ -448,6 +436,10 @@ function OverviewTab({ results, streak }) {
                   {best.skill !== worst.skill && ` Your ${SKILL_LABEL[best.skill].toLowerCase()} is strongest at ${bestDisplay}.`}
                   {' '}Spend extra time here before your exam.
                 </div>
+                <Link to={`/practice/${worst.skill}`}
+                  style={{ display:'inline-flex', alignItems:'center', marginTop:10, padding:'8px 14px', minHeight:36, borderRadius:10, border:'2px solid var(--amber)', borderBottom:'3px solid #cc7700', background:'transparent', color:'var(--amber)', fontWeight:800, fontSize:12, fontFamily:'Nunito, sans-serif', textDecoration:'none' }}>
+                  Practice {SKILL_LABEL[worst.skill]} →
+                </Link>
               </div>
             </div>
           </div>
@@ -475,12 +467,15 @@ function OverviewTab({ results, streak }) {
 export default function Progress({ results = [], loading, streak = 0 }) {
   const [tab, setTab] = useState('overview')
 
+  // Real test attempts only. Vocab drills and the Daily Challenge are local-only rows that vanish
+  // on reload, so counting them would make every total here jump back after a refresh.
+  const tests = useMemo(() => results.filter(isTestResult), [results])
   const bySkill = useMemo(() => ({
-    listening: results.filter(r => r.skill === 'listening'),
-    reading:   results.filter(r => r.skill === 'reading'),
-    writing:   results.filter(r => r.skill === 'writing'),
-    speaking:  results.filter(r => r.skill === 'speaking'),
-  }), [results])
+    listening: tests.filter(r => r.skill === 'listening'),
+    reading:   tests.filter(r => r.skill === 'reading'),
+    writing:   tests.filter(r => r.skill === 'writing'),
+    speaking:  tests.filter(r => r.skill === 'speaking'),
+  }), [tests])
 
   if (loading) return (
     <div style={{ display:'flex', alignItems:'center', justifyContent:'center', padding:80 }}>
@@ -503,7 +498,7 @@ export default function Progress({ results = [], loading, streak = 0 }) {
       <div style={{ marginBottom:16 }}>
         <div style={{ fontSize:20, fontWeight:900, color:'var(--text)' }}>My Progress</div>
         <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:2 }}>
-          {results.length} tests completed across all skills
+          {tests.length} tests completed across all skills
         </div>
       </div>
 
@@ -530,7 +525,7 @@ export default function Progress({ results = [], loading, streak = 0 }) {
       </div>
 
       {/* Tab content */}
-      {tab === 'overview' && <OverviewTab results={results} streak={streak} />}
+      {tab === 'overview' && <OverviewTab results={tests} streak={streak} />}
       {tab === 'listening' && <ListeningReadingTab results={bySkill.listening} skill="listening" />}
       {tab === 'reading'   && <ListeningReadingTab results={bySkill.reading}   skill="reading"   />}
       {tab === 'writing'   && <WritingSpeakingTab  results={bySkill.writing}   skill="writing"   />}

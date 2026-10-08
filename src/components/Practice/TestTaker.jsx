@@ -3,6 +3,7 @@ import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip } from '../ui'
 import Confetti from '../Confetti'
 import DiagramRenderer from './DiagramRenderer'
+import { activateProps } from './useTestSelection'
 import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones } from 'lucide-react'
 
 export default function TestTaker({ test, skill, prev, addResult, onBack, userId }) {
@@ -224,12 +225,12 @@ export default function TestTaker({ test, skill, prev, addResult, onBack, userId
                         if (submitted && (Array.isArray(q.a) ? q.a.includes(oi) : isAns)) cls += ' correct'
                         if (submitted && isSel && !isAns) cls += ' incorrect'
                         return (
-                          <div key={oi} className={cls} onClick={() => {
+                          <div key={oi} className={cls} aria-pressed={!submitted && isSel} {...activateProps(() => {
                             if (submitted) return
                             const next = {...answers, [qi]: oi}
                             setAnswers(next)
                             try { localStorage.setItem(draftKey, JSON.stringify(next)) } catch {}
-                          }}>
+                          })}>
                             <div style={{ width:20, height:20, borderRadius:'50%', border:`2px solid ${!submitted&&isSel?'var(--blue)':submitted&&isAns?'var(--green)':submitted&&isSel&&!isAns?'var(--coral)':'var(--border)'}`, flexShrink:0, position:'relative', background:!submitted&&isSel?'var(--blue)':'transparent' }}>
                               {!submitted&&isSel && <div style={{ position:'absolute', inset:3, borderRadius:'50%', background:'#fff' }}/>}
                               {submitted&&isAns && <CheckCircle size={14} color="var(--green)" style={{ position:'absolute', top:-1, left:-1 }}/>}

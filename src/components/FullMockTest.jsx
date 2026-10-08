@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { saveResult } from '../lib/supabase'
 import { LISTENING } from '../data/listening'
 import { READING } from '../data/reading'
 import { WRITING } from '../data/writing'
 import { SPEAKING } from '../data/speaking'
-import { Card, Chip } from './ui'
+import { Card } from './ui'
 
 // HIGH-01 fix: Rotate mock test content across multiple sets
 const MOCK_SETS = [
@@ -12,12 +12,18 @@ const MOCK_SETS = [
   { listening: LISTENING[1], reading: READING[0], writing: WRITING[1], speaking: SPEAKING[1] },
   { listening: LISTENING[2], reading: READING[2], writing: WRITING[2], speaking: SPEAKING[2] },
 ]
-// Pick set based on number of completed mocks (stored in localStorage)
-const mockCount = parseInt(localStorage.getItem('ellt-mock-count') || '0')
-const MOCK = MOCK_SETS[mockCount % MOCK_SETS.length]
+// The set is picked from the number of completed mocks (localStorage). Read it when a mock
+// starts, not once when the module loads, so finishing a mock moves the next one on to the
+// following set instead of repeating the same one until the page is reloaded.
+const MOCK_COUNT_KEY = 'ellt-mock-count'
+function readMockCount() {
+  try { return Math.max(0, parseInt(localStorage.getItem(MOCK_COUNT_KEY) || '0', 10) || 0) } catch { return 0 }
+}
+function writeMockCount(n) {
+  try { localStorage.setItem(MOCK_COUNT_KEY, String(n)) } catch { /* storage blocked: rotation just restarts */ }
+}
 
 const SECTION_DURATIONS = { listening: 20*60, reading: 30*60, writing: 45*60, speaking: 10*60 }
-const SECTION_ORDER = ['listening','reading','writing','speaking']
 
 function fmt(s) {
   const m = Math.floor(s/60)
@@ -26,17 +32,21 @@ function fmt(s) {
 }
 
 // ─── TIMER HOOK ──────────────────────────────────────────────────────────────
+// onExpire is read through a ref so the interval always calls the latest closure (the answers or
+// essay typed so far), not the one from the render when the timer started.
 function useTimer(duration, running, onExpire) {
   const [left, setLeft] = useState(duration)
   const ref = useRef(null)
-  useEffect(() => { setLeft(duration) }, [duration])
+  const leftRef = useRef(duration)
+  const expireRef = useRef(onExpire)
+  expireRef.current = onExpire
+  useEffect(() => { leftRef.current = duration; setLeft(duration) }, [duration])
   useEffect(() => {
     if (!running) { clearInterval(ref.current); return }
     ref.current = setInterval(() => {
-      setLeft(t => {
-        if (t <= 1) { clearInterval(ref.current); onExpire?.(); return 0 }
-        return t - 1
-      })
+      leftRef.current = Math.max(0, leftRef.current - 1)
+      setLeft(leftRef.current)
+      if (leftRef.current <= 0) { clearInterval(ref.current); expireRef.current?.() }
     }, 1000)
     return () => clearInterval(ref.current)
   }, [running])
@@ -69,56 +79,6 @@ function SectionHeader({ title, subtitle, timeLeft, totalTime, color }) {
         <div style={{ height:'100%', width:`${pct}%`, background: urgent ? 'var(--coral)' : color,
           borderRadius:2, transition:'width 1s linear' }}/>
       </div>
-    </div>
-  )
-}
-
-// ─── INTRO PHASE ─────────────────────────────────────────────────────────────
-function IntroPhase({ onStart }) {
-  const sections = [
-    { name:'Listening', time:'20 min', q:'8 questions', col:'var(--blue)',   icon:'🎧' },
-    { name:'Reading',   time:'30 min', q:'16 questions',col:'var(--amber)',  icon:'📖' },
-    { name:'Writing',   time:'45 min', q:'1 essay task', col:'var(--purple)',icon:'✍️' },
-    { name:'Speaking',  time:'10 min', q:'1 topic',      col:'var(--coral)', icon:'🎤' },
-  ]
-  return (
-    <div style={{ maxWidth:600, margin:'0 auto', padding:'48px 20px', textAlign:'center' }}>
-      <div style={{ fontSize:40, marginBottom:12 }}>📋</div>
-      <h1 style={{ fontSize:26, fontWeight:700, color:'var(--text)', marginBottom:6 }}>
-        Oxford ELLT Full Mock Test
-      </h1>
-      <p style={{ color:'var(--textM)', fontSize:14, marginBottom:28, lineHeight:1.6 }}>
-        You will complete all 4 sections back to back.<br/>
-        Scores are revealed only at the very end.
-      </p>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:10, marginBottom:28, textAlign:'left' }}>
-        {sections.map((s,i) => (
-          <Card key={s.name} style={{ display:'flex', gap:12, alignItems:'center' }}>
-            <div style={{ fontSize:24 }}>{s.icon}</div>
-            <div>
-              <div style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>{s.name}</div>
-              <div style={{ fontSize:11, color:'var(--textM)' }}>{s.time} · {s.q}</div>
-            </div>
-            <div style={{ marginLeft:'auto', fontSize:11, fontWeight:700, color:s.col }}>
-              {i+1}/4
-            </div>
-          </Card>
-        ))}
-      </div>
-      <div style={{ padding:'12px 16px', background:'var(--amberBg)',
-        border:'1px solid rgba(245,158,11,0.3)', borderRadius:10, marginBottom:24,
-        fontSize:13, color:'var(--amber)', textAlign:'left', lineHeight:1.6 }}>
-        💡 <strong>Tips:</strong> Find a quiet place · Use headphones for listening ·
-        You cannot go back to a previous section · Aim for full sentences in writing and speaking
-      </div>
-      <button onClick={onStart} style={{
-        padding:'14px 40px', borderRadius:10, border:'none',
-        background:'linear-gradient(135deg,var(--teal),var(--blue))',
-        color:'#000', fontWeight:700, fontSize:15, cursor:'pointer', fontFamily:'inherit',
-        width:'100%',
-      }}>
-        Start Full Mock Test →
-      </button>
     </div>
   )
 }
@@ -159,6 +119,26 @@ function TransitionPhase({ completed, next, nextIcon, onContinue }) {
   )
 }
 
+// ─── MULTIPLE-CHOICE OPTION ──────────────────────────────────────────────────
+// A native radio inside a label: operable by keyboard (Tab, arrow keys, Space), announced as a
+// radio, and at least 44px tall for a thumb. The input itself is hidden; .mock-opt shows focus.
+function McqOption({ name, label, checked, onChange, color, bg }) {
+  return (
+    <label className="mock-opt" style={{ position:'relative', display:'flex', alignItems:'center', gap:8,
+      minHeight:44, padding:'10px 12px', borderRadius:8, cursor:'pointer', transition:'all .15s',
+      border:`1.5px solid ${checked?color:'var(--border)'}`, background:checked?bg:'transparent' }}>
+      <input type="radio" name={name} checked={checked} onChange={onChange}
+        style={{ position:'absolute', opacity:0, width:1, height:1, margin:0, pointerEvents:'none' }}/>
+      <span aria-hidden="true" style={{ width:14, height:14, borderRadius:'50%',
+        border:`2px solid ${checked?color:'var(--border)'}`, flexShrink:0, position:'relative' }}>
+        {checked && <span style={{ position:'absolute', top:2, left:2, width:6, height:6,
+          borderRadius:'50%', background:color }}/>}
+      </span>
+      <span style={{ fontSize:12, color:checked?color:'var(--textM)', fontWeight:checked?600:400 }}>{label}</span>
+    </label>
+  )
+}
+
 // ─── LISTENING SECTION ───────────────────────────────────────────────────────
 function ListeningSection({ test, onComplete }) {
   const [answers, setAnswers] = useState({})
@@ -196,19 +176,10 @@ function ListeningSection({ test, onComplete }) {
                 </div>
                 <div style={{ flex:1 }}>
                   <p style={{ fontSize:13, fontWeight:500, color:'var(--text)', marginBottom:8, lineHeight:1.5 }}>{q.q}</p>
-                  <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                  <div role="radiogroup" aria-label={`Question ${qi+1}`} style={{ display:'flex', flexDirection:'column', gap:5 }}>
                     {q.opts.map((opt,oi) => (
-                      <div key={oi} onClick={() => setAnswers(a=>({...a,[qi]:oi}))}
-                        style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px',
-                          borderRadius:8, border:`1.5px solid ${sel===oi?'var(--teal)':'var(--border)'}`,
-                          background:sel===oi?'var(--tealBg)':'transparent', cursor:'pointer', transition:'all .15s' }}>
-                        <div style={{ width:14, height:14, borderRadius:'50%',
-                          border:`2px solid ${sel===oi?'var(--teal)':'var(--border)'}`, flexShrink:0, position:'relative' }}>
-                          {sel===oi && <div style={{ position:'absolute', top:2, left:2, width:6, height:6,
-                            borderRadius:'50%', background:'var(--teal)' }}/>}
-                        </div>
-                        <span style={{ fontSize:12, color:sel===oi?'var(--teal)':'var(--textM)', fontWeight:sel===oi?600:400 }}>{opt}</span>
-                      </div>
+                      <McqOption key={oi} name={`listening-q${qi}`} label={opt} checked={sel===oi}
+                        onChange={() => setAnswers(a=>({...a,[qi]:oi}))} color="var(--teal)" bg="var(--tealBg)"/>
                     ))}
                   </div>
                 </div>
@@ -281,19 +252,10 @@ function ReadingSection({ test, onComplete }) {
                       onChange={e => setAnswers(a=>({...a,[qi]:e.target.value.toUpperCase()}))}
                       style={{ maxWidth:260, textTransform:'uppercase', fontWeight:600, letterSpacing:1 }}/>
                   ) : (
-                    <div style={{ display:'flex', flexDirection:'column', gap:5 }}>
+                    <div role="radiogroup" aria-label={`Question ${qi+1}`} style={{ display:'flex', flexDirection:'column', gap:5 }}>
                       {q.opts.map((opt,oi) => (
-                        <div key={oi} onClick={() => setAnswers(a=>({...a,[qi]:oi}))}
-                          style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px',
-                            borderRadius:8, border:`1.5px solid ${sel===oi?'var(--amber)':'var(--border)'}`,
-                            background:sel===oi?'var(--amberBg)':'transparent', cursor:'pointer', transition:'all .15s' }}>
-                          <div style={{ width:14, height:14, borderRadius:'50%',
-                            border:`2px solid ${sel===oi?'var(--amber)':'var(--border)'}`, flexShrink:0, position:'relative' }}>
-                            {sel===oi && <div style={{ position:'absolute', top:2, left:2, width:6, height:6,
-                              borderRadius:'50%', background:'var(--amber)' }}/>}
-                          </div>
-                          <span style={{ fontSize:12, color:sel===oi?'var(--amber)':'var(--textM)', fontWeight:sel===oi?600:400 }}>{opt}</span>
-                        </div>
+                        <McqOption key={oi} name={`reading-q${qi}`} label={opt} checked={sel===oi}
+                          onChange={() => setAnswers(a=>({...a,[qi]:oi}))} color="var(--amber)" bg="var(--amberBg)"/>
                       ))}
                     </div>
                   )}
@@ -553,13 +515,13 @@ function SpeakingSection({ topic, onComplete }) {
 }
 
 // ─── SCORING PHASE ───────────────────────────────────────────────────────────
-function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingTranscript, onDone }) {
+function ScoringPhase({ mock, listeningAnswers, readingAnswers, writingText, speakingTranscript, onDone }) {
   const [status, setStatus] = useState('Scoring Listening & Reading…')
 
   useEffect(() => {
     async function score() {
       // 1. Auto-score listening
-      const lTest = MOCK.listening
+      const lTest = mock.listening
       const lScore = lTest.qs.reduce((s,q,i) => {
         const ans = listeningAnswers[i]
         return s + (ans === q.a ? 1 : 0)
@@ -567,7 +529,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
       const lBand = parseFloat((lScore/lTest.qs.length*9).toFixed(1))
 
       // 2. Auto-score reading
-      const rTest = MOCK.reading
+      const rTest = mock.reading
       const rScore = rTest.qs.reduce((s,q,i) => {
         const ans = readingAnswers[i]
         if (q.type === 'fill') return s + (typeof ans === 'string' && ans.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
@@ -583,7 +545,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
         const wRes = await fetch('/api/feedback', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ messages:[{ role:'user', content:
-            `You are an Oxford ELLT examiner. Score this essay for the prompt: "${MOCK.writing.task}"\n\nEssay:\n${writingText}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
+            `You are an Oxford ELLT examiner. Score this essay for the prompt: "${mock.writing.task}"\n\nEssay:\n${writingText}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
           }]})
         })
         const wData = await wRes.json()
@@ -601,7 +563,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
         const sRes = await fetch('/api/feedback', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ messages:[{ role:'user', content:
-            `You are an Oxford ELLT speaking examiner. Score this transcribed spoken response for the topic: "${MOCK.speaking.task}"\n\nTranscript:\n${speakingTranscript}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
+            `You are an Oxford ELLT speaking examiner. Score this transcribed spoken response for the topic: "${mock.speaking.task}"\n\nTranscript:\n${speakingTranscript}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
           }]})
         })
         const sData = await sRes.json()
@@ -634,7 +596,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
 }
 
 // ─── RESULTS PHASE ───────────────────────────────────────────────────────────
-function ResultsPhase({ scores, onRetake, onHome }) {
+function ResultsPhase({ mock, scores, exitLabel, saveFailed, retrying, onRetry, onRetake, onExit }) {
   const { lScore, lBand, rScore, rBand, wBand, sBand, overall } = scores
 
   function bandLabel(b) {
@@ -651,14 +613,34 @@ function ResultsPhase({ scores, onRetake, onHome }) {
   }
 
   const sections = [
-    { name:'Listening', band:lBand, detail:`${lScore}/${MOCK.listening.qs.length} correct`, icon:'🎧', col:'var(--blue)' },
-    { name:'Reading',   band:rBand, detail:`${rScore}/${MOCK.reading.qs.length} correct`,   icon:'📖', col:'var(--amber)' },
+    { name:'Listening', band:lBand, detail:`${lScore}/${mock.listening.qs.length} correct`, icon:'🎧', col:'var(--blue)' },
+    { name:'Reading',   band:rBand, detail:`${rScore}/${mock.reading.qs.length} correct`,   icon:'📖', col:'var(--amber)' },
     { name:'Writing',   band:wBand, detail:'AI scored',                                     icon:'✍️', col:'var(--purple)' },
     { name:'Speaking',  band:sBand, detail:'AI scored',                                     icon:'🎤', col:'var(--coral)' },
   ]
 
+  // Until all four sections are saved the mock does not count: leaving or retaking would lose it
+  const blocked = { opacity: saveFailed ? 0.5 : 1, cursor: saveFailed ? 'not-allowed' : 'pointer' }
+
   return (
     <div style={{ maxWidth:620, margin:'0 auto', padding:'40px 20px' }}>
+      {saveFailed && (
+        <div role="alert" style={{ display:'flex', alignItems:'center', gap:12, flexWrap:'wrap', marginBottom:24,
+          padding:'12px 16px', background:'var(--coralBg)', border:'2px solid var(--coral)', borderRadius:12 }}>
+          <div style={{ flex:'1 1 220px', minWidth:0 }}>
+            <div style={{ fontSize:13, fontWeight:800, color:'var(--text)' }}>Your results could not be saved</div>
+            <div style={{ fontSize:12, color:'var(--textM)', fontWeight:600, marginTop:2, lineHeight:1.5 }}>
+              Check your connection, then retry. The mock only counts once it is saved, so stay on this page until it is.
+            </div>
+          </div>
+          <button onClick={onRetry} disabled={retrying} style={{
+            padding:'8px 18px', borderRadius:8, border:'none', background:'var(--coral)', color:'#fff',
+            fontWeight:800, fontSize:12, fontFamily:'inherit', cursor:retrying?'wait':'pointer' }}>
+            {retrying ? 'Saving…' : 'Retry'}
+          </button>
+        </div>
+      )}
+
       {/* Overall score hero */}
       <div style={{ textAlign:'center', marginBottom:32 }}>
         <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, letterSpacing:'0.5px', marginBottom:8 }}>
@@ -679,7 +661,7 @@ function ResultsPhase({ scores, onRetake, onHome }) {
       {/* Section scores */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12, marginBottom:24 }}>
         {sections.map(s => (
-          <Card key={s.name} style={{ textAlign:'center', borderColor:`${s.col}33` }}>
+          <Card key={s.name} style={{ textAlign:'center', borderColor:`color-mix(in srgb, ${s.col} 30%, var(--border))` }}>
             <div style={{ fontSize:24, marginBottom:6 }}>{s.icon}</div>
             <div style={{ fontSize:13, color:'var(--textM)', marginBottom:4 }}>{s.name}</div>
             <div style={{ fontSize:32, fontWeight:700, color:s.col }}>{s.band}</div>
@@ -713,16 +695,16 @@ function ResultsPhase({ scores, onRetake, onHome }) {
       </Card>
 
       <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
-        <button onClick={onHome} style={{
+        <button onClick={onExit} disabled={saveFailed} style={{
           padding:'10px 24px', borderRadius:8, border:'1px solid var(--border)',
           background:'transparent', color:'var(--textM)', fontWeight:600,
-          fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
-          ← Back to Dashboard
+          fontSize:13, fontFamily:'inherit', ...blocked }}>
+          {exitLabel}
         </button>
-        <button onClick={onRetake} style={{
+        <button onClick={onRetake} disabled={saveFailed} style={{
           padding:'10px 24px', borderRadius:8, border:'none',
           background:'linear-gradient(135deg,var(--teal),var(--blue))',
-          color:'#000', fontWeight:700, fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
+          color:'#000', fontWeight:700, fontSize:13, fontFamily:'inherit', ...blocked }}>
           Retake Mock Test
         </button>
       </div>
@@ -731,15 +713,26 @@ function ResultsPhase({ scores, onRetake, onHome }) {
 }
 
 // ─── MAIN ORCHESTRATOR ───────────────────────────────────────────────────────
-export default function FullMockTest({ userId, addResult, onExit }) {
-  const [phase, setPhase] = useState('intro')
+// The Mock tab (MockTests) is the start screen, so a run begins straight in the Listening section.
+// onExit      the student leaves the results screen (exitLabel is that button's text)
+// onFinished  all four sections are scored AND saved; fires once, before the student leaves the
+//             results. If a save fails the results stay on screen with a Retry and this does not
+//             fire (so a plan mock day is not ticked off) until a retry has saved everything.
+export default function FullMockTest({ userId, addResult, onExit, onFinished, exitLabel = '← Back to Mock Tests' }) {
+  const [setIdx, setSetIdx] = useState(readMockCount)   // which MOCK_SETS entry this run uses
+  const mock = MOCK_SETS[setIdx % MOCK_SETS.length]
+  const [phase, setPhase] = useState('listening')
   const [transition, setTransition] = useState(null) // {completed, next, nextIcon, nextPhase}
   const [listeningAnswers, setListeningAnswers] = useState({})
   const [readingAnswers, setReadingAnswers] = useState({})
   const [writingText, setWritingText] = useState('')
   const [speakingTranscript, setSpeakingTranscript] = useState('')
   const [scores, setScores] = useState(null)
+  const [saveFailed, setSaveFailed] = useState(false)
+  const [retrying, setRetrying] = useState(false)
   const mockId = useRef(crypto.randomUUID())
+  const unsavedRef = useRef([])        // result rows that have not reached the database yet
+  const finishedRef = useRef(false)    // onFinished / mock count fire once per run
 
   const goTo = (phase) => setPhase(phase)
 
@@ -766,46 +759,72 @@ export default function FullMockTest({ userId, addResult, onExit }) {
     setPhase('scoring')
   }
 
+  // Save rows one at a time. The ones that fail are kept for a retry (never saved twice).
+  // Returns true when every row is saved.
+  const persist = async (rows) => {
+    const failed = []
+    for (const row of rows) {
+      let ok = false
+      try { ok = await saveResult(row) } catch { ok = false }
+      if (ok) addResult(row)
+      else failed.push(row)
+    }
+    unsavedRef.current = failed
+    return failed.length === 0
+  }
+
+  // The mock only counts once all four sections are saved
+  const settle = (allSaved) => {
+    setSaveFailed(!allSaved)
+    if (!allSaved || finishedRef.current) return
+    finishedRef.current = true
+    writeMockCount(readMockCount() + 1)   // one more completed mock: the next run uses the next set
+    onFinished?.()
+  }
+
   const afterScoring = async (finalScores) => {
     setScores(finalScores)
 
     // Save all 4 sections to Supabase
     const mid = mockId.current
     const saves = [
-      { skill:'listening', test_id:MOCK.listening.id, test_title:MOCK.listening.title,
-        score:finalScores.lScore, total:MOCK.listening.qs.length, band_score:finalScores.lBand,
+      { skill:'listening', test_id:mock.listening.id, test_title:mock.listening.title,
+        score:finalScores.lScore, total:mock.listening.qs.length, band_score:finalScores.lBand,
         answers:JSON.stringify(listeningAnswers), is_mock:true, mock_test_id:mid },
-      { skill:'reading', test_id:MOCK.reading.id, test_title:MOCK.reading.title,
-        score:finalScores.rScore, total:MOCK.reading.qs.length, band_score:finalScores.rBand,
+      { skill:'reading', test_id:mock.reading.id, test_title:mock.reading.title,
+        score:finalScores.rScore, total:mock.reading.qs.length, band_score:finalScores.rBand,
         answers:JSON.stringify(readingAnswers), is_mock:true, mock_test_id:mid },
-      { skill:'writing', test_id:MOCK.writing.id, test_title:MOCK.writing.title,
+      { skill:'writing', test_id:mock.writing.id, test_title:mock.writing.title,
         band_score:finalScores.wBand, essay_text:writingText, is_mock:true, mock_test_id:mid },
-      { skill:'speaking', test_id:MOCK.speaking.id, test_title:MOCK.speaking.title,
+      { skill:'speaking', test_id:mock.speaking.id, test_title:mock.speaking.title,
         band_score:finalScores.sBand, is_mock:true, mock_test_id:mid },
     ]
 
-    for (const s of saves) {
-      await saveResult(s)
-      addResult(s)
-    }
-
-    localStorage.setItem('ellt-mock-count', String(mockCount + 1))
+    const allSaved = await persist(saves)
     setPhase('results')
+    settle(allSaved)
+  }
+
+  const retrySave = async () => {
+    setRetrying(true)
+    const allSaved = await persist(unsavedRef.current)
+    setRetrying(false)
+    settle(allSaved)
   }
 
   return (
     <div>
-      {phase === 'intro'      && <IntroPhase onStart={() => goTo('listening')}/>}
       {phase === 'transition' && transition && (
         <TransitionPhase {...transition}
           onContinue={() => { const next = transition.nextPhase; setTransition(null); goTo(next) }}/>
       )}
-      {phase === 'listening'  && <ListeningSection test={MOCK.listening} onComplete={afterListening}/>}
-      {phase === 'reading'    && <ReadingSection   test={MOCK.reading}   onComplete={afterReading}/>}
-      {phase === 'writing'    && <WritingSection   task={MOCK.writing}   onComplete={afterWriting}/>}
-      {phase === 'speaking'   && <SpeakingSection  topic={MOCK.speaking} onComplete={afterSpeaking}/>}
+      {phase === 'listening'  && <ListeningSection test={mock.listening} onComplete={afterListening}/>}
+      {phase === 'reading'    && <ReadingSection   test={mock.reading}   onComplete={afterReading}/>}
+      {phase === 'writing'    && <WritingSection   task={mock.writing}   onComplete={afterWriting}/>}
+      {phase === 'speaking'   && <SpeakingSection  topic={mock.speaking} onComplete={afterSpeaking}/>}
       {phase === 'scoring'    && (
         <ScoringPhase
+          mock={mock}
           listeningAnswers={listeningAnswers}
           readingAnswers={readingAnswers}
           writingText={writingText}
@@ -814,17 +833,26 @@ export default function FullMockTest({ userId, addResult, onExit }) {
       )}
       {phase === 'results' && scores && (
         <ResultsPhase
+          mock={mock}
           scores={scores}
+          exitLabel={exitLabel}
+          saveFailed={saveFailed}
+          retrying={retrying}
+          onRetry={retrySave}
           onRetake={() => {
-          mockId.current = crypto.randomUUID()
-          setListeningAnswers({})
-          setReadingAnswers({})
-          setWritingText('')
-          setSpeakingTranscript('')
-          setScores(null)
-          setPhase('intro')
-        }}
-          onHome={onExit}/>
+            // Straight into a fresh run: the Mock tab already was the start screen
+            mockId.current = crypto.randomUUID()
+            finishedRef.current = false
+            unsavedRef.current = []
+            setSetIdx(i => Math.max(readMockCount(), i + 1))   // the set after the one just finished
+            setListeningAnswers({})
+            setReadingAnswers({})
+            setWritingText('')
+            setSpeakingTranscript('')
+            setScores(null)
+            setPhase('listening')
+          }}
+          onExit={onExit}/>
       )}
     </div>
   )
