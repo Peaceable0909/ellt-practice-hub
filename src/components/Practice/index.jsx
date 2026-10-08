@@ -30,14 +30,17 @@ export default function Practice({ results, addResult, userId }) {
 
   // Opened from a plan task (router state { from: 'today' })? Carry that state through every
   // move inside Practice so the Back to Today bar survives switching tabs and opening tests.
-  const routeState = location.state
-  const fromToday = routeState?.from === 'today'
+  // fromList marks a test opened from this skill's list, i.e. the entry below it is that list.
+  const { fromList, ...routeState } = location.state || {}
+  const fromToday = routeState.from === 'today'
 
-  const openTest = id => navigate(`${listPath}/${encodeURIComponent(id)}`, { state: routeState })
-  // Back out of a test to its list: one step back when we arrived from the list, otherwise
-  // (deep link, refresh) replace the test URL with the list so Back never loops.
+  const openTest = id => navigate(`${listPath}/${encodeURIComponent(id)}`, { state: { ...routeState, fromList: true } })
+  // Back out of a test to its list: pop the list entry when the test was opened from it (so
+  // Back / Next Test never skips past it). A test with no list below it - a deep link, or "Practise"
+  // from the Full plan - gets the list swapped in for the test URL, so the student stays in Practice
+  // and Back never loops.
   const closeTest = () => {
-    if (location.key !== 'default') navigate(-1)
+    if (fromList) navigate(-1)
     else navigate(listPath, { replace: true, state: routeState })
   }
   const hubProps = {
@@ -49,7 +52,7 @@ export default function Practice({ results, addResult, userId }) {
   return (
     <div className="app-container">
       {fromToday && (
-        <Link to="/today" style={{ ...backLink, display: 'flex', width: '100%', marginBottom: 14, color: 'var(--blue)', border: '2px solid var(--blueBdr)', borderBottom: '3px solid var(--blue)' }}>
+        <Link to="/today" style={{ ...backLink, display: 'flex', width: '100%', marginBottom: 14, color: 'var(--blueT)', border: '2px solid var(--blueBdr)', borderBottom: '3px solid var(--blue)' }}>
           <ChevronLeft size={16} /> Back to Today
         </Link>
       )}

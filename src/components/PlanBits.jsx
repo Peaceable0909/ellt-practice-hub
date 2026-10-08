@@ -1,19 +1,20 @@
 // Small presentational pieces shared by Today and the Full plan view.
 import { Headphones, BookOpen, PenLine, Mic, ClipboardList, Star, Brain, CheckCircle, Trophy } from 'lucide-react'
 
+// color is for icons, borders and fills; text is the darker variant that passes 4.5:1 for small text
 export const TASK_META = {
-  listening: { Icon: Headphones,    color: 'var(--blue)'   },
-  reading:   { Icon: BookOpen,      color: 'var(--amber)'  },
-  writing:   { Icon: PenLine,       color: 'var(--purple)' },
-  speaking:  { Icon: Mic,           color: 'var(--coral)'  },
-  review:    { Icon: Star,          color: 'var(--teal)'   },
-  vocab:     { Icon: Brain,         color: 'var(--green)'  },
-  mock:      { Icon: ClipboardList, color: 'var(--green)'  },
-  intro:     { Icon: Trophy,        color: 'var(--green)'  },
+  listening: { Icon: Headphones,    color: 'var(--blue)',   text: 'var(--blueT)'   },
+  reading:   { Icon: BookOpen,      color: 'var(--amber)',  text: 'var(--amberT)'  },
+  writing:   { Icon: PenLine,       color: 'var(--purple)', text: 'var(--purpleT)' },
+  speaking:  { Icon: Mic,           color: 'var(--coral)',  text: 'var(--coralT)'  },
+  review:    { Icon: Star,          color: 'var(--teal)',   text: 'var(--tealT)'   },
+  vocab:     { Icon: Brain,         color: 'var(--green)',  text: 'var(--greenT)'  },
+  mock:      { Icon: ClipboardList, color: 'var(--green)',  text: 'var(--greenT)'  },
+  intro:     { Icon: Trophy,        color: 'var(--green)',  text: 'var(--greenT)'  },
 }
 
 export function metaFor(skill) {
-  return TASK_META[skill] || { Icon: BookOpen, color: 'var(--textM)' }
+  return TASK_META[skill] || { Icon: BookOpen, color: 'var(--textM)', text: 'var(--textM)' }
 }
 
 export const DAY_TYPE_LABELS = {
@@ -37,10 +38,10 @@ export function fmtDate(date, opts = { weekday: 'short', day: 'numeric', month: 
 
 /** Colour-coded task pill. `onGreen` restyles it for use on the green Up Next card. */
 export function TaskChip({ task, onGreen = false }) {
-  const { Icon, color } = metaFor(task.skill)
+  const { Icon, color, text } = metaFor(task.skill)
   const style = onGreen
-    ? { color: '#fff', background: 'rgba(255,255,255,0.22)', border: '1px solid rgba(255,255,255,0.4)' }
-    : { color, background: `color-mix(in srgb, ${color} 10%, var(--bg3))`, border: `1px solid color-mix(in srgb, ${color} 30%, var(--border))` }
+    ? { color: '#fff', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.35)' }
+    : { color: text, background: `color-mix(in srgb, ${color} 10%, var(--bg3))`, border: `1px solid color-mix(in srgb, ${color} 30%, var(--border))` }
   return (
     <span style={{ ...style, fontSize: 11, fontWeight: 700, borderRadius: 8, padding: '3px 8px', display: 'inline-flex', alignItems: 'center', gap: 4, maxWidth: '100%' }}>
       <Icon size={10} style={{ flexShrink: 0 }} />
@@ -51,7 +52,7 @@ export function TaskChip({ task, onGreen = false }) {
 
 export function DoneBadge() {
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 900, color: 'var(--green)', textTransform: 'uppercase', letterSpacing: '0.4px', background: 'var(--greenBg)', border: '1px solid var(--greenBdr)', padding: '2px 8px', borderRadius: 99 }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, fontWeight: 900, color: 'var(--greenT)', textTransform: 'uppercase', letterSpacing: '0.4px', background: 'var(--greenBg)', border: '1px solid var(--greenBdr)', padding: '2px 8px', borderRadius: 99 }}>
       <CheckCircle size={11} /> Done
     </span>
   )

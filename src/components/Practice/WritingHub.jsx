@@ -4,7 +4,7 @@ import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 import { Camera, Upload, X, Image, PenLine, ChevronLeft, Eye, EyeOff, FileText } from 'lucide-react'
 import DiagramRenderer from './DiagramRenderer'
-import useTestSelection from './useTestSelection'
+import useTestSelection, { activateProps } from './useTestSelection'
 
 // Task 2 essays
 const ALL_TASK2 = [...WRITING, ...WRITING_IELTS]
@@ -482,7 +482,7 @@ ${essay}
         {(tab === 'task2' ? ALL_TASK2 : ALL_TASK1).map(w => {
           const prev = results.find(r => r.test_id === w.id)
           return (
-            <div key={w.id} onClick={() => openTask(w)} className="skill-card" style={{ cursor: 'pointer' }}>
+            <div key={w.id} {...activateProps(() => openTask(w))} className="skill-card" style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <Chip text={w.source || 'Oxford ELLT'} color="var(--purple)" />
                 {prev && <Chip text="Done" color="var(--green)" />}

@@ -76,10 +76,17 @@ export default function App() {
     })
   }, [session?.user?.id, isPasswordRecovery])
 
+  // A retake replaces the earlier attempt of the same test. Mock rows are kept apart: a mock
+  // section never replaces (or is replaced by) a plan or practice result for the same test,
+  // only a retake of the same mock run replaces its own row.
   const addResult = useCallback(row => {
+    const sameAttempt = r =>
+      r.test_id === row.test_id && r.skill === row.skill &&
+      !!r.is_mock === !!row.is_mock &&
+      (!row.is_mock || r.mock_test_id === row.mock_test_id)
     setResults(prev => [
       { ...row, completed_at: new Date().toISOString() },
-      ...prev.filter(r => !(r.test_id === row.test_id && r.skill === row.skill)),
+      ...prev.filter(r => !sameAttempt(r)),
     ])
   }, [])
 
@@ -112,9 +119,9 @@ export default function App() {
         </div>
       )}
 
-      <SessionReminder schedule={scheduleStore.schedule} />
       <ScrollToTop />
       <ScheduleProvider value={scheduleStore}>
+        <SessionReminder />
         <Routes>
           <Route path="/" element={<RedirectTo to="/today" />} />
           <Route path="/today" element={<Today {...sharedProps} profile={profile} />} />

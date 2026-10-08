@@ -1,4 +1,4 @@
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import StudySession from './StudySession'
 import { useSchedule, buildSession, getDaySlots, sessionKey } from '../lib/useSchedule'
 
@@ -9,9 +9,17 @@ const SLOTS = ['morning', 'noon', 'evening']
 // The session is marked done in the shared schedule the moment its last task is finished
 // (markDone updates the store synchronously), so by the time the student taps Back to
 // Today, Today already shows it ticked and the next session as Up next.
+//
+// History: Today and the Full plan open a session with router state { from: 'today' | 'plan' }.
+// Leaving then POPS that entry (navigate(-1)) instead of pushing a new one, so the browser Back
+// button never walks back into a session that was finished or abandoned, and Today is not left
+// twice in a row in the stack. A deep link (no router state) has no in-app entry to pop, so it
+// replaces the session URL instead.
 export default function TodaySession({ results, addResult, userId }) {
   const { dayNum: dayParam, slot } = useParams()
   const navigate = useNavigate()
+  const from = useLocation().state?.from
+  const leaveTo = (screen, path) => (from === screen ? navigate(-1) : navigate(path, { replace: true }))
   const { schedule, loading, status, plan, dayNum, completed, markDone } = useSchedule()
 
   if (loading) return (
@@ -44,10 +52,10 @@ export default function TodaySession({ results, addResult, userId }) {
       userId={userId}
       upNext={upNext}
       onFinish={() => markDone(session.key)}
-      onComplete={() => navigate('/today', { replace: true })}
+      onComplete={() => leaveTo('today', '/today')}
       // A catch-up on an earlier day is not visible on Today: offer the plan on that day
-      onViewPlan={day < dayNum ? () => navigate(`/today/plan?day=${day}`, { replace: true }) : undefined}
-      onBack={() => navigate('/today')}
+      onViewPlan={day < dayNum ? () => leaveTo('plan', `/today/plan?day=${day}`) : undefined}
+      onBack={() => (from ? navigate(-1) : navigate('/today', { replace: true }))}
     />
   )
 }

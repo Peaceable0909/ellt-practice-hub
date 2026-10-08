@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight, ClipboardList, PlayCircle, RotateCcw, Eye } from 'lucide-react'
 import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays } from '../lib/useSchedule'
@@ -13,13 +14,14 @@ const PRACTICE_SKILLS = ['listening', 'reading', 'writing', 'speaking']   // tas
 export default function Plan({ results = [] }) {
   const { schedule, loading, error, reload, status, plan, dayNum, totalDays, cfg, completed, doneSessions, totalSessions } = useSchedule()
   const [params, setParams] = useSearchParams()
+  const detailRef = useRef(null)
 
   if (loading) return <Page><Centered>Loading your plan...</Centered></Page>
   if (error && !schedule) return (
     <Page>
       <Centered>
         Could not load your plan.{' '}
-        <button onClick={reload} style={{ background: 'none', border: 'none', color: 'var(--blue)', fontWeight: 900, fontSize: 14, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'underline' }}>Try again</button>
+        <button onClick={reload} style={{ background: 'none', border: 'none', color: 'var(--blueT)', fontWeight: 900, fontSize: 14, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'underline' }}>Try again</button>
       </Centered>
     </Page>
   )
@@ -33,6 +35,15 @@ export default function Plan({ results = [] }) {
   const selected = asked >= 1 && asked <= totalDays ? asked : defaultDay
   const selectedDay = plan.find(d => d.day === selected)
   const pct = totalSessions ? Math.round((doneSessions / totalSessions) * 100) : 0
+
+  // On a phone the day's sessions sit below the calendar, off screen: bring them into view
+  const selectDay = n => {
+    setParams({ day: String(n) }, { replace: true })
+    requestAnimationFrame(() => {
+      const calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      detailRef.current?.scrollIntoView({ block: 'nearest', behavior: calm ? 'auto' : 'smooth' })
+    })
+  }
 
   const statusText = status === 'upcoming'
     ? `Starts ${fmtDate(start, { weekday: 'short', day: 'numeric', month: 'short' })}`
@@ -69,7 +80,7 @@ export default function Plan({ results = [] }) {
           const done = slots.map(s => !!completed[sessionKey(d.day, s.which)])
           return (
             <DayTile key={d.day} d={d} date={addDays(start, d.day - 1)} dayNum={dayNum} done={done}
-              selected={d.day === selected} onSelect={() => setParams({ day: String(d.day) }, { replace: true })} />
+              selected={d.day === selected} onSelect={() => selectDay(d.day)} />
           )
         })}
       </div>
@@ -78,7 +89,10 @@ export default function Plan({ results = [] }) {
       </div>
 
       {selectedDay && (
-        <DayDetail d={selectedDay} schedule={schedule} start={start} dayNum={dayNum} completed={completed} results={results} />
+        // scroll margins keep it clear of the sticky top nav and the mobile bottom bar
+        <div ref={detailRef} style={{ scrollMarginTop: 'calc(var(--nav-h) + 8px)', scrollMarginBottom: 'calc(var(--bottom-nav-h) + 12px)' }}>
+          <DayDetail d={selectedDay} schedule={schedule} start={start} dayNum={dayNum} completed={completed} results={results} />
+        </div>
       )}
     </Page>
   )
@@ -100,7 +114,7 @@ function DayTile({ d, date, dayNum, done, selected, onSelect }) {
         background: selected ? 'var(--blueBg)' : isToday ? 'var(--greenBg)' : 'var(--bg2)',
         opacity: isFuture && !selected ? 0.6 : 1, fontFamily: 'Nunito, sans-serif',
       }}>
-      <span style={{ fontSize: 13, fontWeight: 900, lineHeight: 1, color: allDone ? 'var(--green)' : isToday ? 'var(--green)' : 'var(--text)' }}>{d.day}</span>
+      <span style={{ fontSize: 13, fontWeight: 900, lineHeight: 1, color: allDone || isToday ? 'var(--greenT)' : 'var(--text)' }}>{d.day}</span>
       <span style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
         {done.map((v, i) => <span key={i} style={{ width: 7, height: 7, borderRadius: '50%', background: v ? 'var(--green)' : 'var(--border)' }} />)}
       </span>
@@ -113,11 +127,11 @@ function ResultBadge({ r }) {
   const band = Number(r.band_score)
   const pctScore = r.total > 0 ? Math.round((r.score / r.total) * 100) : null
   if (!(band > 0) && pctScore == null) return null
-  const col = band > 0
-    ? (band >= 7 ? 'var(--green)' : band >= 5.5 ? 'var(--amber)' : 'var(--coral)')
-    : (pctScore >= 70 ? 'var(--green)' : pctScore >= 50 ? 'var(--amber)' : 'var(--coral)')
+  const tone = band > 0
+    ? (band >= 7 ? 'green' : band >= 5.5 ? 'amber' : 'coral')
+    : (pctScore >= 70 ? 'green' : pctScore >= 50 ? 'amber' : 'coral')
   return (
-    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 900, color: col, border: `1.5px solid ${col}`, borderRadius: 8, padding: '2px 7px' }}>
+    <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 900, color: `var(--${tone}T)`, border: `1.5px solid var(--${tone})`, borderRadius: 8, padding: '2px 7px' }}>
       {band > 0 ? `Band ${band}` : `${r.score}/${r.total}`}
     </span>
   )
@@ -129,8 +143,8 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
   const slots = getDaySlots(d, schedule)
   const date = addDays(start, d.day - 1)
   const typeLabel = DAY_TYPE_LABELS[d.dayType]
-  const chip = (text, col) => (
-    <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4px', color: col, border: `1.5px solid ${col}`, borderRadius: 99, padding: '2px 8px' }}>{text}</span>
+  const chip = (text, col, textCol = col) => (
+    <span style={{ fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.4px', color: textCol, border: `1.5px solid ${col}`, borderRadius: 99, padding: '2px 8px' }}>{text}</span>
   )
 
   return (
@@ -138,8 +152,8 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
         <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--text)' }}>Day {d.day}</div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {typeLabel && chip(typeLabel, d.dayType === 'mock' ? 'var(--green)' : 'var(--blue)')}
-          {isToday ? chip('Today', 'var(--green)') : isFuture ? chip('Preview only', 'var(--textM)') : chip('Review', 'var(--textM)')}
+          {typeLabel && (d.dayType === 'mock' ? chip(typeLabel, 'var(--green)', 'var(--greenT)') : chip(typeLabel, 'var(--blue)', 'var(--blueT)'))}
+          {isToday ? chip('Today', 'var(--green)', 'var(--greenT)') : isFuture ? chip('Preview only', 'var(--textM)') : chip('Review', 'var(--textM)')}
         </div>
       </div>
       <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 700, marginBottom: 6 }}>{fmtDate(date, { weekday: 'long', day: 'numeric', month: 'long' })}</div>
@@ -156,7 +170,7 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
               <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--textD)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{slot.label} · {slot.time}</span>
               {isDone && <DoneBadge />}
               {!isDone && !isFuture && !isToday && (
-                <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--amber)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Not done</span>
+                <span style={{ fontSize: 10, fontWeight: 900, color: 'var(--amberT)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Not done</span>
               )}
             </div>
             <div style={{ fontSize: 15, fontWeight: 900, color: 'var(--text)', lineHeight: 1.3 }}>{s.label}</div>
@@ -177,7 +191,7 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
                         {r && <ResultBadge r={r} />}
                         {practiceTo && (
                           <Link to={practiceTo} state={{ from: 'today' }} aria-label={`Practise ${t.label} on its own`}
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: 2, minHeight: 32, fontSize: 11, fontWeight: 900, color: 'var(--blue)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 2, minHeight: 32, fontSize: 11, fontWeight: 900, color: 'var(--blueT)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
                             Practise <ChevronRight size={13} />
                           </Link>
                         )}
@@ -188,7 +202,7 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
               })}
             </div>
             {!isFuture && (
-              <Link to={`/today/session/${d.day}/${slot.which}`}
+              <Link to={`/today/session/${d.day}/${slot.which}`} state={{ from: 'plan' }}
                 style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 40, padding: '9px 16px', borderRadius: 12, textDecoration: 'none', fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.4px',
                   ...(isDone
                     ? { border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg2)', color: 'var(--textM)' }

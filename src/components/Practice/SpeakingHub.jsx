@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { SPEAKING, SPEAKING_IELTS } from '../../data/speaking'
 import { saveResult } from '../../lib/supabase'
 import { Card, Chip, FeedbackBlock } from '../ui'
-import useTestSelection from './useTestSelection'
+import useTestSelection, { activateProps } from './useTestSelection'
 import { Mic, MicOff, ChevronLeft, Square, Clock, CheckCircle, BookOpen } from 'lucide-react'
 
 // ─── MIC RECORDER ─────────────────────────────────────────────
@@ -421,7 +421,7 @@ export default function SpeakingHub({ results, addResult, userId, selectedId, on
         {ALL_SPEAKING.map(s => {
           const prev = results.find(r => r.test_id === s.id)
           return (
-            <div key={s.id} onClick={() => openTopic(s)} className="skill-card" style={{ cursor: 'pointer' }}>
+            <div key={s.id} {...activateProps(() => openTopic(s))} className="skill-card" style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <Chip text={s.stage} color="var(--coral)" />
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

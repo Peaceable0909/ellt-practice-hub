@@ -17,3 +17,19 @@ export default function useTestSelection(pool, { selectedId, onSelect, preselect
   const close = () => (controlled ? onSelect(null) : setLocal(null))
   return [selected, open, close]
 }
+
+/**
+ * Props that make a clickable card (or answer option) a real control: announced as a button,
+ * reachable with Tab, and activated by Enter or Space as well as by click.
+ */
+export function activateProps(onActivate) {
+  return {
+    role: 'button',
+    tabIndex: 0,
+    onClick: onActivate,
+    onKeyDown: e => {
+      if (e.target !== e.currentTarget) return   // a key pressed inside a nested control is not ours
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onActivate() }
+    },
+  }
+}

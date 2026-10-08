@@ -4,9 +4,11 @@
 //   variant="edit"        single page form for /today/plan/edit (edit, or ?new=1 for a fresh plan)
 //
 // Both read the plan from useSchedule() and save through its savePlan(), so there is
-// exactly one save path. After a successful save we land on /today with the new plan.
+// exactly one save path. After a successful save the form leaves the history instead of
+// stacking another entry: onboarding swaps itself for Today, and the edit form steps back to
+// the screen it was opened from (or Today when it was opened directly).
 import { useEffect, useId, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, ChevronLeft, Clock, Globe, Moon, Sparkles, Sun, CalendarDays, Target, AlertTriangle } from 'lucide-react'
 import { PERIOD_CONFIG } from '../data/timetable'
 import { useSchedule, localDateKey, parseLocalDate } from '../lib/useSchedule'
@@ -58,6 +60,7 @@ const primaryBtn = disabled => ({
 export default function PlanSetup({ variant = 'edit', existing = false, name = '' }) {
   const { schedule, savePlan } = useSchedule()
   const navigate = useNavigate()
+  const location = useLocation()
   const onboarding = variant === 'onboarding'
   const hasPlan = !!schedule
 
@@ -94,8 +97,11 @@ export default function PlanSetup({ variant = 'edit', existing = false, name = '
       return
     }
     window.scrollTo(0, 0)
-    // Onboarding already lives at /today: replace it so Back does not return to the wizard
-    navigate('/today', { replace: onboarding })
+    // Never push /today on top of the form: Back would re-open it. Onboarding already lives at
+    // /today, so it just replaces itself. The edit form pops back to where it was opened from
+    // (key 'default' means there is nothing in the app below it, e.g. a bookmarked URL).
+    if (!onboarding && location.key !== 'default') navigate(-1)
+    else navigate('/today', { replace: true })
   }
 
   const errorBanner = error && (

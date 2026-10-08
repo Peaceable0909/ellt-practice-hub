@@ -33,12 +33,21 @@
   --tealBr:   #18B8A8;
   --text:     #3C3C3C;
   --textM:    #777777;
-  --textD:    #AFAFAF;
+  --textD:    #767676;
+  /* Text-safe brand colours: 4.5:1 or better on white and on the pale tints.
+     The bright colours above stay for icons, borders and fills. */
+  --greenT:   #337601;
+  --amberT:   #965800;
+  --blueT:    #116D99;
+  --tealT:    #0F7268;
+  --purpleT:  #8236C4;
+  --coralT:   #BE2A2A;
   --streak:   #FF9600;
   --xp:       #CE82FF;
   --heart:    #FF4B4B;
   --nav-h:    62px;
   --bottom-nav-h: 64px;
+  color-scheme: light;   /* native date/time pickers, selects and scrollbars follow the theme */
 }
 
 /* ─── DARK MODE ──────────────────────────────────────── */
@@ -72,7 +81,14 @@ body.dark {
   --tealBr:   rgba(24,184,168,0.4);
   --text:     #F2F2F2;
   --textM:    #9BABB5;
-  --textD:    #5A7380;
+  --textD:    #8499A5;
+  --greenT:   #5BCD07;
+  --amberT:   #FF9C0F;
+  --blueT:    #49C0F8;
+  --tealT:    #46C6B9;
+  --purpleT:  #D89BFF;
+  --coralT:   #FF8C8C;
+  color-scheme: dark;
 }
 
 body {
@@ -86,7 +102,8 @@ body {
   padding-bottom: var(--bottom-nav-h);
 }
 
-@media (min-width: 768px) {
+/* The top nav needs about 790px; below 820px the bottom bar stays (keep in step with Nav.jsx) */
+@media (min-width: 820px) {
   body { padding-bottom: 0; }
 }
 
@@ -158,6 +175,9 @@ input[type="time"], select {
   width: 100%; box-sizing: border-box;
 }
 textarea:focus, input:focus, select:focus { border-color: var(--blue); }
+
+/* Mock test answer option: the radio input is visually hidden, so the whole row shows the focus ring */
+.mock-opt:focus-within { outline: 2px solid var(--blue); outline-offset: 2px; }
 textarea { resize: vertical; min-height: 160px; line-height: 1.6; }
 
 /* ─── AUDIO ─────────────────────────────────────────── */

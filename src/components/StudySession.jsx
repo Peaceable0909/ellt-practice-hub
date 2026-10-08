@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
-import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, PlayCircle } from 'lucide-react'
+import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones, PenLine, Mic, PlayCircle } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
@@ -9,6 +9,8 @@ import TestTaker from './Practice/TestTaker'
 import WritingHub from './Practice/WritingHub'
 import SpeakingHub from './Practice/SpeakingHub'
 import MockTests from './MockTests'
+import { metaFor } from './PlanBits'
+import { isTestResult } from '../lib/skillStats'
 
 // Every test, by skill. Listening and reading tasks run in TestTaker (resolved from the
 // plan's testId); writing and speaking tasks open the same testId inside their hubs; the
@@ -27,9 +29,6 @@ function resolveTest(skill, testId) {
   const pool = skill === 'listening' ? ALL_L : skill === 'reading' ? ALL_R : []
   return pool.find(t => t.id === testId) || null
 }
-
-const SKILL_ICON  = { listening: Headphones, reading: BookOpen, writing: PenLine, speaking: Mic, review: Star, vocab: Brain, mock: Star }
-const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--green)', speaking:'var(--purple)', review:'var(--coral)', vocab:'var(--teal)', mock:'var(--green)' }
 
 // ─── Vocabulary bank (32 B2/C1 academic words) ───────────────────────────────
 const VOCAB_BANK = [
@@ -105,6 +104,10 @@ export default function StudySession({ session, results, addResult, userId, onFi
 
   const currentTask = tasks[taskIdx]
 
+  // A new task or the grade screen is a new screen: start at the top instead of keeping the
+  // scroll offset of the task before it (the route does not change, so ScrollToTop never fires)
+  useEffect(() => { window.scrollTo(0, 0) }, [taskIdx, showGrade])
+
   // Record one task as done. As soon as the last one is, the session counts as complete,
   // even if the student is still reading a mock's results before moving on.
   function markTaskDone(idx) {
@@ -152,10 +155,9 @@ export default function StudySession({ session, results, addResult, userId, onFi
       {/* Task progress bar */}
       <div style={{ background:'var(--bg2)', borderBottom:'1px solid var(--border)', padding:'10px 16px', display:'flex', gap:8, overflowX:'auto' }}>
         {tasks.map((task, i) => {
-          const Icon = SKILL_ICON[task.skill] || BookOpen
+          const { Icon, color } = metaFor(task.skill)
           const done = tasksDone.includes(i)
           const active = i === taskIdx
-          const color = SKILL_COLOR[task.skill] || 'var(--blue)'
           return (
             <button key={i} onClick={() => setTaskIdx(i)} style={{
               display:'flex', alignItems:'center', gap:6, padding:'6px 12px',
@@ -304,7 +306,7 @@ function VocabExercise({ task, addResult, userId, onTaskComplete }) {
   const [chosen,  setChosen]  = useState(null)
   const [answers, setAnswers] = useState([])
   const [saved,   setSaved]   = useState(false)
-  const col = SKILL_COLOR['vocab'] || 'var(--blue)'
+  const col = metaFor('vocab').color
 
   const current = questions[qi]
   const isDone  = answers.length === questions.length
@@ -435,9 +437,9 @@ function ReviewSession({ task, results, onTaskComplete }) {
             const Icon  = RICON[r.skill] || BookOpen
             const col   = RCOL[r.skill] || 'var(--blue)'
             return (
-              <div key={ri} style={{ background:'var(--bg2)', border:`2px solid ${col}33`, borderRadius:14, overflow:'hidden' }}>
+              <div key={ri} style={{ background:'var(--bg2)', border:`2px solid color-mix(in srgb, ${col} 30%, var(--border))`, borderRadius:14, overflow:'hidden' }}>
                 <div style={{ padding:'12px 16px', borderBottom:'1px solid var(--border)', display:'flex', alignItems:'center', gap:10 }}>
-                  <div style={{ width:36, height:36, borderRadius:10, background:`${col}18`, border:`2px solid ${col}33`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+                  <div style={{ width:36, height:36, borderRadius:10, background:`color-mix(in srgb, ${col} 12%, var(--bg3))`, border:`2px solid color-mix(in srgb, ${col} 30%, var(--border))`, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
                     <Icon size={16} color={col} />
                   </div>
                   <div style={{ flex:1, minWidth:0 }}>
@@ -486,14 +488,17 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
   const [msgPick] = useState(() => Math.floor(Math.random() * 2))   // fixed for the life of the screen
 
   const taskTestIds = tasks.map(t => t.testId).filter(Boolean)
-  const taskSkills  = [...new Set(tasks.map(t => t.skill))]
-  const hasMock     = taskSkills.includes('mock')   // a mock day: grade the four mock sections
+  const hasMock     = tasks.some(t => t.skill === 'mock')   // a mock day: grade the four mock sections
+  // A task with a fixed test is graded by that test only. Skills are matched loosely just where
+  // the student may have picked another test (writing, speaking) or the task has no fixed test
+  // (vocab...), and never pick up the Daily Challenge or a mock section done earlier today.
+  const looseSkills = [...new Set(tasks.filter(t => !t.testId || t.skill === 'writing' || t.skill === 'speaking').map(t => t.skill))]
   const todayLocal  = new Date().toLocaleDateString('en-CA')
 
   const results = (allResults || []).filter(r => {
     const isToday = !r.completed_at || new Date(r.completed_at).toLocaleDateString('en-CA') === todayLocal
     const matchesId = taskTestIds.includes(r.test_id)
-    const matchesSkill = taskSkills.includes(r.skill)
+    const matchesSkill = looseSkills.includes(r.skill) && r.test_id !== 'daily_challenge' && !r.is_mock
     const matchesMock = hasMock && r.is_mock
     return isToday && (matchesId || matchesSkill || matchesMock)
   })
@@ -504,9 +509,6 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
     seen.add(r.test_id)
     return true
   })
-
-  const SKILL_COLOR = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
-  const SKILL_ICON  = { listening:Headphones, reading:BookOpen, writing:PenLine, speaking:Mic }
 
   // Grade each result
   const graded = dedupedResults.map(r => {
@@ -549,14 +551,15 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
 
   // ── Plan scoreboard: all plan results grouped by skill ─────────────────────
   const planSkills = ['listening','reading','writing','speaking']
-  const planResults = (allResults || []).filter(r => planSkills.includes(r.skill))
+  const planResults = (allResults || []).filter(isTestResult)   // real tests only: the local-only Daily Challenge would skew the averages
   const scoreboardBySkill = planSkills.map(skill => {
     const rs = planResults.filter(r => r.skill === skill)
     if (!rs.length) return { skill, avg: null, count: 0, trend: null }
     const bands = rs.filter(r => r.band_score > 0).map(r => r.band_score)
     const avg = bands.length ? +(bands.reduce((a,b) => a+b,0)/bands.length).toFixed(1) : null
-    const recent = bands.slice(-3)
-    const older  = bands.slice(-6,-3)
+    // bands are newest first
+    const recent = bands.slice(0, 3)
+    const older  = bands.slice(3, 6)
     const trend = recent.length && older.length
       ? (recent.reduce((a,b)=>a+b,0)/recent.length) - (older.reduce((a,b)=>a+b,0)/older.length)
       : null
@@ -567,7 +570,7 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
   // ── Wrong answers ───────────────────────────────────────────────────────────
   const allWrong = dedupedResults.flatMap(r => {
     const wrong = getWrongAnswers(r)
-    const col = SKILL_COLOR[r.skill] || 'var(--textM)'
+    const col = metaFor(r.skill).color
     return wrong.map(w => ({ ...w, skill: r.skill, testTitle: r.test_title, col }))
   })
   const feedbackResults = dedupedResults.filter(r => (r.skill === 'writing' || r.skill === 'speaking') && r.feedback)
@@ -618,8 +621,7 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
             <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>This Session — Skill Breakdown</div>
             <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
               {graded.map((r, i) => {
-                const Icon = SKILL_ICON[r.skill] || BookOpen
-                const col  = SKILL_COLOR[r.skill] || 'var(--textM)'
+                const { Icon, color: col } = metaFor(r.skill)
                 const bandPct = r.band_score > 0 ? Math.round((r.band_score/9)*100) : r.score || 0
                 const wrongCount = allWrong.filter(w => w.testTitle === r.test_title).length
                 const status = bandPct >= 78 ? '✓ Strong' : bandPct >= 55 ? '~ Developing' : '✗ Needs work'
@@ -656,8 +658,7 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
           <div style={{ fontSize:11, fontWeight:800, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>My Plan — Running Scoreboard</div>
           <div style={{ background:'var(--bg2)', border:'1.5px solid var(--border)', borderRadius:14, overflow:'hidden', boxShadow:'var(--shadow)' }}>
             {scoreboardBySkill.map((s, i) => {
-              const Icon = SKILL_ICON[s.skill] || BookOpen
-              const col  = SKILL_COLOR[s.skill] || 'var(--textM)'
+              const { Icon, color: col } = metaFor(s.skill)
               const bandPct = s.avg ? Math.round((s.avg/9)*100) : null
               const trendIcon = s.trend === null ? '—' : s.trend > 0.3 ? '↑' : s.trend < -0.3 ? '↓' : '→'
               const trendCol  = s.trend === null ? 'var(--textM)' : s.trend > 0.3 ? 'var(--green)' : s.trend < -0.3 ? 'var(--coral)' : 'var(--amber)'
@@ -743,7 +744,7 @@ function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPl
             )}
 
             {tab === 'feedback' && feedbackResults.map((r, i) => {
-              const col = SKILL_COLOR[r.skill] || 'var(--purple)'
+              const col = metaFor(r.skill).color
               const fb  = r.feedback || ''
               const sections = fb.split('\n').filter(l => l.trim().length > 5)
               return (

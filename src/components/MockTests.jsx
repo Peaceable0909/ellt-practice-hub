@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Card, Chip } from './ui'
 import FullMockTest from './FullMockTest'
 
-// The Mock tab: start screen (what to expect) -> FullMockTest runner, plus past mock history.
+// The Mock tab: start screen (what to expect, tips) -> FullMockTest runner, plus past mock history.
+// This is the only start screen: the runner begins straight in the Listening section.
 //
 // A plan mock day shows the very same start screen and runner from inside a study session:
 //   embedded    render without the page wrapper and the history (the session supplies its own)
@@ -70,6 +71,13 @@ export default function MockTests({ results, addResult, userId, embedded = false
         </div>
       </div>
 
+      {/* Tips */}
+      <div style={{ padding:'12px 16px', background:'var(--amberBg)', border:'1px solid var(--amberBdr)',
+        borderRadius:10, marginBottom:24, fontSize:13, color:'var(--text)', lineHeight:1.6 }}>
+        💡 <strong>Tips:</strong> Find a quiet place · Use headphones for listening ·
+        You cannot go back to a previous section · Aim for full sentences in writing and speaking
+      </div>
+
       {/* What to expect */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(200px,1fr))', gap:12, marginBottom:28 }}>
         {[
@@ -78,7 +86,7 @@ export default function MockTests({ results, addResult, userId, embedded = false
           { icon:'✍️', name:'Writing',   time:'45 min', note:'Essay task — AI scores your response', col:'var(--purple)' },
           { icon:'🎤', name:'Speaking',  time:'10 min', note:'Speak aloud — voice is captured & AI scored', col:'var(--coral)' },
         ].map(s => (
-          <Card key={s.name} style={{ borderColor:`${s.col}33` }}>
+          <Card key={s.name} style={{ borderColor:`color-mix(in srgb, ${s.col} 30%, var(--border))` }}>
             <div style={{ fontSize:22, marginBottom:8 }}>{s.icon}</div>
             <div style={{ fontSize:14, fontWeight:700, color:'var(--text)', marginBottom:2 }}>{s.name}</div>
             <div style={{ fontSize:11, color:s.col, fontWeight:600, marginBottom:4 }}>{s.time}</div>

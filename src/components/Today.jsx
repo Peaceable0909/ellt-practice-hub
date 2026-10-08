@@ -24,7 +24,7 @@ function useClock() {
 }
 
 export default function Today({ profile, userId, addResult }) {
-  const { schedule, loading, error, reload, status, plan, dayNum, totalDays, cfg, completed, streak, doneSessions, totalSessions } = useSchedule()
+  const { schedule, loading, error, reload, status, plan, dayNum, totalDays, cfg, completed, streak, doneSessions, totalSessions, todayKey, syncError, retrySync } = useSchedule()
   const now = useClock()
   const nowMins = now.getHours() * 60 + now.getMinutes()
   const name = profile?.full_name?.trim().split(' ')[0] || ''
@@ -38,12 +38,23 @@ export default function Today({ profile, userId, addResult }) {
         <StreakPill streak={streak} />
       </div>
       <h1 style={{ fontSize: 24, fontWeight: 900, color: 'var(--text)', lineHeight: 1.2 }}>{name ? `${greeting}, ${name}` : greeting}</h1>
+      {syncError && (
+        <div role="alert" style={{ marginTop: 12, background: 'var(--coralBg)', border: '2px solid var(--coral)', borderBottom: '4px solid var(--coralBdr)', borderRadius: 14, padding: '10px 12px', display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <AlertTriangle size={18} color="var(--coral)" style={{ flexShrink: 0 }} />
+          <div style={{ flex: 1, minWidth: 180 }}>
+            <div style={{ fontSize: 13, fontWeight: 900, color: 'var(--text)' }}>Your last session is not saved yet</div>
+            <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600, marginTop: 1 }}>We will keep trying. If you close the app now it may be lost.</div>
+          </div>
+          <button type="button" onClick={retrySync} style={outlineBtn}>Retry</button>
+        </div>
+      )}
     </div>
   )
 
+  // Keyed by the day so the card rolls over at local midnight with the rest of Today
   const dailyChallenge = (
     <div style={{ marginBottom: 16 }}>
-      <DailyChallenge userId={userId} addResult={addResult} compact />
+      <DailyChallenge key={todayKey} todayKey={todayKey} userId={userId} addResult={addResult} compact />
     </div>
   )
 
@@ -159,7 +170,7 @@ export default function Today({ profile, userId, addResult }) {
             <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text)' }}>Today's sessions are done</div>
             <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600, lineHeight: 1.5, marginTop: 2 }}>
               {tomorrow ? `Tomorrow, Day ${tomorrow.day}: ${tomorrow.morning.label}.` : 'That was the last day of your plan. Great finish.'}
-              {' '}Want more? <Link to="/practice" state={{ from: 'today' }} style={{ color: 'var(--green)', fontWeight: 800 }}>Open Practice</Link>.
+              {' '}Want more? <Link to="/practice" state={{ from: 'today' }} style={{ color: 'var(--greenT)', fontWeight: 800, textDecoration: 'underline' }}>Open Practice</Link>.
             </div>
           </div>
         </div>
@@ -193,7 +204,7 @@ function StreakPill({ streak }) {
   return (
     <div title={`${streak} day streak`} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', borderRadius: 99, background: on ? 'var(--amberBg)' : 'var(--bg3)', border: `2px solid ${on ? 'var(--amber)' : 'var(--border)'}`, borderBottom: `3px solid ${on ? '#cc7700' : 'var(--borderB)'}` }}>
       <Flame size={18} color={on ? 'var(--streak)' : 'var(--textD)'} fill={on ? 'var(--streak)' : 'none'} />
-      <span style={{ fontSize: 15, fontWeight: 900, color: on ? 'var(--streak)' : 'var(--textM)', lineHeight: 1 }}>{streak}</span>
+      <span style={{ fontSize: 15, fontWeight: 900, color: on ? 'var(--amberT)' : 'var(--textM)', lineHeight: 1 }}>{streak}</span>
       <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--textM)', lineHeight: 1 }}>day streak</span>
     </div>
   )
@@ -210,7 +221,7 @@ function UpNextCard({ slot, dayNum }) {
       <div style={{ ...quietCard, padding: 18, marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 900, color: 'var(--textM)', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Up next · {slot.label}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: 'var(--amber)', background: 'var(--amberBg)', borderRadius: 99, padding: '2px 8px' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 800, color: 'var(--amberT)', background: 'var(--amberBg)', borderRadius: 99, padding: '2px 8px' }}>
             <Clock size={11} /> Available at {slot.time}
           </span>
         </div>
@@ -226,7 +237,7 @@ function UpNextCard({ slot, dayNum }) {
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 14 }}>
           {tasks.map((t, i) => <TaskChip key={i} task={t} />)}
         </div>
-        <Link to={sessionUrl(dayNum, slot.which)} className="duo-btn duo-btn-outline" style={{ textDecoration: 'none' }}>
+        <Link to={sessionUrl(dayNum, slot.which)} state={{ from: 'today' }} className="duo-btn duo-btn-outline" style={{ textDecoration: 'none' }}>
           <PlayCircle size={16} /> Start early
         </Link>
       </div>
@@ -234,19 +245,19 @@ function UpNextCard({ slot, dayNum }) {
   }
 
   return (
-    <div style={{ background: 'linear-gradient(135deg, var(--green) 0%, #46A302 100%)', border: '3px solid var(--greenD)', borderBottom: '6px solid var(--greenD)', borderRadius: 20, padding: 18, marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
+    <div style={{ background: 'linear-gradient(135deg, #357F00 0%, #2C7000 100%)', border: '3px solid #2A6A00', borderBottom: '6px solid #1F5200', borderRadius: 20, padding: 18, marginBottom: 16, position: 'relative', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', right: -24, top: -24, width: 110, height: 110, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
       <div style={{ position: 'relative' }}>
-        <div style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.92)', textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 6 }}>
+        <div style={{ fontSize: 11, fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.9px', marginBottom: 6 }}>
           Up next · {slot.label} · {slot.time}
         </div>
         <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 4, textShadow: '0 1px 0 rgba(0,0,0,0.12)' }}>{session.label}</div>
-        <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.95)', fontWeight: 800, marginBottom: 12 }}>{meta}</div>
+        <div style={{ fontSize: 13, color: '#fff', fontWeight: 800, marginBottom: 12 }}>{meta}</div>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 16 }}>
           {tasks.map((t, i) => <TaskChip key={i} task={t} onGreen />)}
         </div>
-        <Link to={sessionUrl(dayNum, slot.which)}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 18px', borderRadius: 14, background: '#fff', color: 'var(--greenD)', borderBottom: '4px solid rgba(0,0,0,0.22)', fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.7px', textDecoration: 'none' }}>
+        <Link to={sessionUrl(dayNum, slot.which)} state={{ from: 'today' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 18px', borderRadius: 14, background: '#fff', color: '#2A6A00', borderBottom: '4px solid rgba(0,0,0,0.22)', fontFamily: 'Nunito, sans-serif', fontWeight: 900, fontSize: 15, textTransform: 'uppercase', letterSpacing: '0.7px', textDecoration: 'none' }}>
           <PlayCircle size={18} /> Start session
         </Link>
       </div>
@@ -269,10 +280,10 @@ function SessionCard({ slot, dayNum }) {
         <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', fontSize: 11, color: 'var(--textM)', fontWeight: 700 }}>
           {done ? <DoneBadge /> : available
             ? <span>{tasks.length} {tasks.length === 1 ? 'task' : 'tasks'} · ~{fmtDuration(session.duration)}</span>
-            : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--amber)' }}><Clock size={11} /> Available at {slot.time}</span>}
+            : <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--amberT)' }}><Clock size={11} /> Available at {slot.time}</span>}
         </div>
       </div>
-      <Link to={sessionUrl(dayNum, slot.which)} style={done ? outlineBtn : { ...outlineBtn, color: 'var(--green)', borderColor: 'var(--green)', borderBottomColor: 'var(--greenD)' }}>
+      <Link to={sessionUrl(dayNum, slot.which)} state={{ from: 'today' }} style={done ? outlineBtn : { ...outlineBtn, color: 'var(--greenT)', borderColor: 'var(--green)', borderBottomColor: 'var(--greenD)' }}>
         {done ? <><RotateCcw size={12} /> Redo</> : 'Start'}
       </Link>
     </div>
@@ -304,7 +315,7 @@ function PlanFooter({ mock, note }) {
   return (
     <div style={{ ...quietCard, padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: left ? 'space-between' : 'flex-end', gap: 12, flexWrap: 'wrap' }}>
       {left}
-      <Link to="/today/plan" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 900, color: 'var(--blue)', textDecoration: 'none', padding: '6px 0', minHeight: 32 }}>
+      <Link to="/today/plan" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 900, color: 'var(--blueT)', textDecoration: 'none', padding: '6px 0', minHeight: 32 }}>
         <CalendarDays size={15} /> See full plan <ChevronRight size={14} />
       </Link>
     </div>

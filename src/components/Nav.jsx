@@ -20,6 +20,7 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
   const adminAccess = isAdmin || user?.email === 'myinterviewhub@gmail.com'
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropRef = useRef(null)
+  const triggerRef = useRef(null)
 
   const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'Student'
@@ -29,20 +30,26 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
     function handleClick(e) {
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false)
     }
-    function handleKey(e) {
-      if (e.key === 'Escape') setDropdownOpen(false)
-    }
     document.addEventListener('mousedown', handleClick)
-    document.addEventListener('keydown', handleKey)
-    return () => {
-      document.removeEventListener('mousedown', handleClick)
-      document.removeEventListener('keydown', handleKey)
-    }
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
+
+  // Escape closes the menu and hands focus back to the button that opened it (closing unmounts
+  // the focused menu link, which would otherwise drop focus to the page body)
+  useEffect(() => {
+    if (!dropdownOpen) return
+    const onKey = e => {
+      if (e.key !== 'Escape') return
+      setDropdownOpen(false)
+      triggerRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [dropdownOpen])
 
   return (
     <>
-      <nav style={{ background: 'var(--bg2)', borderBottom: '1.5px solid var(--border)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100 }}>
+      <nav aria-label="Header" style={{ background: 'var(--bg2)', borderBottom: '1.5px solid var(--border)', boxShadow: 'var(--shadow)', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', height: 62, gap: 8 }}>
 
           {/* Logo */}
@@ -57,7 +64,7 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
               <NavLink key={to} to={to} style={({ isActive }) => ({
                 padding: '7px 12px', borderRadius: 10, border: 'none',
                 background: isActive ? 'var(--greenBg)' : 'transparent',
-                color: isActive ? 'var(--green)' : 'var(--textM)',
+                color: isActive ? 'var(--greenT)' : 'var(--textM)',
                 fontWeight: isActive ? 800 : 700, fontSize: 13,
                 cursor: 'pointer', fontFamily: 'Nunito, sans-serif',
                 borderBottom: '2px solid transparent', textDecoration: 'none',
@@ -75,22 +82,23 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
 
           {/* Stats */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link to="/progress" style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', textDecoration: 'none' }}>
+            <Link to="/progress" aria-label={`Streak: ${streak} ${streak === 1 ? 'day' : 'days'}`} style={{ display: 'flex', alignItems: 'center', gap: 4, minHeight: 36, padding: '0 2px', cursor: 'pointer', textDecoration: 'none' }}>
               <Flame size={18} color="var(--streak)" fill="var(--streak)" />
-              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--streak)' }}>{streak}</span>
+              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--amberT)' }}>{streak}</span>
             </Link>
-            <Link to="/progress" style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', textDecoration: 'none' }}>
+            <Link to="/progress" aria-label={`${xp} XP`} style={{ display: 'flex', alignItems: 'center', gap: 4, minHeight: 36, padding: '0 2px', cursor: 'pointer', textDecoration: 'none' }}>
               <Zap size={16} color="var(--xp)" fill="var(--xp)" />
-              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--xp)' }}>{xp}</span>
+              <span style={{ fontWeight: 900, fontSize: 14, color: 'var(--purpleT)' }}>{xp}</span>
             </Link>
 
-            <button onClick={() => setDark(d => !d)} style={{ width: 36, height: 36, borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
+            <button onClick={() => setDark(d => !d)} aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'} style={{ width: 36, height: 36, borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
               {dark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             {/* Avatar dropdown */}
-            <div ref={dropRef} style={{ position: 'relative' }}>
-              <button onClick={() => setDropdownOpen(o => !o)} aria-haspopup="menu" aria-expanded={dropdownOpen} aria-label="Account menu" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
+            <div ref={dropRef} style={{ position: 'relative' }}
+              onBlur={e => { if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget)) setDropdownOpen(false) }}>
+              <button ref={triggerRef} onClick={() => setDropdownOpen(o => !o)} aria-expanded={dropdownOpen} aria-label="Account menu" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--greenD)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{initials}</div>
                 <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="hide-mobile">{displayName.split(' ')[0]}</span>
                 <ChevronDown size={12} color="var(--textM)" style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .2s' }} />
@@ -132,9 +140,9 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
       </nav>
 
       {/* Mobile bottom nav */}
-      <div className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
+      <nav aria-label="Main" className="bottom-nav" style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 200, background: 'var(--bg2)', borderTop: '2px solid var(--border)', display: 'flex', height: 64, paddingBottom: 'env(safe-area-inset-bottom)' }}>
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
-          <NavLink key={to} to={to} style={({ isActive }) => ({ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'none', color: isActive ? 'var(--green)' : 'var(--textD)', borderTop: isActive ? '3px solid var(--green)' : '3px solid transparent', transition: 'all .15s' })}>
+          <NavLink key={to} to={to} style={({ isActive }) => ({ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'Nunito, sans-serif', textDecoration: 'none', color: isActive ? 'var(--greenT)' : 'var(--textD)', borderTop: isActive ? '3px solid var(--green)' : '3px solid transparent', transition: 'all .15s' })}>
             {({ isActive }) => (
               <>
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
@@ -143,18 +151,19 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
             )}
           </NavLink>
         ))}
-      </div>
+      </nav>
 
       <style>{`
         .hide-mobile { display: inline-flex; }
         .show-mobile-only { display: none; }
         .bottom-nav { display: flex; }
-        @media (min-width: 768px) {
+        /* The top nav needs about 790px, so the bottom bar stays until 820px (keep in step with index.css) */
+        @media (min-width: 820px) {
           .hide-mobile { display: inline-flex !important; }
           .show-mobile-only { display: none !important; }
           .bottom-nav { display: none !important; }
         }
-        @media (max-width: 767px) {
+        @media (max-width: 819px) {
           .hide-mobile { display: none !important; }
           .show-mobile-only { display: flex !important; }
         }
