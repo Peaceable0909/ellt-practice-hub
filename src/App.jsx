@@ -7,7 +7,6 @@ import Plan from './components/Plan'
 import Practice from './components/Practice'
 import MockTests from './components/MockTests'
 import Progress from './components/Progress'
-import LiveSessions from './components/LiveSessions'
 import Admin from './components/Admin'
 import SessionReminder from './components/SessionReminder'
 
@@ -116,7 +115,6 @@ export default function App() {
       {page === 'Practice' && <Practice {...sharedProps} />}
       {page === 'MockTest' && <MockTests {...sharedProps} />}
       {page === 'Progress' && <Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />}
-      {page === 'Live'     && <LiveSessions />}
       {page === 'Admin'    && <Admin user={session.user} />}
     </div>
   )
