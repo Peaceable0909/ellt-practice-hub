@@ -1,10 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { saveResult } from '../lib/supabase'
 import { LISTENING } from '../data/listening'
 import { READING } from '../data/reading'
 import { WRITING } from '../data/writing'
 import { SPEAKING } from '../data/speaking'
-import { Card, Chip } from './ui'
+import { Card } from './ui'
 
 // HIGH-01 fix: Rotate mock test content across multiple sets
 const MOCK_SETS = [
@@ -12,12 +12,18 @@ const MOCK_SETS = [
   { listening: LISTENING[1], reading: READING[0], writing: WRITING[1], speaking: SPEAKING[1] },
   { listening: LISTENING[2], reading: READING[2], writing: WRITING[2], speaking: SPEAKING[2] },
 ]
-// Pick set based on number of completed mocks (stored in localStorage)
-const mockCount = parseInt(localStorage.getItem('ellt-mock-count') || '0')
-const MOCK = MOCK_SETS[mockCount % MOCK_SETS.length]
+// The set is picked from the number of completed mocks (localStorage). Read it when a mock
+// starts, not once when the module loads, so finishing a mock moves the next one on to the
+// following set instead of repeating the same one until the page is reloaded.
+const MOCK_COUNT_KEY = 'ellt-mock-count'
+function readMockCount() {
+  try { return Math.max(0, parseInt(localStorage.getItem(MOCK_COUNT_KEY) || '0', 10) || 0) } catch { return 0 }
+}
+function writeMockCount(n) {
+  try { localStorage.setItem(MOCK_COUNT_KEY, String(n)) } catch { /* storage blocked: rotation just restarts */ }
+}
 
 const SECTION_DURATIONS = { listening: 20*60, reading: 30*60, writing: 45*60, speaking: 10*60 }
-const SECTION_ORDER = ['listening','reading','writing','speaking']
 
 function fmt(s) {
   const m = Math.floor(s/60)
@@ -553,13 +559,13 @@ function SpeakingSection({ topic, onComplete }) {
 }
 
 // ─── SCORING PHASE ───────────────────────────────────────────────────────────
-function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingTranscript, onDone }) {
+function ScoringPhase({ mock, listeningAnswers, readingAnswers, writingText, speakingTranscript, onDone }) {
   const [status, setStatus] = useState('Scoring Listening & Reading…')
 
   useEffect(() => {
     async function score() {
       // 1. Auto-score listening
-      const lTest = MOCK.listening
+      const lTest = mock.listening
       const lScore = lTest.qs.reduce((s,q,i) => {
         const ans = listeningAnswers[i]
         return s + (ans === q.a ? 1 : 0)
@@ -567,7 +573,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
       const lBand = parseFloat((lScore/lTest.qs.length*9).toFixed(1))
 
       // 2. Auto-score reading
-      const rTest = MOCK.reading
+      const rTest = mock.reading
       const rScore = rTest.qs.reduce((s,q,i) => {
         const ans = readingAnswers[i]
         if (q.type === 'fill') return s + (typeof ans === 'string' && ans.toUpperCase().trim() === q.a.toUpperCase() ? 1 : 0)
@@ -583,7 +589,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
         const wRes = await fetch('/api/feedback', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ messages:[{ role:'user', content:
-            `You are an Oxford ELLT examiner. Score this essay for the prompt: "${MOCK.writing.task}"\n\nEssay:\n${writingText}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
+            `You are an Oxford ELLT examiner. Score this essay for the prompt: "${mock.writing.task}"\n\nEssay:\n${writingText}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
           }]})
         })
         const wData = await wRes.json()
@@ -601,7 +607,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
         const sRes = await fetch('/api/feedback', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ messages:[{ role:'user', content:
-            `You are an Oxford ELLT speaking examiner. Score this transcribed spoken response for the topic: "${MOCK.speaking.task}"\n\nTranscript:\n${speakingTranscript}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
+            `You are an Oxford ELLT speaking examiner. Score this transcribed spoken response for the topic: "${mock.speaking.task}"\n\nTranscript:\n${speakingTranscript}\n\nReply with ONLY a JSON object: {"band":"B2","score":65,"comment":"one sentence"}`
           }]})
         })
         const sData = await sRes.json()
@@ -634,7 +640,7 @@ function ScoringPhase({ listeningAnswers, readingAnswers, writingText, speakingT
 }
 
 // ─── RESULTS PHASE ───────────────────────────────────────────────────────────
-function ResultsPhase({ scores, onRetake, onHome }) {
+function ResultsPhase({ mock, scores, exitLabel, onRetake, onExit }) {
   const { lScore, lBand, rScore, rBand, wBand, sBand, overall } = scores
 
   function bandLabel(b) {
@@ -651,8 +657,8 @@ function ResultsPhase({ scores, onRetake, onHome }) {
   }
 
   const sections = [
-    { name:'Listening', band:lBand, detail:`${lScore}/${MOCK.listening.qs.length} correct`, icon:'🎧', col:'var(--blue)' },
-    { name:'Reading',   band:rBand, detail:`${rScore}/${MOCK.reading.qs.length} correct`,   icon:'📖', col:'var(--amber)' },
+    { name:'Listening', band:lBand, detail:`${lScore}/${mock.listening.qs.length} correct`, icon:'🎧', col:'var(--blue)' },
+    { name:'Reading',   band:rBand, detail:`${rScore}/${mock.reading.qs.length} correct`,   icon:'📖', col:'var(--amber)' },
     { name:'Writing',   band:wBand, detail:'AI scored',                                     icon:'✍️', col:'var(--purple)' },
     { name:'Speaking',  band:sBand, detail:'AI scored',                                     icon:'🎤', col:'var(--coral)' },
   ]
@@ -713,11 +719,11 @@ function ResultsPhase({ scores, onRetake, onHome }) {
       </Card>
 
       <div style={{ display:'flex', gap:10, justifyContent:'center', flexWrap:'wrap' }}>
-        <button onClick={onHome} style={{
+        <button onClick={onExit} style={{
           padding:'10px 24px', borderRadius:8, border:'1px solid var(--border)',
           background:'transparent', color:'var(--textM)', fontWeight:600,
           fontSize:13, cursor:'pointer', fontFamily:'inherit' }}>
-          ← Back to Dashboard
+          {exitLabel}
         </button>
         <button onClick={onRetake} style={{
           padding:'10px 24px', borderRadius:8, border:'none',
@@ -731,7 +737,11 @@ function ResultsPhase({ scores, onRetake, onHome }) {
 }
 
 // ─── MAIN ORCHESTRATOR ───────────────────────────────────────────────────────
-export default function FullMockTest({ userId, addResult, onExit }) {
+// onExit      the student leaves the results screen (exitLabel is that button's text)
+// onFinished  all four sections are scored and saved; fires before the results are shown
+export default function FullMockTest({ userId, addResult, onExit, onFinished, exitLabel = '← Back to Mock Tests' }) {
+  const [setIdx, setSetIdx] = useState(readMockCount)   // which MOCK_SETS entry this run uses
+  const mock = MOCK_SETS[setIdx % MOCK_SETS.length]
   const [phase, setPhase] = useState('intro')
   const [transition, setTransition] = useState(null) // {completed, next, nextIcon, nextPhase}
   const [listeningAnswers, setListeningAnswers] = useState({})
@@ -772,15 +782,15 @@ export default function FullMockTest({ userId, addResult, onExit }) {
     // Save all 4 sections to Supabase
     const mid = mockId.current
     const saves = [
-      { skill:'listening', test_id:MOCK.listening.id, test_title:MOCK.listening.title,
-        score:finalScores.lScore, total:MOCK.listening.qs.length, band_score:finalScores.lBand,
+      { skill:'listening', test_id:mock.listening.id, test_title:mock.listening.title,
+        score:finalScores.lScore, total:mock.listening.qs.length, band_score:finalScores.lBand,
         answers:JSON.stringify(listeningAnswers), is_mock:true, mock_test_id:mid },
-      { skill:'reading', test_id:MOCK.reading.id, test_title:MOCK.reading.title,
-        score:finalScores.rScore, total:MOCK.reading.qs.length, band_score:finalScores.rBand,
+      { skill:'reading', test_id:mock.reading.id, test_title:mock.reading.title,
+        score:finalScores.rScore, total:mock.reading.qs.length, band_score:finalScores.rBand,
         answers:JSON.stringify(readingAnswers), is_mock:true, mock_test_id:mid },
-      { skill:'writing', test_id:MOCK.writing.id, test_title:MOCK.writing.title,
+      { skill:'writing', test_id:mock.writing.id, test_title:mock.writing.title,
         band_score:finalScores.wBand, essay_text:writingText, is_mock:true, mock_test_id:mid },
-      { skill:'speaking', test_id:MOCK.speaking.id, test_title:MOCK.speaking.title,
+      { skill:'speaking', test_id:mock.speaking.id, test_title:mock.speaking.title,
         band_score:finalScores.sBand, is_mock:true, mock_test_id:mid },
     ]
 
@@ -789,8 +799,9 @@ export default function FullMockTest({ userId, addResult, onExit }) {
       addResult(s)
     }
 
-    localStorage.setItem('ellt-mock-count', String(mockCount + 1))
+    writeMockCount(readMockCount() + 1)   // one more completed mock: the next run uses the next set
     setPhase('results')
+    onFinished?.()
   }
 
   return (
@@ -800,12 +811,13 @@ export default function FullMockTest({ userId, addResult, onExit }) {
         <TransitionPhase {...transition}
           onContinue={() => { const next = transition.nextPhase; setTransition(null); goTo(next) }}/>
       )}
-      {phase === 'listening'  && <ListeningSection test={MOCK.listening} onComplete={afterListening}/>}
-      {phase === 'reading'    && <ReadingSection   test={MOCK.reading}   onComplete={afterReading}/>}
-      {phase === 'writing'    && <WritingSection   task={MOCK.writing}   onComplete={afterWriting}/>}
-      {phase === 'speaking'   && <SpeakingSection  topic={MOCK.speaking} onComplete={afterSpeaking}/>}
+      {phase === 'listening'  && <ListeningSection test={mock.listening} onComplete={afterListening}/>}
+      {phase === 'reading'    && <ReadingSection   test={mock.reading}   onComplete={afterReading}/>}
+      {phase === 'writing'    && <WritingSection   task={mock.writing}   onComplete={afterWriting}/>}
+      {phase === 'speaking'   && <SpeakingSection  topic={mock.speaking} onComplete={afterSpeaking}/>}
       {phase === 'scoring'    && (
         <ScoringPhase
+          mock={mock}
           listeningAnswers={listeningAnswers}
           readingAnswers={readingAnswers}
           writingText={writingText}
@@ -814,9 +826,12 @@ export default function FullMockTest({ userId, addResult, onExit }) {
       )}
       {phase === 'results' && scores && (
         <ResultsPhase
+          mock={mock}
           scores={scores}
+          exitLabel={exitLabel}
           onRetake={() => {
           mockId.current = crypto.randomUUID()
+          setSetIdx(i => Math.max(readMockCount(), i + 1))   // the set after the one just finished
           setListeningAnswers({})
           setReadingAnswers({})
           setWritingText('')
@@ -824,7 +839,7 @@ export default function FullMockTest({ userId, addResult, onExit }) {
           setScores(null)
           setPhase('intro')
         }}
-          onHome={onExit}/>
+          onExit={onExit}/>
       )}
     </div>
   )

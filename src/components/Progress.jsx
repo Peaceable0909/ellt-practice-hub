@@ -7,6 +7,7 @@ import { Headphones, BookOpen, PenLine, Mic, TrendingUp,
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
+import { skillScores, lowestSkill, highestSkill, formatSkillScore } from '../lib/skillStats'
 
 const ALL_L = [...LISTENING, ...(LISTENING_IELTS||[]), ...(LISTENING_CAM17_T1||[]),
   ...(LISTENING_CAM17_T2||[]), ...(LISTENING_CAM17_T3||[]), ...(LISTENING_CAM17_T4||[]),
@@ -422,20 +423,12 @@ function OverviewTab({ results, streak }) {
 
       {/* Weakest skill recommendation */}
       {(() => {
-        const withData = skills
-          .map(skill => {
-            const sr   = results.filter(r => r.skill === skill)
-            const band = avgBand(sr)
-            const pc   = pct(sr)
-            const score = band ? (parseFloat(band)/9)*100 : pc
-            return { skill, score, count: sr.length, band, pc }
-          })
-          .filter(s => s.count >= 1 && s.score != null)
+        const withData = skillScores(results)
         if (withData.length < 2) return null
-        const worst = withData.reduce((a, b) => a.score < b.score ? a : b)
-        const best  = withData.reduce((a, b) => a.score > b.score ? a : b)
-        const worstDisplay = worst.band ? `Band ${worst.band}` : `${worst.pc}%`
-        const bestDisplay  = best.band  ? `Band ${best.band}`  : `${best.pc}%`
+        const worst = lowestSkill(withData)
+        const best  = highestSkill(withData)
+        const worstDisplay = formatSkillScore(worst)
+        const bestDisplay  = formatSkillScore(best)
         return (
           <div style={{ background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:14, padding:'14px 16px' }}>
             <div style={{ display:'flex', alignItems:'flex-start', gap:10 }}>

@@ -1,5 +1,5 @@
-import { useState, useMemo, useEffect } from 'react'
-import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, Sun, Moon } from 'lucide-react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { ChevronLeft, CheckCircle, XCircle, BookOpen, Headphones, PenLine, Mic, Brain, Star, PlayCircle } from 'lucide-react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2,
          LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../data/listening'
 import { READING, READING_IELTS } from '../data/reading'
@@ -8,22 +8,23 @@ import { SPEAKING, SPEAKING_IELTS } from '../data/speaking'
 import TestTaker from './Practice/TestTaker'
 import WritingHub from './Practice/WritingHub'
 import SpeakingHub from './Practice/SpeakingHub'
-import FullMockTest from './FullMockTest'
+import MockTests from './MockTests'
 
-const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1,
+// Every test, by skill. Listening and reading tasks run in TestTaker (resolved from the
+// plan's testId); writing and speaking tasks open the same testId inside their hubs; the
+// grade screen looks answers up across all of them.
+const ALL_L = [...LISTENING, ...(LISTENING_IELTS||[]), ...(LISTENING_CAM17_T1||[]),
   ...(LISTENING_CAM17_T2||[]), ...(LISTENING_CAM17_T3||[]), ...(LISTENING_CAM17_T4||[]),
   ...(LISTENING_CAM17_EXTRA||[])]
-const ALL_READING  = [...READING, ...(READING_IELTS||[])]
-const ALL_WRITING  = [...WRITING, ...(WRITING_TASK1||[]), ...WRITING_IELTS,
-  ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[])]
-const ALL_SPEAKING = [...SPEAKING, ...(SPEAKING_IELTS||[])]
+const ALL_R = [...(READING||[]), ...(READING_IELTS||[])]
+const ALL_W = [...(WRITING||[]), ...(WRITING_TASK1||[]), ...(WRITING_IELTS||[]),
+  ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[]), ...(WRITING_IELTS_3||[]), ...(WRITING_IELTS_4||[])]
+const ALL_S = [...(SPEAKING||[]), ...(SPEAKING_IELTS||[])]
+const ALL_TESTS = [...ALL_L, ...ALL_R, ...ALL_W, ...ALL_S]
 
 function resolveTest(skill, testId) {
   if (!testId) return null
-  const pool = skill === 'listening' ? ALL_LISTENING
-             : skill === 'reading'   ? ALL_READING
-             : skill === 'writing'   ? ALL_WRITING
-             : skill === 'speaking'  ? ALL_SPEAKING : []
+  const pool = skill === 'listening' ? ALL_L : skill === 'reading' ? ALL_R : []
   return pool.find(t => t.id === testId) || null
 }
 
@@ -86,36 +87,50 @@ function pickVocabWords() {
   })
 }
 
-export default function StudySession({ session, results, addResult, userId, onComplete, onBack }) {
+const SLOT_LABELS = { morning: 'Morning', noon: 'Afternoon', evening: 'Evening' }
+
+// Runs one plan session task by task, then shows the grade screen.
+//   onFinish    called once, the moment every task is done (the plan marks the session complete)
+//   onComplete  "Back to Today" on the grade screen
+//   onBack      leave mid-session
+//   upNext      { label, time, title } of the next unfinished session today, shown on the grade screen
+//   onViewPlan  optional extra exit for catch-up sessions on a past day
+export default function StudySession({ session, results, addResult, userId, onFinish, onComplete, onBack, upNext, onViewPlan }) {
   const tasks = session.tasks || [{ skill: session.type, testId: session.testId, label: session.label }]
   const [taskIdx, setTaskIdx] = useState(0)
   const [tasksDone, setTasksDone] = useState([])
-  const [sessionDone, setSessionDone] = useState(false)
-  const [showGrade, setShowGrade]     = useState(false)
+  const [showGrade, setShowGrade] = useState(false)
+  const doneRef = useRef([])         // finished task indexes, readable from async callbacks
+  const finishedRef = useRef(false)  // onFinish fires once per run
 
   const currentTask = tasks[taskIdx]
-  const allDone = tasksDone.length >= tasks.length
 
-
-  const progress = `${tasksDone.length}/${tasks.length}`
-
-  function finishSession() {
-    setSessionDone(true)
-    setShowGrade(true)
-  }
-
-  function completeTask() {
-    const newDone = tasksDone.includes(taskIdx) ? tasksDone : [...tasksDone, taskIdx]
-    setTasksDone(newDone)
-    if (taskIdx < tasks.length - 1) {
-      setTaskIdx(taskIdx + 1)  // more tasks — advance
-    } else {
-      finishSession()           // last task — finish session directly
+  // Record one task as done. As soon as the last one is, the session counts as complete,
+  // even if the student is still reading a mock's results before moving on.
+  function markTaskDone(idx) {
+    if (!doneRef.current.includes(idx)) {
+      doneRef.current = [...doneRef.current, idx]
+      setTasksDone(doneRef.current)
     }
+    if (doneRef.current.length >= tasks.length && !finishedRef.current) {
+      finishedRef.current = true
+      onFinish?.()
+    }
+    return doneRef.current
   }
 
-  if (sessionDone && showGrade) {
-    return <SessionGrade session={session} allResults={results} tasks={tasks} onContinue={onComplete} />
+  // Move on after a task: the next unfinished one, or the grade screen when none are left
+  // (so skipping ahead and finishing the last tab early does not end the session).
+  function completeTask(idx) {
+    const done = markTaskDone(idx)
+    const after = tasks.findIndex((_, i) => i > idx && !done.includes(i))
+    const next = after >= 0 ? after : tasks.findIndex((_, i) => !done.includes(i))
+    if (next >= 0) setTaskIdx(next)
+    else setShowGrade(true)
+  }
+
+  if (showGrade) {
+    return <SessionGrade session={session} allResults={results} tasks={tasks} upNext={upNext} onContinue={onComplete} onViewPlan={onViewPlan} />
   }
 
   return (
@@ -129,10 +144,9 @@ export default function StudySession({ session, results, addResult, userId, onCo
         <div style={{ flex:1, minWidth:0 }}>
           <div style={{ fontSize:14, fontWeight:900, color:'var(--text)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{session.label}</div>
           <div style={{ fontSize:10, color:'var(--textM)', fontWeight:700, textTransform:'uppercase', letterSpacing:'0.4px' }}>
-            Day {session.dayNum} · 
+            Day {session.dayNum}{SLOT_LABELS[session.which] ? ` · ${SLOT_LABELS[session.which]}` : ''}
           </div>
         </div>
-
       </div>
 
       {/* Task progress bar */}
@@ -145,8 +159,8 @@ export default function StudySession({ session, results, addResult, userId, onCo
           return (
             <button key={i} onClick={() => setTaskIdx(i)} style={{
               display:'flex', alignItems:'center', gap:6, padding:'6px 12px',
-              borderRadius:10, border:`2px solid ${active ? color : done ? 'var(--border)' : 'var(--border)'}`,
-              borderBottom:`3px solid ${active ? color : done ? 'var(--borderB)' : 'var(--borderB)'}`,
+              borderRadius:10, border:`2px solid ${active ? color : 'var(--border)'}`,
+              borderBottom:`3px solid ${active ? color : 'var(--borderB)'}`,
               background: done ? 'var(--greenBg)' : active ? `color-mix(in srgb, ${color} 12%, var(--bg2))` : 'var(--bg3)',
               cursor:'pointer', flexShrink:0, fontFamily:'Nunito, sans-serif',
             }}>
@@ -164,20 +178,19 @@ export default function StudySession({ session, results, addResult, userId, onCo
         <TaskRenderer
           key={taskIdx}
           task={currentTask}
-          taskIdx={taskIdx}
           results={results}
           addResult={addResult}
           userId={userId}
-          onTaskComplete={completeTask}
+          onTaskDone={() => markTaskDone(taskIdx)}
+          onTaskComplete={() => completeTask(taskIdx)}
           onBack={onBack}
-
         />
       </div>
     </div>
   )
 }
 
-function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplete, onBack }) {
+function TaskRenderer({ task, results, addResult, userId, onTaskDone, onTaskComplete, onBack }) {
   const { skill, testId, label, desc } = task
   const test = resolveTest(skill, testId)
   const [taskCompleted, setTaskCompleted] = useState(false)
@@ -205,11 +218,10 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
   if ((skill === 'listening' || skill === 'reading') && test) {
     return (
       <TestTaker
-        test={test} skill={skill}
+        key={test.id} test={test} skill={skill}
         prev={results.find(r => r.test_id === test.id)}
         addResult={(r) => handleComplete(r)}
         userId={userId} onBack={onBack}
-        onComplete={() => {}}
       />
     )
   }
@@ -220,7 +232,7 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
       <div>
         <WritingHub results={results} addResult={(r) => handleComplete(r)} userId={userId} preselectedId={testId} />
         <div style={{ marginTop:14, padding:'12px 16px', background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, fontSize:12, color:'var(--textM)', fontWeight:600 }}>
-          📝 Complete any writing task above, then tap Next Task when you're done.
+          📝 Write your response and get your AI feedback. The session moves on by itself when it is done.
         </div>
       </div>
     )
@@ -232,15 +244,19 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
       <div>
         <SpeakingHub results={results} addResult={(r) => handleComplete(r)} userId={userId} preselectedId={testId} />
         <div style={{ marginTop:14, padding:'12px 16px', background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, fontSize:12, color:'var(--textM)', fontWeight:600 }}>
-          🎤 Complete a speaking topic above, then tap Next Task when you're done.
+          🎤 Record your answer and get your AI feedback. The session moves on by itself when it is done.
         </div>
       </div>
     )
   }
 
-  // Mock
+  // Mock day: the same start screen and runner as the Mock tab. The task is done as soon as
+  // the mock is scored and saved; "Continue" on its results screen moves the session on.
   if (skill === 'mock') {
-    return <FullMockTest userId={userId} addResult={(r) => addResult(r)} onExit={() => handleComplete(null)} />
+    return (
+      <MockTests embedded results={results} addResult={addResult} userId={userId}
+        onFinished={onTaskDone} onExit={() => handleComplete(null)} />
+    )
   }
 
   if (skill === 'vocab')  return <VocabExercise  task={task} addResult={addResult} userId={userId} onTaskComplete={onTaskComplete} />
@@ -261,22 +277,9 @@ function TaskRenderer({ task, taskIdx, results, addResult, userId, onTaskComplet
 }
 
 
-// ─── All tests pool for grade review ─────────────────────────────────────────
-const ALL_L = [...LISTENING, ...(LISTENING_IELTS||[]), ...(LISTENING_CAM17_T1||[]),
-  ...(LISTENING_CAM17_T2||[]), ...(LISTENING_CAM17_T3||[]), ...(LISTENING_CAM17_T4||[]),
-  ...(LISTENING_CAM17_EXTRA||[])]
-const ALL_R = [...(READING||[]), ...(READING_IELTS||[])]
-const ALL_W = [...(WRITING||[]), ...(WRITING_TASK1||[]), ...(WRITING_IELTS||[]),
-  ...(WRITING_IELTS_2||[]), ...(WRITING_OFFICIAL_2023||[]), ...(WRITING_IELTS_3||[]), ...(WRITING_IELTS_4||[])]
-const ALL_S = [...(SPEAKING||[]), ...(SPEAKING_IELTS||[])]
-const ALL_TESTS = [...ALL_L, ...ALL_R, ...ALL_W, ...ALL_S]
-
-function resolveTestForGrade(skill, testId) {
-  return ALL_TESTS.find(t => t.id === testId) || null
-}
-
+// ─── Grade review helpers ────────────────────────────────────────────────────
 function getWrongAnswers(result) {
-  const test = resolveTestForGrade(result.skill, result.test_id)
+  const test = ALL_TESTS.find(t => t.id === result.test_id)
   if (!test || !test.qs || !result.answers) return []
   let answers = {}
   try { answers = typeof result.answers === 'string' ? JSON.parse(result.answers) : result.answers } catch { return [] }
@@ -478,18 +481,21 @@ function ReviewSession({ task, results, onTaskComplete }) {
 }
 
 // ─── Session Grade Screen ─────────────────────────────────────────────────────
-function SessionGrade({ session, allResults, tasks, onContinue }) {
+function SessionGrade({ session, allResults, tasks, upNext, onContinue, onViewPlan }) {
   const [tab, setTab] = useState('review') // 'review' | 'scoreboard'
+  const [msgPick] = useState(() => Math.floor(Math.random() * 2))   // fixed for the life of the screen
 
   const taskTestIds = tasks.map(t => t.testId).filter(Boolean)
   const taskSkills  = [...new Set(tasks.map(t => t.skill))]
+  const hasMock     = taskSkills.includes('mock')   // a mock day: grade the four mock sections
   const todayLocal  = new Date().toLocaleDateString('en-CA')
 
   const results = (allResults || []).filter(r => {
     const isToday = !r.completed_at || new Date(r.completed_at).toLocaleDateString('en-CA') === todayLocal
     const matchesId = taskTestIds.includes(r.test_id)
     const matchesSkill = taskSkills.includes(r.skill)
-    return isToday && (matchesId || matchesSkill)
+    const matchesMock = hasMock && r.is_mock
+    return isToday && (matchesId || matchesSkill || matchesMock)
   })
   // Dedupe by test_id — keep latest
   const seen = new Set()
@@ -526,7 +532,8 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
     ? Math.round(scores.reduce((s, r) => s + (r.band_score > 0 ? (r.band_score / 9) * 100 : r.score), 0) / scores.length)
     : 0
 
-  const grade = avgPct >= 85 ? { letter:'A', label:'Excellent', color:'var(--green)' }
+  const grade = graded.length === 0 ? { letter:'✓', label:'Session complete', color:'var(--green)' }   // nothing to score (e.g. a review session)
+              : avgPct >= 85 ? { letter:'A', label:'Excellent', color:'var(--green)' }
               : avgPct >= 70 ? { letter:'B', label:'Good work', color:'var(--blue)' }
               : avgPct >= 55 ? { letter:'C', label:'Keep going', color:'var(--amber)' }
               :                { letter:'D', label:'Needs practice', color:'var(--coral)' }
@@ -535,9 +542,10 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
     A: ["Outstanding session — you're right on track!", "Excellent work today. Keep this momentum going."],
     B: ["Solid session — you're making real progress.", "Good consistent work. Every session builds your skills."],
     C: ["You showed up and that's what counts. Review any weak areas tonight.", "Stay consistent — improvement takes time. You're doing it."],
+    '✓': ["Nothing to score this time. Well done for showing up and doing the work.", "Review sessions make the next practice stronger. Nice work."],
     D: ["Don't be discouraged — difficult questions mean you're pushing yourself.", "Review the answers carefully and try again tomorrow. You'll improve."],
   }
-  const msg = messages[grade.letter][Math.floor(Math.random() * 2)]
+  const msg = messages[grade.letter][msgPick]
 
   // ── Plan scoreboard: all plan results grouped by skill ─────────────────────
   const planSkills = ['listening','reading','writing','speaking']
@@ -593,7 +601,7 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:8, marginBottom:20 }}>
           {[
             { label:'Session', value:`Day ${session.dayNum}`, color:'var(--blue)' },
-            { label:'Tasks Done', value:graded.length, color:'var(--green)' },
+            { label:'Tasks Done', value:tasks.length, color:'var(--green)' },
             { label:'Avg Score', value:avgPct > 0 ? `${avgPct}%` : '—', color:grade.color },
             { label:'Mistakes', value:allWrong.length, color: allWrong.length === 0 ? 'var(--green)' : 'var(--coral)' },
           ].map(({ label, value, color }) => (
@@ -753,7 +761,7 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
           </div>
         )}
 
-        {allWrong.length === 0 && feedbackResults.length === 0 && (
+        {graded.length > 0 && allWrong.length === 0 && feedbackResults.length === 0 && (
           <div style={{ background:'var(--greenBg)', border:'1.5px solid var(--green)', borderRadius:14, padding:'16px', marginBottom:20, textAlign:'center' }}>
             <div style={{ fontSize:22, marginBottom:4 }}>🎉</div>
             <div style={{ fontSize:15, fontWeight:900, color:'var(--green)' }}>Perfect session — no mistakes!</div>
@@ -761,10 +769,24 @@ function SessionGrade({ session, allResults, tasks, onContinue }) {
           </div>
         )}
 
-        {/* Continue */}
+        {/* Next session, then back to Today (where it is highlighted as Up next) */}
+        {upNext && (
+          <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px', marginBottom:12, background:'var(--greenBg)', border:'2px solid var(--green)', borderBottom:'4px solid var(--greenD)', borderRadius:16 }}>
+            <PlayCircle size={26} color="var(--green)" style={{ flexShrink:0 }} />
+            <div style={{ minWidth:0 }}>
+              <div style={{ fontSize:10, fontWeight:900, color:'var(--green)', textTransform:'uppercase', letterSpacing:'0.8px' }}>Up next · {upNext.label} · {upNext.time}</div>
+              <div style={{ fontSize:14, fontWeight:900, color:'var(--text)', lineHeight:1.3 }}>{upNext.title}</div>
+            </div>
+          </div>
+        )}
         <button onClick={onContinue} style={{ width:'100%', padding:'15px', borderRadius:14, border:'none', borderBottom:'4px solid var(--greenD)', background:'var(--green)', color:'#fff', fontWeight:900, fontSize:16, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
-          Back to My Plan
+          Back to Today
         </button>
+        {onViewPlan && (
+          <button onClick={onViewPlan} style={{ width:'100%', marginTop:10, padding:'12px', minHeight:44, borderRadius:14, border:'2px solid var(--border)', borderBottom:'3px solid var(--borderB)', background:'var(--bg2)', color:'var(--textM)', fontWeight:800, fontSize:13, cursor:'pointer', fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.4px' }}>
+            See Day {session.dayNum} in my plan
+          </button>
+        )}
       </div>
     </div>
   )

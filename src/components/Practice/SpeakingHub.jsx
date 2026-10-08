@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { SPEAKING, SPEAKING_IELTS } from '../../data/speaking'
 import { saveResult } from '../../lib/supabase'
 import { Card, Chip, FeedbackBlock } from '../ui'
+import useTestSelection from './useTestSelection'
 import { Mic, MicOff, ChevronLeft, Square, Clock, CheckCircle, BookOpen } from 'lucide-react'
 
 // ─── MIC RECORDER ─────────────────────────────────────────────
@@ -258,8 +259,10 @@ EXAMINER TIP: [One actionable tip for ELLT Stage 2 — 2 sentences max]`
 // ─── SPEAKING HUB ─────────────────────────────────────────────
 const ALL_SPEAKING = [...SPEAKING, ...SPEAKING_IELTS]
 
-export default function SpeakingHub({ results, addResult, userId }) {
-  const [selected, setSelected] = useState(null)
+// Which topic is open comes from the URL in Practice (selectedId + onSelect), or starts on
+// preselectedId inside a plan session (see useTestSelection).
+export default function SpeakingHub({ results, addResult, userId, selectedId, onSelect, preselectedId }) {
+  const [selected, openTopic, closeTopic] = useTestSelection(ALL_SPEAKING, { selectedId, onSelect, preselectedId })
   const [phase, setPhase]       = useState('intro')  // intro | speaking | feedback
   const [transcript, setTranscript] = useState('')
   const [duration, setDuration] = useState(0)
@@ -267,6 +270,11 @@ export default function SpeakingHub({ results, addResult, userId }) {
   const [loading, setLoading]   = useState(false)
   const [showTranscript, setShowTranscript] = useState(false)
   const [structureOpen, setStructureOpen] = useState(true)
+
+  // A different topic (or none) is open: start it fresh
+  useEffect(() => {
+    setPhase('intro'); setTranscript(''); setFeedback('')
+  }, [selected?.id])
 
   const handleSpeechDone = async (text, secs) => {
     setTranscript(text)
@@ -295,7 +303,7 @@ export default function SpeakingHub({ results, addResult, userId }) {
       <div className="anim-fadeUp">
         {/* Header */}
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16 }}>
-          <button onClick={() => { setSelected(null); setPhase('intro'); setTranscript(''); setFeedback('') }}
+          <button onClick={closeTopic} aria-label="Back to topics"
             style={{ width: 40, height: 40, borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
             <ChevronLeft size={18} />
           </button>
@@ -413,7 +421,7 @@ export default function SpeakingHub({ results, addResult, userId }) {
         {ALL_SPEAKING.map(s => {
           const prev = results.find(r => r.test_id === s.id)
           return (
-            <div key={s.id} onClick={() => { setSelected(s); setPhase('intro') }} className="skill-card" style={{ cursor: 'pointer' }}>
+            <div key={s.id} onClick={() => openTopic(s)} className="skill-card" style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <Chip text={s.stage} color="var(--coral)" />
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

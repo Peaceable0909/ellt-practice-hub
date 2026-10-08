@@ -121,7 +121,7 @@ export default function App() {
           <Route path="/today/plan" element={<Plan results={results} />} />
           <Route path="/today/plan/edit" element={<PlanEdit />} />
           <Route path="/today/session/:dayNum/:slot" element={<TodaySession {...sharedProps} />} />
-          <Route path="/practice/:skill?" element={<Practice {...sharedProps} />} />
+          <Route path="/practice/:skill?/:testId?" element={<Practice {...sharedProps} />} />
           <Route path="/mock" element={<MockTests {...sharedProps} />} />
           <Route path="/progress" element={<Progress {...sharedProps} loading={loadingResults} streak={scheduleStore.streak} />} />
           {/* Plan used to be a top-level tab; keep old links and bookmarks working */}

@@ -2,16 +2,17 @@ import { useState } from 'react'
 import { LISTENING, LISTENING_IELTS, LISTENING_CAM17_T1, LISTENING_CAM17_T2, LISTENING_CAM17_T3, LISTENING_CAM17_T4, LISTENING_CAM17_EXTRA } from '../../data/listening'
 import { Card, Chip, Btn } from '../ui'
 import TestTaker from './TestTaker'
+import useTestSelection from './useTestSelection'
 import { Headphones } from 'lucide-react'
 
 const ALL_LISTENING = [...LISTENING, ...LISTENING_IELTS, ...LISTENING_CAM17_T1, ...LISTENING_CAM17_T2, ...LISTENING_CAM17_T3, ...LISTENING_CAM17_T4, ...(LISTENING_CAM17_EXTRA||[])]
 
-export default function ListeningHub({ results, addResult, userId }) {
-  const [test, setTest] = useState(null)
+export default function ListeningHub({ results, addResult, userId, selectedId, onSelect }) {
+  const [test, openTest, closeTest] = useTestSelection(ALL_LISTENING, { selectedId, onSelect })
   const [filter, setFilter] = useState('all')
 
   if (test) {
-    return <TestTaker test={test} skill="listening" prev={results.find(r=>r.test_id===test.id)} addResult={addResult} onBack={() => setTest(null)} userId={userId}/>
+    return <TestTaker key={test.id} test={test} skill="listening" prev={results.find(r=>r.test_id===test.id)} addResult={addResult} onBack={closeTest} userId={userId}/>
   }
 
   const filtered = ALL_LISTENING.filter(t =>
@@ -48,7 +49,7 @@ export default function ListeningHub({ results, addResult, userId }) {
           const prev = results.find(r => r.test_id === t.id)
           const hasAudio = !!t.audio
           return (
-            <div key={t.id} className="skill-card" style={{ cursor: 'pointer' }} onClick={() => setTest(t)}>
+            <div key={t.id} className="skill-card" style={{ cursor: 'pointer' }} onClick={() => openTest(t)}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <div>
                   <div style={{ fontSize: 10, color: 'var(--textM)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: 2 }}>

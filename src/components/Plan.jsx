@@ -1,10 +1,11 @@
 import { Link, Navigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ClipboardList, PlayCircle, RotateCcw, Eye } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ClipboardList, PlayCircle, RotateCcw, Eye } from 'lucide-react'
 import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays } from '../lib/useSchedule'
 import { TaskChip, DoneBadge, metaFor, fmtDuration, fmtDate, DAY_TYPE_LABELS, quietCard, sectionLabel, backLink } from './PlanBits'
 import PlanSetup from './PlanSetup'
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']   // Monday first
+const PRACTICE_SKILLS = ['listening', 'reading', 'writing', 'speaking']   // tasks that have a test in Practice
 
 // ── FULL PLAN (/today/plan) ────────────────────────────────────
 // Calendar of every day in the plan. Tap a day to see its sessions: past days
@@ -165,10 +166,23 @@ function DayDetail({ d, schedule, start, dayNum, completed, results }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {tasks.map((t, i) => {
                 const r = !isFuture && t.testId ? results.find(x => x.test_id === t.testId) : null
+                // The exact test as free practice (opens in Practice with a Back to Today bar);
+                // the Start / Redo button below runs it as part of the session instead.
+                const practiceTo = !isFuture && t.testId && PRACTICE_SKILLS.includes(t.skill) ? `/practice/${t.skill}/${encodeURIComponent(t.testId)}` : null
                 return (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                     <TaskChip task={t} />
-                    {r && <ResultBadge r={r} />}
+                    {(r || practiceTo) && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                        {r && <ResultBadge r={r} />}
+                        {practiceTo && (
+                          <Link to={practiceTo} state={{ from: 'today' }} aria-label={`Practise ${t.label} on its own`}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: 2, minHeight: 32, fontSize: 11, fontWeight: 900, color: 'var(--blue)', textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            Practise <ChevronRight size={13} />
+                          </Link>
+                        )}
+                      </span>
+                    )}
                   </div>
                 )
               })}

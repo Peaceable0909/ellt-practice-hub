@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { WRITING, WRITING_TASK1, WRITING_IELTS, WRITING_IELTS_2, WRITING_OFFICIAL_2023, WRITING_IELTS_3, WRITING_IELTS_4 } from '../../data/writing'
 import { saveResult } from '../../lib/supabase'
 import { Card, Btn, Chip, FeedbackBlock } from '../ui'
 import { Camera, Upload, X, Image, PenLine, ChevronLeft, Eye, EyeOff, FileText } from 'lucide-react'
 import DiagramRenderer from './DiagramRenderer'
+import useTestSelection from './useTestSelection'
 
 // Task 2 essays
 const ALL_TASK2 = [...WRITING, ...WRITING_IELTS]
@@ -256,14 +257,21 @@ EXAMINER NOTE: [One practical exam strategy tip — 2 sentences max]`
 }
 
 // ─── MAIN WRITING HUB ─────────────────────────────────────────
-export default function WritingHub({ results, addResult, userId }) {
-  const [selected, setSelected] = useState(null)
+// Which task is open comes from the URL in Practice (selectedId + onSelect), or starts on
+// preselectedId inside a plan session (see useTestSelection).
+export default function WritingHub({ results, addResult, userId, selectedId, onSelect, preselectedId }) {
+  const [selected, openTask, closeTask] = useTestSelection(ALL_WRITING, { selectedId, onSelect, preselectedId })
   const [inputMode, setInputMode] = useState('type')   // 'type' | 'handwriting'
   const [essay, setEssay] = useState('')
   const [feedback, setFeedback] = useState('')
   const [loadingAI, setLoadingAI] = useState(false)
   const [showModel, setShowModel] = useState(false)
-  const [tab, setTab] = useState('task2')
+  const [tab, setTab] = useState(() => (selected && ALL_TASK1.some(w => w.id === selected.id) ? 'task1' : 'task2'))
+
+  // A different task (or none) is open: drop the previous draft, feedback and model answer
+  useEffect(() => {
+    setEssay(''); setFeedback(''); setShowModel(false); setInputMode('type')
+  }, [selected?.id])
 
   const wordCount = essay.trim().split(/\s+/).filter(Boolean).length
 
@@ -315,7 +323,7 @@ ${essay}
       <div className="anim-fadeUp">
         {/* Header */}
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
-          <button onClick={() => { setSelected(null); setEssay(''); setFeedback(''); setShowModel(false) }}
+          <button onClick={closeTask} aria-label="Back to tasks"
             style={{ width: 40, height: 40, borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg2)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--textM)', flexShrink: 0 }}>
             <ChevronLeft size={18} />
           </button>
@@ -474,7 +482,7 @@ ${essay}
         {(tab === 'task2' ? ALL_TASK2 : ALL_TASK1).map(w => {
           const prev = results.find(r => r.test_id === w.id)
           return (
-            <div key={w.id} onClick={() => setSelected(w)} className="skill-card" style={{ cursor: 'pointer' }}>
+            <div key={w.id} onClick={() => openTask(w)} className="skill-card" style={{ cursor: 'pointer' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                 <Chip text={w.source || 'Oxford ELLT'} color="var(--purple)" />
                 {prev && <Chip text="Done" color="var(--green)" />}

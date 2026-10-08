@@ -159,7 +159,7 @@ export default function Today({ profile, userId, addResult }) {
             <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text)' }}>Today's sessions are done</div>
             <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600, lineHeight: 1.5, marginTop: 2 }}>
               {tomorrow ? `Tomorrow, Day ${tomorrow.day}: ${tomorrow.morning.label}.` : 'That was the last day of your plan. Great finish.'}
-              {' '}Want more? <Link to="/practice" style={{ color: 'var(--green)', fontWeight: 800 }}>Open Practice</Link>.
+              {' '}Want more? <Link to="/practice" state={{ from: 'today' }} style={{ color: 'var(--green)', fontWeight: 800 }}>Open Practice</Link>.
             </div>
           </div>
         </div>
