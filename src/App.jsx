@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { supabase, loadResults, onAuthChange, getProfile } from './lib/supabase'
 import Auth from './components/Auth'
 import Nav from './components/Nav'
@@ -10,13 +11,24 @@ import Progress from './components/Progress'
 import Admin from './components/Admin'
 import SessionReminder from './components/SessionReminder'
 
+// Redirect that keeps ?query and #hash so Supabase auth callbacks
+// (#access_token=..., ?code=...) survive the hop to the landing route.
+function RedirectTo({ to }) {
+  const { search, hash } = useLocation()
+  return <Navigate to={{ pathname: to, search, hash }} replace />
+}
+
+// New URL = new screen: start at the top instead of keeping the old scroll offset.
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
 export default function App() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [dark, setDark] = useState(() => localStorage.getItem('ellt-theme') !== 'light')
-  const [page, setPage] = useState(() => {
-    if (window.location.hash === '#admin') return 'Admin'
-    const saved = localStorage.getItem('ellt-page')
-    return saved || 'Home'
-  })
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [results, setResults] = useState([])
@@ -30,6 +42,11 @@ export default function App() {
     document.body.className = dark ? 'dark' : ''
     localStorage.setItem('ellt-theme', dark ? 'dark' : 'light')
   }, [dark])
+
+  // Legacy deep link: https://host/#admin  ->  /admin
+  useEffect(() => {
+    if (location.hash === '#admin') navigate('/admin', { replace: true })
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -99,7 +116,7 @@ export default function App() {
 
   return (
     <div style={{ background:'var(--bg)', minHeight:'100vh', color:'var(--text)' }}>
-      <Nav page={page} setPage={setPage} dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} isAdmin={isAdmin} />
+      <Nav dark={dark} setDark={setDark} user={session.user} profile={profile} results={results} streak={calcStreak(schedule)} isAdmin={isAdmin} />
 
       {loadingResults && (
         <div style={{ position:'fixed', top:70, right:16, zIndex:999, background:'var(--bg2)', border:'2px solid var(--border)', borderRadius:12, padding:'8px 14px', fontSize:12, fontWeight:700, color:'var(--textM)', display:'flex', alignItems:'center', gap:8, boxShadow:'0 4px 16px rgba(0,0,0,0.1)' }}>
@@ -110,12 +127,19 @@ export default function App() {
       )}
 
       <SessionReminder schedule={schedule} />
-      {page === 'Home'     && <Home {...sharedProps} setPage={setPage} profile={profile} streak={calcStreak(schedule)} />}
-      {page === 'Plan'     && <Plan {...sharedProps} />}
-      {page === 'Practice' && <Practice {...sharedProps} />}
-      {page === 'MockTest' && <MockTests {...sharedProps} />}
-      {page === 'Progress' && <Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />}
-      {page === 'Admin'    && <Admin user={session.user} />}
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<RedirectTo to="/today" />} />
+        {/* TEMP (step 3): Home stands in until the Today page exists */}
+        <Route path="/today/*" element={<Home {...sharedProps} profile={profile} streak={calcStreak(schedule)} />} />
+        <Route path="/practice/:skill?" element={<Practice {...sharedProps} />} />
+        <Route path="/mock" element={<MockTests {...sharedProps} />} />
+        <Route path="/progress" element={<Progress {...sharedProps} loading={loadingResults} streak={calcStreak(schedule)} />} />
+        {/* TEMP (step 3): Plan moves under /today as the "Full plan" view */}
+        <Route path="/plan" element={<Plan {...sharedProps} />} />
+        <Route path="/admin" element={isAdmin ? <Admin user={session.user} /> : <RedirectTo to="/today" />} />
+        <Route path="*" element={<RedirectTo to="/today" />} />
+      </Routes>
     </div>
   )
 }

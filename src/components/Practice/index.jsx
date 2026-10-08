@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
 import { Headphones, BookOpen, PenLine, Mic } from 'lucide-react'
 import ListeningHub from './ListeningHub'
 import ReadingHub from './ReadingHub'
@@ -12,8 +12,14 @@ const TABS = [
   { key:'Speaking',  Icon:Mic,        color:'var(--coral)',  bg:'var(--coralBg)'  },
 ]
 
+const SKILL_SLUGS = TABS.map(t => t.key.toLowerCase())
+
 export default function Practice({ results, addResult, userId }) {
-  const [tab, setTab] = useState('Listening')
+  // The URL drives the tab: /practice/:skill (listening|reading|writing|speaking).
+  // /practice and any unknown skill fall back to Listening.
+  const { skill } = useParams()
+  const slug = SKILL_SLUGS.includes(skill) ? skill : 'listening'
+  const tab = TABS.find(t => t.key.toLowerCase() === slug).key
   return (
     <div className="app-container">
       <div style={{ marginBottom: 18 }}>
@@ -24,8 +30,8 @@ export default function Practice({ results, addResult, userId }) {
       {/* Scrollable tab bar for mobile */}
       <div className="tab-bar" style={{ marginBottom: 20 }}>
         {TABS.map(({ key, Icon, color, bg }) => (
-          <button key={key} onClick={() => setTab(key)} style={{
-            padding: '10px 16px', borderRadius: 14,
+          <Link key={key} to={`/practice/${key.toLowerCase()}`} aria-current={tab===key ? 'page' : undefined} style={{
+            padding: '10px 16px', borderRadius: 14, textDecoration: 'none', boxSizing: 'border-box',
             border: tab===key ? `2px solid ${color}` : '2px solid var(--border)',
             borderBottom: tab===key ? `4px solid ${color}` : '4px solid var(--borderB)',
             background: tab===key ? bg : 'var(--bg2)',
@@ -37,7 +43,7 @@ export default function Practice({ results, addResult, userId }) {
           }}>
             <Icon size={15} />
             {key}
-          </button>
+          </Link>
         ))}
       </div>
 

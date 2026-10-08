@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { Headphones, BookOpen, PenLine, Mic, Flame, Zap, ClipboardList,
          Target, ChevronRight, Trophy, Calendar, AlertTriangle } from 'lucide-react'
 import DailyChallenge from './DailyChallenge'
@@ -13,7 +14,7 @@ const SKILLS = [
 const SKILL_COLORS = { listening:'var(--blue)', reading:'var(--amber)', writing:'var(--purple)', speaking:'var(--coral)' }
 const SKILL_LABELS = { listening:'Listening', reading:'Reading', writing:'Writing', speaking:'Speaking' }
 
-export default function Home({ setPage, results, profile, userId, addResult, streak = 0 }) {
+export default function Home({ results, profile, userId, addResult, streak = 0 }) {
   const name = profile?.full_name?.split(' ')[0] || 'there'
   const totalTests = results.length
   const xp = results.reduce((s, r) => s + (r.score || 0) * 10, 0)
@@ -92,10 +93,10 @@ export default function Home({ setPage, results, profile, userId, addResult, str
               Your {SKILL_LABELS[weakestSkill.skill].toLowerCase()} is your weakest area — extra practice here will lift your overall band fastest.
             </div>
           </div>
-          <button onClick={() => setPage('Practice')}
-            style={{ flexShrink:0, padding:'7px 13px', borderRadius:10, border:`2px solid var(--amber)`, borderBottom:`3px solid #cc7700`, background:'transparent', color:'var(--amber)', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif', whiteSpace:'nowrap' }}>
+          <Link to={`/practice/${weakestSkill.skill}`}
+            style={{ flexShrink:0, padding:'7px 13px', borderRadius:10, border:`2px solid var(--amber)`, borderBottom:`3px solid #cc7700`, background:'transparent', color:'var(--amber)', fontWeight:800, fontSize:12, cursor:'pointer', fontFamily:'Nunito, sans-serif', whiteSpace:'nowrap', textDecoration:'none' }}>
             Practice →
-          </button>
+          </Link>
         </div>
       )}
 
@@ -125,8 +126,8 @@ export default function Home({ setPage, results, profile, userId, addResult, str
           const pct = skillPct(key)
           const count = (bySkill[key] || []).length
           return (
-            <div key={key} onClick={() => setPage('Practice')}
-              style={{ background: 'var(--bg2)', border: `2px solid ${color}44`, borderBottom: `4px solid ${borderColor}66`, borderRadius: 16, padding: 16, cursor: 'pointer' }}>
+            <Link key={key} to={`/practice/${key}`}
+              style={{ display: 'block', textDecoration: 'none', background: 'var(--bg2)', border: `2px solid ${color}44`, borderBottom: `4px solid ${borderColor}66`, borderRadius: 16, padding: 16, cursor: 'pointer' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: bg, border: `2px solid ${color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Icon size={22} color={color} />
@@ -141,14 +142,14 @@ export default function Home({ setPage, results, profile, userId, addResult, str
               <div className="xp-bar">
                 <div className="xp-bar-fill" style={{ width: `${pct}%`, background: color }} />
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>
 
       {/* Quick links */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 22 }}>
-        <div onClick={() => setPage('Plan')} style={{ background: 'var(--purpleBg)', border: '2px solid var(--purple)', borderBottom: '4px solid var(--purpleD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link to="/plan" style={{ background: 'var(--purpleBg)', border: '2px solid var(--purple)', borderBottom: '4px solid var(--purpleD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Calendar size={18} color="var(--purple)" />
@@ -157,9 +158,9 @@ export default function Home({ setPage, results, profile, userId, addResult, str
             <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>Today's sessions · daily schedule · progress tracking</div>
           </div>
           <ChevronRight size={20} color="var(--purple)" />
-        </div>
+        </Link>
 
-        <div onClick={() => setPage('MockTest')} style={{ background: 'var(--greenBg)', border: '2px solid var(--green)', borderBottom: '4px solid var(--greenD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Link to="/mock" style={{ background: 'var(--greenBg)', border: '2px solid var(--green)', borderBottom: '4px solid var(--greenD)', borderRadius: 16, padding: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <ClipboardList size={18} color="var(--green)" />
@@ -168,7 +169,7 @@ export default function Home({ setPage, results, profile, userId, addResult, str
             <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600 }}>All 4 skills · voice recording · AI scored</div>
           </div>
           <ChevronRight size={20} color="var(--green)" />
-        </div>
+        </Link>
       </div>
 
       {/* Recent activity */}
@@ -212,7 +213,7 @@ export default function Home({ setPage, results, profile, userId, addResult, str
           <Target size={40} color="var(--green)" style={{ margin: '0 auto 12px' }} />
           <div style={{ fontSize: 17, fontWeight: 900, color: 'var(--text)', marginBottom: 8 }}>Ready to begin?</div>
           <div style={{ fontSize: 13, color: 'var(--textM)', fontWeight: 600, marginBottom: 20 }}>Start your first practice test and watch your band score grow.</div>
-          <button onClick={() => setPage('Practice')} className="duo-btn duo-btn-green" style={{ maxWidth: 260, margin: '0 auto' }}>Start Practising</button>
+          <Link to="/practice" className="duo-btn duo-btn-green" style={{ maxWidth: 260, margin: '0 auto', textDecoration: 'none' }}>Start Practising</Link>
         </div>
       )}
     </div>
