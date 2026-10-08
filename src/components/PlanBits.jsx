@@ -69,3 +69,11 @@ export const sectionLabel = {
   fontSize: 12, fontWeight: 900, color: 'var(--textM)',
   textTransform: 'uppercase', letterSpacing: '0.6px',
 }
+
+/** Small "< Back" chip used at the top of the plan screens (<Link style={backLink}>). */
+export const backLink = {
+  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 12px 8px 8px', minHeight: 36,
+  borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)',
+  background: 'var(--bg2)', color: 'var(--textM)', fontWeight: 800, fontSize: 12,
+  fontFamily: 'Nunito, sans-serif', textDecoration: 'none',
+}

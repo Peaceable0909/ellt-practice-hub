@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Flame, PlayCircle, RotateCcw, Clock, CheckCircle, Trophy, Target, ClipboardList, ChevronRight, CalendarDays, AlertTriangle } from 'lucide-react'
+import { Flame, PlayCircle, RotateCcw, Clock, CheckCircle, Trophy, ClipboardList, ChevronRight, CalendarDays, AlertTriangle } from 'lucide-react'
 import DailyChallenge from './DailyChallenge'
+import PlanSetup from './PlanSetup'
 import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays } from '../lib/useSchedule'
 import { TaskChip, DoneBadge, metaFor, fmtDuration, fmtDate, quietCard, sectionLabel } from './PlanBits'
 
@@ -69,20 +70,9 @@ export default function Today({ profile, userId, addResult }) {
     </Page>
   )
 
-  if (status === 'none') return (
-    <Page>
-      {header}
-      <div style={{ ...quietCard, padding: '28px 20px', textAlign: 'center', marginBottom: 16 }}>
-        <Target size={40} color="var(--green)" style={{ margin: '0 auto 12px' }} />
-        <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--text)', marginBottom: 6 }}>Let's set up your study plan</div>
-        <div style={{ fontSize: 13, color: 'var(--textM)', fontWeight: 600, lineHeight: 1.6, marginBottom: 18 }}>
-          Choose how long you have and when you study. Your plan gives you a clear list of sessions every day.
-        </div>
-        <Link to="/today/plan/edit" className="duo-btn duo-btn-green" style={{ textDecoration: 'none', maxWidth: 280, margin: '0 auto' }}>Create my plan</Link>
-      </div>
-      {dailyChallenge}
-    </Page>
-  )
+  // First run: no plan yet. Only reached once loading is done and the load succeeded
+  // (both handled above), so a user who has a plan never sees this flash up.
+  if (status === 'none') return <PlanSetup variant="onboarding" name={name} />
 
   const startDate = parseLocalDate(schedule.start_date)
 

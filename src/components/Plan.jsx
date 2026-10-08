@@ -1,18 +1,10 @@
-import { useState } from 'react'
-import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ClipboardList, PlayCircle, RotateCcw, Eye, Clock } from 'lucide-react'
-import { PERIOD_CONFIG } from '../data/timetable'
-import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays, localDateKey } from '../lib/useSchedule'
-import { TaskChip, DoneBadge, metaFor, fmtDuration, fmtDate, DAY_TYPE_LABELS, quietCard, sectionLabel } from './PlanBits'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { ChevronLeft, ClipboardList, PlayCircle, RotateCcw, Eye } from 'lucide-react'
+import { useSchedule, getDaySlots, sessionKey, parseLocalDate, addDays } from '../lib/useSchedule'
+import { TaskChip, DoneBadge, metaFor, fmtDuration, fmtDate, DAY_TYPE_LABELS, quietCard, sectionLabel, backLink } from './PlanBits'
+import PlanSetup from './PlanSetup'
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']   // Monday first
-
-const backLink = {
-  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '8px 12px 8px 8px', minHeight: 36,
-  borderRadius: 10, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)',
-  background: 'var(--bg2)', color: 'var(--textM)', fontWeight: 800, fontSize: 12,
-  fontFamily: 'Nunito, sans-serif', textDecoration: 'none',
-}
 
 // ── FULL PLAN (/today/plan) ────────────────────────────────────
 // Calendar of every day in the plan. Tap a day to see its sessions: past days
@@ -30,7 +22,8 @@ export default function Plan({ results = [] }) {
       </Centered>
     </Page>
   )
-  if (!schedule) return <Navigate to="/today/plan/edit" replace />
+  // No plan yet: creating the first one is the onboarding on Today
+  if (!schedule) return <Navigate to="/today" replace />
 
   const start = parseLocalDate(schedule.start_date)
   const lead = (start.getDay() + 6) % 7   // blank cells so day 1 sits under its real weekday
@@ -210,126 +203,18 @@ function Centered({ children }) {
   return <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--textM)', fontSize: 14, fontWeight: 700 }}>{children}</div>
 }
 
-// ── SETUP / EDIT (/today/plan/edit) ────────────────────────────
+// ── EDIT PLAN (/today/plan/edit) ───────────────────────────────
 // /today/plan/edit        edit the current plan (completed sessions are kept)
 // /today/plan/edit?new=1  start a brand new plan (completed sessions reset)
-const TIMEZONES = ['Europe/London','Europe/Paris','Africa/Lagos','Africa/Accra','Africa/Nairobi','America/New_York','America/Los_Angeles','Asia/Dubai','Asia/Karachi','Asia/Dhaka','Australia/Sydney']
-
+// The form itself, and the save, live in PlanSetup (shared with first-run onboarding).
 export function PlanEdit() {
-  const { schedule, loading, savePlan } = useSchedule()
-  const navigate = useNavigate()
+  const { schedule, loading } = useSchedule()
   const [params] = useSearchParams()
-  const [saving, setSaving] = useState(false)
 
   if (loading) return <Page><Centered>Loading your plan...</Centered></Page>
+  // Nothing to edit yet (or the plan failed to load): Today shows the onboarding or the retry
+  if (!schedule) return <Navigate to="/today" replace />
 
-  const existing = !!schedule && params.get('new') !== '1'
-  const initial = existing
-    ? {
-        period: schedule.period,
-        startDate: String(schedule.start_date).slice(0, 10),
-        morningTime: (schedule.morning_time || '09:00').slice(0, 5),
-        eveningTime: (schedule.evening_time || '19:00').slice(0, 5),
-        timezone: schedule.timezone || 'Europe/London',
-        emailReminders: schedule.email_reminders ?? true,
-      }
-    : { period: '1_month', startDate: localDateKey(), morningTime: '09:00', eveningTime: '19:00', timezone: 'Europe/London', emailReminders: true }
-
-  async function handleSave(values) {
-    setSaving(true)
-    const res = await savePlan(values, !existing)
-    setSaving(false)
-    if (!res.ok) {
-      alert('Could not save your plan. Please check your connection and try again.')
-      return
-    }
-    navigate('/today')
-  }
-
-  return <SetupView key={existing ? 'edit' : 'new'} initial={initial} existing={existing} hasPlan={!!schedule} saving={saving} onSave={handleSave} />
-}
-
-function SetupView({ initial, existing, hasPlan, saving, onSave }) {
-  const [period, setPeriod]       = useState(initial.period)
-  const [startDate, setStartDate] = useState(initial.startDate)
-  const [morningTime, setMorning] = useState(initial.morningTime)
-  const [eveningTime, setEvening] = useState(initial.eveningTime)
-  const [timezone, setTimezone]   = useState(initial.timezone)
-  const [emailReminders, setEmail]= useState(initial.emailReminders)
-  const cfg = PERIOD_CONFIG[period] || PERIOD_CONFIG['1_month']
-  const tzOptions = TIMEZONES.includes(timezone) ? TIMEZONES : [timezone, ...TIMEZONES]
-
-  return (
-    <div className="app-container anim-fadeUp" style={{ maxWidth:520 }}>
-      <div style={{ display:'flex', gap:10, alignItems:'center', marginBottom:24 }}>
-        {hasPlan && <Link to="/today" style={backLink}>← Cancel</Link>}
-        <div>
-          <h2 style={{ fontSize:20, fontWeight:900, color:'var(--text)' }}>{existing?'Edit':'Start'} Your Learning Plan</h2>
-          <p style={{ fontSize:13, color:'var(--textM)', fontWeight:600, marginTop:2 }}>Your plan will guide every session — let's set it up.</p>
-        </div>
-      </div>
-
-      {hasPlan && !existing && (
-        <div style={{ marginBottom:20, padding:'10px 14px', background:'var(--amberBg)', border:'2px solid var(--amber)', borderRadius:12, fontSize:12, color:'var(--text)', fontWeight:700, lineHeight:1.5, display:'flex', gap:8, alignItems:'flex-start' }}>
-          <Clock size={14} color="var(--amber)" style={{ flexShrink:0, marginTop:2 }} />
-          Starting a new plan clears the sessions you have ticked off in your current one. Your test results and progress are kept.
-        </div>
-      )}
-
-      {/* Period */}
-      <div style={{ marginBottom:20 }}>
-        <div style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.6px', marginBottom:10 }}>How long do you have?</div>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:8 }}>
-          {Object.entries(PERIOD_CONFIG).map(([key,c]) => (
-            <div key={key} onClick={() => setPeriod(key)} style={{ padding:14, borderRadius:14, border:`2px solid ${period===key?'var(--green)':'var(--border)'}`, borderBottom:`4px solid ${period===key?'var(--greenD)':'var(--borderB)'}`, background:period===key?'var(--greenBg)':'var(--bg2)', cursor:'pointer', transition:'all .2s' }}>
-              <div style={{ fontSize:16, fontWeight:900, color:period===key?'var(--green)':'var(--text)', marginBottom:3 }}>{c.label}</div>
-              <div style={{ fontSize:11, color:'var(--textM)', fontWeight:700 }}>{c.sessionsPerDay >= 3 ? `${c.morningHours}h + ${c.noonHours}h + ${c.eveningHours}h per day` : `${c.morningHours}h morning + ${c.eveningHours}h evening per day`}</div>
-            </div>
-          ))}
-        </div>
-        <div style={{ marginTop:8, padding:'10px 14px', background:'var(--bg3)', borderRadius:10, fontSize:12, color:'var(--textM)', fontWeight:600, lineHeight:1.5 }}>
-          {cfg.description}
-        </div>
-      </div>
-
-      {/* Date */}
-      <div style={{ marginBottom:14 }}>
-        <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>Start Date</label>
-        <input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)} min={existing ? undefined : localDateKey()} />
-      </div>
-
-      {/* Times */}
-      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:12, marginBottom:14 }}>
-        {[['☀️ Morning Time', morningTime, setMorning],['🌙 Evening Time', eveningTime, setEvening]].map(([label,val,set]) => (
-          <div key={label}>
-            <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>{label}</label>
-            <input type="time" value={val} onChange={e=>set(e.target.value)} />
-          </div>
-        ))}
-      </div>
-
-      {/* Timezone */}
-      <div style={{ marginBottom:14 }}>
-        <label style={{ fontSize:12, fontWeight:900, color:'var(--textM)', textTransform:'uppercase', letterSpacing:'0.5px', display:'block', marginBottom:6 }}>Timezone</label>
-        <select value={timezone} onChange={e=>setTimezone(e.target.value)}>
-          {tzOptions.map(tz => <option key={tz} value={tz}>{tz}</option>)}
-        </select>
-      </div>
-
-      {/* Email reminders */}
-      <div onClick={() => setEmail(e=>!e)} style={{ marginBottom:22, padding:14, background:emailReminders?'var(--greenBg)':'var(--bg3)', border:`2px solid ${emailReminders?'var(--green)':'var(--border)'}`, borderRadius:12, cursor:'pointer', display:'flex', alignItems:'center', gap:12 }}>
-        <div style={{ width:22, height:22, borderRadius:6, border:`2px solid ${emailReminders?'var(--green)':'var(--border)'}`, background:emailReminders?'var(--green)':'transparent', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, fontSize:12, color:'#fff', fontWeight:900 }}>
-          {emailReminders ? '✓' : ''}
-        </div>
-        <div>
-          <div style={{ fontSize:13, fontWeight:900, color:'var(--text)' }}>Email Reminders</div>
-          <div style={{ fontSize:11, color:'var(--textM)', fontWeight:600, marginTop:1 }}>Get a daily email at {morningTime} with your sessions and a study tip</div>
-        </div>
-      </div>
-
-      <button onClick={() => onSave({ period, startDate, morningTime, eveningTime, timezone, emailReminders })} disabled={saving || !startDate} style={{ width:'100%', padding:'14px', borderRadius:14, border:'none', borderBottom:`4px solid ${saving?'var(--border)':'var(--greenD)'}`, background:saving?'var(--bg3)':'var(--green)', color:saving?'var(--textM)':'#fff', fontWeight:900, fontSize:15, cursor:(saving || !startDate)?'not-allowed':'pointer', opacity:startDate?1:0.6, fontFamily:'Nunito, sans-serif', textTransform:'uppercase', letterSpacing:'0.6px' }}>
-        {saving ? 'Saving...' : existing ? `Save Changes →` : `Start My ${cfg.label} Plan →`}
-      </button>
-    </div>
-  )
+  const existing = params.get('new') !== '1'
+  return <PlanSetup key={existing ? 'edit' : 'new'} variant="edit" existing={existing} />
 }

@@ -1,15 +1,18 @@
-import { CalendarCheck, BarChart2, BookOpen,
+import { CalendarCheck, Dumbbell, ClipboardList, TrendingUp,
          Flame, Zap, Sun, Moon, LogOut, User, ChevronDown,
-         Calendar, ClipboardList, ShieldCheck } from 'lucide-react'
+         Calendar, ShieldCheck } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { signOut } from '../lib/supabase'
 
+// The four destinations, same order in the desktop top nav and the mobile bottom bar.
+// NavLink matches by path prefix, so Today stays highlighted on /today/plan,
+// /today/plan/edit and /today/session/... and Practice on /practice/:skill.
 const NAV_ITEMS = [
-  { to: '/today',    icon: CalendarCheck,   label: 'Today'    },
-  { to: '/practice', icon: BookOpen,        label: 'Practice' },
-  { to: '/mock',     icon: ClipboardList,   label: 'Mock Test'},
-  { to: '/progress', icon: BarChart2,       label: 'Progress' },
+  { to: '/today',    icon: CalendarCheck, label: 'Today'    },
+  { to: '/practice', icon: Dumbbell,      label: 'Practice' },
+  { to: '/mock',     icon: ClipboardList, label: 'Mock'     },
+  { to: '/progress', icon: TrendingUp,    label: 'Progress' },
 ]
 
 export default function Nav({ dark, setDark, user, profile, results = [], streak = 0, isAdmin = false }) {
@@ -26,8 +29,15 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
     function handleClick(e) {
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(false)
     }
+    function handleKey(e) {
+      if (e.key === 'Escape') setDropdownOpen(false)
+    }
     document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
+    document.addEventListener('keydown', handleKey)
+    return () => {
+      document.removeEventListener('mousedown', handleClick)
+      document.removeEventListener('keydown', handleKey)
+    }
   }, [])
 
   return (
@@ -80,7 +90,7 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
 
             {/* Avatar dropdown */}
             <div ref={dropRef} style={{ position: 'relative' }}>
-              <button onClick={() => setDropdownOpen(o => !o)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
+              <button onClick={() => setDropdownOpen(o => !o)} aria-haspopup="menu" aria-expanded={dropdownOpen} aria-label="Account menu" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 8px 4px 4px', borderRadius: 12, border: '2px solid var(--border)', borderBottom: '3px solid var(--borderB)', background: 'var(--bg3)', cursor: 'pointer', fontFamily: 'Nunito, sans-serif' }}>
                 <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--green)', border: '2px solid var(--greenD)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff' }}>{initials}</div>
                 <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', maxWidth: 70, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} className="hide-mobile">{displayName.split(' ')[0]}</span>
                 <ChevronDown size={12} color="var(--textM)" style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform .2s' }} />
@@ -92,8 +102,8 @@ export default function Nav({ dark, setDark, user, profile, results = [], streak
                     <div style={{ fontSize: 12, color: 'var(--textM)', fontWeight: 600, marginTop: 2 }}>{user?.email}</div>
                   </div>
                   {[
-                    { icon: User,          label: 'My Profile',  to: '/progress' },
-                    { icon: Calendar,      label: 'Edit My Plan',to: '/today/plan/edit' },
+                    { icon: User,     label: 'My Profile',   to: '/progress' },
+                    { icon: Calendar, label: 'Edit My Plan', to: '/today/plan/edit' },
                   ].map(({ icon: Icon, label, to }) => (
                     <Link key={label} to={to} onClick={() => setDropdownOpen(false)} style={{ width: '100%', boxSizing: 'border-box', padding: '12px 16px', border: 'none', background: 'transparent', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', fontFamily: 'Nunito, sans-serif', fontSize: 14, fontWeight: 700, color: 'var(--text)', borderBottom: '1px solid var(--border)', textAlign: 'left', textDecoration: 'none', transition: 'background .15s' }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--bg3)'}
