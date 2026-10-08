@@ -109,7 +109,7 @@ function buildEmail({ name, email, dayNum, totalDays, morningTime, eveningTime, 
 </td></tr>
 <tr><td style="background:#F7F7F7;border:2px solid #E5E5E5;border-top:none;border-radius:0 0 16px 16px;padding:16px 28px;text-align:center;">
   <div style="font-size:11px;color:#AFAFAF;">
-    To turn off reminders: log in → My Plan → Edit Plan → uncheck Email Reminders
+    To turn off reminders: log in → tap your avatar (top right) → Edit My Plan → untick Email reminders
   </div>
 </td></tr>
 </table>
